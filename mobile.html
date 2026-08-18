@@ -4321,7 +4321,7 @@ function historyWeek(){
   {id:'h2',competition:'LaLiga',home:'RMA',away:'BAR',stadium:'Santiago Bernabéu',kickoff:'2026-08-08T20:00:00Z',phase:'final',result:{home:1,away:1,firstTeam:'BAR',firstScorer:'bar1'}},
   {id:'h3',competition:'Serie A',home:'INT',away:'JUV',stadium:'San Siro',kickoff:'2026-08-09T18:45:00Z',phase:'final',result:{home:0,away:0,firstTeam:'none',firstScorer:'none'}}
  ];
- const pts={u1:[60,25,25],u2:[30,40,20],u3:[35,30,25],u4:[20,45,20],u5:[30,20,25],u6:[20,25,20],u7:[10,15,20]};
+ const pts={u1:[45,25,20],u2:[40,45,25],u3:[30,30,20],u4:[35,45,20],u5:[25,25,20],u6:[20,25,15],u7:[50,45,25]};
  const scoreSets={
   u1:[[2,1,'ARS','ars1',true],[2,2,'BAR','bar1',false],[0,0,'none','none',false]],
   u2:[[3,1,'ARS','ars2',false],[1,1,'RMA','rma1',true],[1,1,'INT','int1',false]],
@@ -4356,10 +4356,10 @@ function leagueStandings(leagueId,mode=state.selectedRankMode){
  return standings(mode).filter(u=>members.has(u.id))
 }
 function blankByUser(seed=false){const o={};defaultUsers().forEach(u=>{o[u.id]={};if(seed)defaultFixtures().forEach(f=>o[u.id][f.id]={home:0,away:0,firstTeam:'none',firstScorer:'none',double:false,touched:false})});return o}
-const prevPts={u1:110,u2:90,u3:90,u4:85,u5:75,u6:65,u7:45};
-const prevStats={u1:{exact:2,gd:3,outcomes:3,teamGoals:4,total:110},u2:{exact:1,gd:2,outcomes:2,teamGoals:4,total:90},u3:{exact:1,gd:3,outcomes:3,teamGoals:3,total:90},u4:{exact:1,gd:2,outcomes:2,teamGoals:3,total:85},u5:{exact:1,gd:2,outcomes:2,teamGoals:3,total:75},u6:{exact:0,gd:2,outcomes:2,teamGoals:2,total:65},u7:{exact:0,gd:1,outcomes:1,teamGoals:2,total:45}};
-function initialState(){return{lang:'en',currentUser:'u1',view:'home',week:2,selectedPredictWeek:2,selectedHomeWeek:'overall',users:defaultUsers(),fixturePool:sandboxFixturePool(),fixtures:defaultFixtures(),nextFixtures:defaultNextFixtures(),nextPublished:true,history:historyWeek(),predictions:blankByUser(true),savedDrafts:blankByUser(),officialPredictions:blankByUser(),roundMeta:Object.fromEntries(defaultUsers().map(u=>[u.id,{draftSavedAt:null,submittedAt:null,editing:true}])),roundLocked:false,forceDeadline:false,previousWeekPoints:prevPts,previousWeekStats:prevStats,selectedRankMode:'overall',selectedRankWeek:2,statsView:'simple',leagues:defaultLeagues(),selectedLeagueId:'mastaba',homeLeagueId:'mastaba',lastUpdate:null,validationMissing:[],rankOrderHistory:[['u1','u2','u3','u4','u5','u6','u7'],['u2','u1','u3','u4','u5','u6','u7']],leaderHistory:['u1','u1'],lastPlaceHistory:['u7','u7']}}
-function loadState(){try{const raw=localStorage.getItem(STORAGE_KEY);return raw?{...initialState(),...JSON.parse(raw)}:initialState()}catch{return initialState()}}
+const prevPts={u1:90,u2:110,u3:80,u4:100,u5:70,u6:60,u7:120};
+const prevStats={u1:{exact:2,gd:3,outcomes:3,teamGoals:4,total:90},u2:{exact:1,gd:2,outcomes:2,teamGoals:4,total:110},u3:{exact:1,gd:3,outcomes:3,teamGoals:3,total:80},u4:{exact:1,gd:2,outcomes:2,teamGoals:3,total:100},u5:{exact:1,gd:2,outcomes:2,teamGoals:3,total:70},u6:{exact:0,gd:2,outcomes:2,teamGoals:2,total:60},u7:{exact:0,gd:1,outcomes:1,teamGoals:2,total:120}};
+function initialState(){return{lang:'en',currentUser:'u1',view:'home',week:2,selectedPredictWeek:2,selectedHomeWeek:'overall',users:defaultUsers(),fixturePool:sandboxFixturePool(),fixtures:defaultFixtures(),nextFixtures:defaultNextFixtures(),nextPublished:true,history:historyWeek(),predictions:blankByUser(true),savedDrafts:blankByUser(),officialPredictions:blankByUser(),roundMeta:Object.fromEntries(defaultUsers().map(u=>[u.id,{draftSavedAt:null,submittedAt:null,editing:true}])),roundLocked:false,forceDeadline:false,previousWeekPoints:prevPts,previousWeekStats:prevStats,selectedRankMode:'overall',selectedRankWeek:2,statsView:'simple',leagues:defaultLeagues(),selectedLeagueId:'mastaba',homeLeagueId:'mastaba',lastUpdate:null,validationMissing:[],rankOrderHistory:[['u7','u2','u4','u1','u3','u5','u6'],['u7','u2','u4','u1','u3','u5','u6']],leaderHistory:['u7','u7'],lastPlaceHistory:['u6','u6']}}
+function loadState(){try{const raw=localStorage.getItem(STORAGE_KEY);const loaded=raw?{...initialState(),...JSON.parse(raw)}:initialState();loaded.previousWeekPoints={...prevPts};loaded.previousWeekStats=JSON.parse(JSON.stringify(prevStats));loaded.rankOrderHistory=[['u7','u2','u4','u1','u3','u5','u6'],['u7','u2','u4','u1','u3','u5','u6']];loaded.leaderHistory=['u7','u7'];loaded.lastPlaceHistory=['u6','u6'];return loaded}catch{return initialState()}}
 let state=loadState();
 function save(){localStorage.setItem(STORAGE_KEY,JSON.stringify(state))} function clone(v){return JSON.parse(JSON.stringify(v))}
 function currentUser(){return state.users.find(u=>u.id===state.currentUser)}
