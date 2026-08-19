@@ -6846,7 +6846,7 @@ html[data-theme="acmilan"] .league-insights-v22 .form-table th{background:#2a161
       </button>
       <div class="topbar-actions">
         <div class="top-social-v1029" aria-label="Al Mastaba social links">
-          <span class="top-social-word-v1029">المصطبة</span>
+          
           <a class="top-social-link-v1029 youtube" href="https://www.youtube.com/@MatchGamed" target="_blank" rel="noopener" title="Subscribe on YouTube" aria-label="Subscribe to Al Mastaba on YouTube"><svg viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M23.5 6.2a3 3 0 0 0-2.1-2.1C19.6 3.6 12 3.6 12 3.6s-7.6 0-9.4.5A3 3 0 0 0 .5 6.2 31 31 0 0 0 0 12a31 31 0 0 0 .5 5.8 3 3 0 0 0 2.1 2.1c1.8.5 9.4.5 9.4.5s7.6 0 9.4-.5a3 3 0 0 0 2.1-2.1A31 31 0 0 0 24 12a31 31 0 0 0-.5-5.8ZM9.6 15.6V8.4l6.3 3.6-6.3 3.6Z"/></svg></a>
           <a class="top-social-link-v1029 instagram" href="https://www.instagram.com/2lmastaba/" target="_blank" rel="noopener" title="Follow on Instagram" aria-label="Follow Al Mastaba on Instagram"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="3" width="18" height="18" rx="5" ry="5" fill="none" stroke="currentColor" stroke-width="2"></rect><circle cx="12" cy="12" r="4" fill="none" stroke="currentColor" stroke-width="2"></circle><circle cx="17.4" cy="6.7" r="1.15" fill="currentColor"></circle></svg></a>
         </div>
@@ -8320,7 +8320,27 @@ function positionProfileTabLineV19(){
   const active=tabs.querySelector('button.active'),line=tabs.querySelector('.profile-tab-line');if(!active||!line)return;
   line.style.left=`${active.offsetLeft}px`;line.style.width=`${active.offsetWidth}px`;
 }
-window.setProfileTabV19=function(tab){state.profileWorkspaceTab=['profile','performance','rules'].includes(tab)?tab:'profile';save();renderProfile()};
+let profileTabTransitionTimerV1039=null;
+window.setProfileTabV19=function(tab){
+  const next=['profile','performance','rules'].includes(tab)?tab:'profile';
+  if(next===state.profileWorkspaceTab)return;
+  const tabs=$('#view-profile .profile-workspace-tabs');
+  const buttons=tabs?[...tabs.querySelectorAll('button')]:[];
+  const order=['profile','performance','rules'];
+  const target=buttons[order.indexOf(next)];
+  const line=tabs?.querySelector('.profile-tab-line');
+  if(target&&line){
+    buttons.forEach((b,i)=>b.classList.toggle('active',order[i]===next));
+    line.style.left=`${target.offsetLeft}px`;
+    line.style.width=`${target.offsetWidth}px`;
+    clearTimeout(profileTabTransitionTimerV1039);
+    profileTabTransitionTimerV1039=setTimeout(()=>{
+      state.profileWorkspaceTab=next;save();renderProfile();
+    },260);
+  }else{
+    state.profileWorkspaceTab=next;save();renderProfile();
+  }
+};
 window.setProfilePerformanceModeV19=function(mode){state.profilePerformanceMode=mode==='totals'?'totals':'rates';save();renderProfile()};
 
 /* ---------- Create League redesigned around the active theme ---------- */
@@ -11476,9 +11496,9 @@ html[data-theme="barcelona"] body #app #view-admin .selected-fixture-chips span 
 /* 9. Show hub + compact top-bar social shortcuts. */
 .top-social-v1029{display:flex;align-items:center;gap:6px;margin-inline-end:4px}
 .top-social-word-v1029{font-size:.84rem;font-weight:1000;letter-spacing:0;opacity:1;white-space:nowrap}
-.top-social-link-v1029{width:32px;height:32px;border-radius:10px;display:grid;place-items:center;text-decoration:none;color:var(--theme-text);border:1px solid color-mix(in srgb,var(--theme-accent) 24%,var(--theme-border));background:color-mix(in srgb,var(--theme-surface) 90%,transparent);transition:transform .18s ease,box-shadow .18s ease}
+.top-social-link-v1029{width:44px;height:42px;min-width:44px;min-height:42px;border-radius:14px;display:grid;place-items:center;text-decoration:none;color:var(--theme-text);border:1px solid color-mix(in srgb,var(--theme-accent) 24%,var(--theme-border));background:color-mix(in srgb,var(--theme-surface) 90%,transparent);transition:transform .18s ease,box-shadow .18s ease}
 .top-social-link-v1029:hover{transform:translateY(-1px);box-shadow:0 6px 14px rgba(0,0,0,.12)}
-.top-social-link-v1029 svg{width:17px;height:17px}
+.top-social-link-v1029 svg{width:21px;height:21px}
 .top-social-link-v1029.youtube{color:#ff0033}
 .top-social-link-v1029.instagram{color:#c13584}
 #view-show{max-width:1120px;margin:0 auto}
@@ -11512,8 +11532,6 @@ html[dir="rtl"] .show-media-card-v1029{border-radius:22px 6px 22px 6px}
 .show-open-v1029{flex:0 0 auto;text-decoration:none;white-space:nowrap;border:1px solid var(--theme-action);background:var(--theme-action);color:var(--theme-action-text);border-radius:10px;padding:8px 10px;font-size:.68rem;font-weight:1000}
 html[dir="rtl"] @media(max-width:760px){
   .top-social-word-v1029{display:inline-block;font-size:.76rem}
-  .top-social-link-v1029{width:29px;height:29px;border-radius:9px}
-  .top-social-link-v1029 svg{width:15px;height:15px}
   .show-hero-v1029{padding:18px 16px;margin-top:0}
   .show-media-grid-v1029{grid-template-columns:1fr;gap:13px}
   .show-media-copy-v1029{align-items:center}
@@ -11546,7 +11564,7 @@ html[dir="rtl"] #view-home .ats-need-copy-v27{text-align:right!important}
 
 @media(max-width:390px){
   .top-social-v1029{gap:4px}
-  .top-social-link-v1029{width:27px;height:27px}
+  .top-social-link-v1029{width:44px;height:42px;min-width:44px;min-height:42px}
   .show-media-copy-v1029{display:block}
   .show-media-copy-v1029 p{max-width:none;margin-bottom:10px}
 }
@@ -11805,6 +11823,21 @@ html[dir="rtl"] html[data-theme] body #app #view-rankings .stats-table tr.curren
 .show-reel-fallback-v1037 small{display:block;margin-top:7px;color:rgba(255,255,255,.72);font-size:.68rem;font-weight:800}
 @media(max-width:760px){</style>
 
+
+
+<style id="v1039-shared-style">
+/* V10.39 shared cleanup */
+.top-social-word-v1029{display:none!important}
+.top-social-link-v1029{
+  width:44px!important;height:42px!important;min-width:44px!important;min-height:42px!important;
+  border-radius:14px!important;box-sizing:border-box!important
+}
+.top-social-link-v1029 svg{width:21px!important;height:21px!important}
+.profile-workspace-tabs .profile-tab-line{
+  transition:left .26s cubic-bezier(.22,1,.36,1),width .26s cubic-bezier(.22,1,.36,1)!important;
+  will-change:left,width
+}
+</style>
 
 <style id="v1038-cleanup-style">
 /* V10.38 root cleanup: true blank prediction state + three Profile workspace tabs. */
