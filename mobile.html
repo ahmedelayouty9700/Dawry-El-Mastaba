@@ -7551,7 +7551,12 @@ function syncBottomNavGlider(){
   const nav=document.querySelector('.bottom-nav');
   if(!nav)return;
   const visibleItems=[...nav.querySelectorAll('.nav-item')].filter(item=>getComputedStyle(item).display!=='none');
-  nav.style.setProperty('--mobile-nav-count',String(Math.max(1,visibleItems.length)));
+  const navCount=Math.max(1,visibleItems.length);
+  nav.style.setProperty('--mobile-nav-count',String(navCount));
+  visibleItems.forEach((item,index)=>{
+    item.style.setProperty('--mobile-nav-index',String(index));
+    item.style.setProperty('--mobile-nav-count',String(navCount));
+  });
   let glider=nav.querySelector('.nav-glider');
   if(!glider){
     glider=document.createElement('span');
@@ -7560,9 +7565,12 @@ function syncBottomNavGlider(){
   }
   const active=nav.querySelector('.nav-item.active');
   if(!active)return;
-  const inset=Math.max(10,active.offsetWidth*.24);
-  glider.style.left=`${active.offsetLeft+inset}px`;
-  glider.style.width=`${Math.max(24,active.offsetWidth-(inset*2))}px`;
+  const navRect=nav.getBoundingClientRect();
+  const activeRect=active.getBoundingClientRect();
+  const activeWidth=activeRect.width;
+  const inset=Math.max(10,activeWidth*.24);
+  glider.style.left=`${(activeRect.left-navRect.left)+inset}px`;
+  glider.style.width=`${Math.max(24,activeWidth-(inset*2))}px`;
 }
 window.setRankMode=function(m){
   const from=state.selectedRankMode==='gameweek'?1:0;
@@ -11801,22 +11809,27 @@ html[dir="rtl"] html[data-theme] body #app #view-rankings .stats-table tr.curren
 }
 .top-social-link-v1029 svg{width:20px!important;height:20px!important}
 
-/* Bottom navigation: exact equal columns based on visible items (5 regular / 6 with Admin). */
+/* Bottom navigation: deterministic centers for every visible item.
+   No flex/grid track sizing is allowed to influence horizontal spacing. */
 .bottom-nav{
-  display:grid!important;
-  grid-template-columns:repeat(var(--mobile-nav-count,5),minmax(0,1fr))!important;
-  align-items:stretch!important;
-  justify-content:stretch!important;
+  display:block!important;
+  position:fixed!important;
   overflow:hidden!important;
   gap:0!important;
-  padding-left:3px!important;
-  padding-right:3px!important
+  padding-left:0!important;
+  padding-right:0!important
 }
 .bottom-nav .nav-item{
-  width:100%!important;
+  position:absolute!important;
+  top:0!important;
+  bottom:0!important;
+  left:calc((var(--mobile-nav-index,0) + .5) * (100% / var(--mobile-nav-count,5)))!important;
+  width:calc(100% / var(--mobile-nav-count,5))!important;
+  height:100%!important;
   min-width:0!important;
   max-width:none!important;
   flex:none!important;
+  transform:translateX(-50%)!important;
   display:grid!important;
   grid-template-rows:28px 18px!important;
   align-content:center!important;
@@ -11824,8 +11837,9 @@ html[dir="rtl"] html[data-theme] body #app #view-rankings .stats-table tr.curren
   justify-items:center!important;
   justify-content:center!important;
   row-gap:4px!important;
-  padding:3px 1px!important;
-  margin:0!important
+  padding:3px 0!important;
+  margin:0!important;
+  box-sizing:border-box!important
 }
 .bottom-nav .nav-item[style*="display: none"]{display:none!important}
 .bottom-nav .nav-svg,
@@ -11834,7 +11848,7 @@ html[dir="rtl"] html[data-theme] body #app #view-rankings .stats-table tr.curren
   margin:0!important;align-self:center!important;justify-self:center!important
 }
 .bottom-nav .nav-svg{display:grid!important;place-items:center!important}
-.bottom-nav .nav-svg svg{width:23px!important;height:23px!important;display:block!important}
+.bottom-nav .nav-svg svg{width:23px!important;height:23px!important;display:block!important;margin:0 auto!important}
 .bottom-nav .nav-logo{object-fit:cover!important;border-radius:5px!important}
 .bottom-nav .nav-item small{
   display:flex!important;
@@ -11852,7 +11866,8 @@ html[dir="rtl"] html[data-theme] body #app #view-rankings .stats-table tr.curren
   line-height:18px!important;
   font-size:.58rem!important;
   font-weight:950!important;
-  vertical-align:middle!important
+  vertical-align:middle!important;
+  text-align:center!important
 }
 .bottom-nav .mastaba-show-nav-v1029 small,
 .bottom-nav .mastaba-show-nav-v1032 small,
