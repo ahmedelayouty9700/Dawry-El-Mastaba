@@ -27,7 +27,7 @@ button,input,select{font:inherit}button{cursor:pointer}.app-shell{max-width:1180
 .topbar{position:sticky;top:0;z-index:50;display:flex;justify-content:space-between;align-items:center;padding:12px 16px;border-bottom:1px solid rgba(255,255,255,.08);background:rgba(8,14,27,.92);backdrop-filter:blur(20px)}
 .brand-button{border:0;color:inherit;background:transparent;padding:0}.brand-wrap{display:flex;align-items:center;gap:10px}.brand-logo{width:48px;height:48px;border-radius:14px;object-fit:cover;border:1px solid rgba(213,18,45,.46);box-shadow:0 0 0 3px rgba(213,18,45,.08)}
 .brand-name{font-size:1.2rem;font-weight:950}.sandbox-chip{display:inline-block;margin-top:2px;padding:2px 7px;border-radius:99px;font-size:.58rem;letter-spacing:.13em;color:#ffbec7;border:1px solid rgba(213,18,45,.35);background:rgba(213,18,45,.12)}
-.topbar-actions{display:flex;align-items:center;gap:8px}.icon-button,.user-pill{min-height:42px;border-radius:14px;border:1px solid rgba(255,255,255,.11);background:#121c30;color:#fff}.icon-button{width:44px;font-weight:900}.lang-button{letter-spacing:.04em}.user-pill{display:flex;align-items:center;gap:8px;padding:4px 10px 4px 5px}.avatar{display:grid;place-items:center;border-radius:50%;font-weight:900;overflow:hidden;background:linear-gradient(145deg,#8d1226,#1c2c4e);border:1px solid rgba(255,255,255,.15)}.avatar img{width:100%;height:100%;object-fit:cover}.avatar.tiny{width:32px;height:32px;font-size:.7rem}.avatar.large{width:76px;height:76px;font-size:1.15rem}
+.topbar-actions{display:flex;align-items:center;gap:6px}.icon-button,.user-pill{min-height:42px;border-radius:14px;border:1px solid rgba(255,255,255,.11);background:#121c30;color:#fff}.icon-button{width:44px;font-weight:900}.lang-button{letter-spacing:.04em}.user-pill{display:flex;align-items:center;gap:8px;padding:4px 10px 4px 5px}.avatar{display:grid;place-items:center;border-radius:50%;font-weight:900;overflow:hidden;background:linear-gradient(145deg,#8d1226,#1c2c4e);border:1px solid rgba(255,255,255,.15)}.avatar img{width:100%;height:100%;object-fit:cover}.avatar.tiny{width:32px;height:32px;font-size:.7rem}.avatar.large{width:76px;height:76px;font-size:1.15rem}
 main{padding:18px 16px 30px}.view{display:none}.view.active{display:block}.page-title{margin:5px 0;font-size:clamp(1.6rem,5vw,2.65rem);font-weight:1000;letter-spacing:-.035em}.page-sub{margin:0 0 16px;color:#b1bac7;line-height:1.55}.section-title{margin:24px 0 12px;font-size:1.08rem;font-weight:950;display:flex;align-items:center;gap:9px}.section-title:before{content:"";width:5px;height:24px;border-radius:99px;background:linear-gradient(var(--red3),var(--red2))}
 .hero{position:relative;overflow:hidden;min-height:222px;padding:26px;border-radius:30px;border:1px solid rgba(255,255,255,.09);background:linear-gradient(112deg,#111e3b 0 58%,#6e0b20 58% 72%,#b80e28 72% 100%);box-shadow:var(--shadow)}
 .hero:before{content:"";position:absolute;width:480px;height:130px;right:-120px;bottom:12px;background:rgba(255,255,255,.06);transform:rotate(-12deg);border:2px solid rgba(255,255,255,.08)}.hero:after{content:"";position:absolute;width:260px;height:260px;border:30px solid rgba(255,255,255,.045);border-radius:46%;right:15%;top:-160px}.hero h1,.hero p,.hero-actions{position:relative;z-index:1}.hero h1{max-width:720px;margin:0 0 10px;font-size:clamp(2rem,7vw,4rem);line-height:.98;font-weight:1000}.hero p{max-width:650px;margin:0 0 21px;color:#dae0e8}
@@ -7550,6 +7550,8 @@ function animateRankGliderAt(segIndex,fromIndex){
 function syncBottomNavGlider(){
   const nav=document.querySelector('.bottom-nav');
   if(!nav)return;
+  const visibleItems=[...nav.querySelectorAll('.nav-item')].filter(item=>getComputedStyle(item).display!=='none');
+  nav.style.setProperty('--mobile-nav-count',String(Math.max(1,visibleItems.length)));
   let glider=nav.querySelector('.nav-glider');
   if(!glider){
     glider=document.createElement('span');
@@ -11469,7 +11471,7 @@ html[data-theme="barcelona"] body #app #view-admin .selected-fixture-chips span 
 .league-result-actions-v1029 .btn{min-height:34px!important;padding:7px 10px!important;font-size:.7rem!important}
 
 /* 9. Show hub + compact top-bar social shortcuts. */
-.top-social-v1029{display:flex;align-items:center;gap:6px;margin-inline-end:4px}
+.top-social-v1029{display:flex;align-items:center;gap:6px;margin-inline-end:0}
 .top-social-word-v1029{font-size:.84rem;font-weight:1000;letter-spacing:0;opacity:1;white-space:nowrap}
 .top-social-link-v1029{width:44px;height:42px;min-width:44px;min-height:42px;border-radius:14px;display:grid;place-items:center;text-decoration:none;color:var(--theme-text);border:1px solid color-mix(in srgb,var(--theme-accent) 24%,var(--theme-border));background:color-mix(in srgb,var(--theme-surface) 90%,transparent);transition:transform .18s ease,box-shadow .18s ease}
 .top-social-link-v1029:hover{transform:translateY(-1px);box-shadow:0 6px 14px rgba(0,0,0,.12)}
@@ -11538,7 +11540,7 @@ html[dir="rtl"] #view-home .ats-need-copy-v27{text-align:right!important}
 }
 
 @media(max-width:390px){
-  .top-social-v1029{gap:4px}
+  .top-social-v1029{gap:6px;margin-inline-end:0}
   .top-social-link-v1029{width:44px;height:42px;min-width:44px;min-height:42px}
   .show-media-copy-v1029{display:block}
   .show-media-copy-v1029 p{max-width:none;margin-bottom:10px}
@@ -11794,19 +11796,71 @@ html[dir="rtl"] html[data-theme] body #app #view-rankings .stats-table tr.curren
 /* Header socials: same geometry as the language selector; no extra Mastaba word. */
 .top-social-word-v1029{display:none!important}
 .top-social-link-v1029{
-  width:44px!important;height:42px!important;min-width:44px!important;min-height:42px!important;
-  border-radius:14px!important
+  width:42px!important;height:42px!important;min-width:42px!important;min-height:42px!important;
+  border-radius:12px!important
 }
-.top-social-link-v1029 svg{width:21px!important;height:21px!important}
+.top-social-link-v1029 svg{width:20px!important;height:20px!important}
 
-/* Bottom navigation distributes every visible item evenly, including when Admin is present. */
+/* Bottom navigation: exact equal columns based on visible items (5 regular / 6 with Admin). */
 .bottom-nav{
-  overflow:hidden!important;justify-content:stretch!important;gap:0!important;padding-left:3px!important;padding-right:3px!important
+  display:grid!important;
+  grid-template-columns:repeat(var(--mobile-nav-count,5),minmax(0,1fr))!important;
+  align-items:stretch!important;
+  justify-content:stretch!important;
+  overflow:hidden!important;
+  gap:0!important;
+  padding-left:3px!important;
+  padding-right:3px!important
 }
 .bottom-nav .nav-item{
-  flex:1 1 0!important;min-width:0!important;width:auto!important;padding-left:1px!important;padding-right:1px!important
+  width:100%!important;
+  min-width:0!important;
+  max-width:none!important;
+  flex:none!important;
+  display:grid!important;
+  grid-template-rows:28px 18px!important;
+  align-content:center!important;
+  align-items:center!important;
+  justify-items:center!important;
+  justify-content:center!important;
+  row-gap:4px!important;
+  padding:3px 1px!important;
+  margin:0!important
 }
-.bottom-nav .nav-item small{max-width:100%!important;overflow:hidden!important;text-overflow:ellipsis!important}
+.bottom-nav .nav-item[style*="display: none"]{display:none!important}
+.bottom-nav .nav-svg,
+.bottom-nav .nav-logo{
+  width:26px!important;height:26px!important;min-width:26px!important;min-height:26px!important;
+  margin:0!important;align-self:center!important;justify-self:center!important
+}
+.bottom-nav .nav-svg{display:grid!important;place-items:center!important}
+.bottom-nav .nav-svg svg{width:23px!important;height:23px!important;display:block!important}
+.bottom-nav .nav-logo{object-fit:cover!important;border-radius:5px!important}
+.bottom-nav .nav-item small{
+  display:flex!important;
+  align-items:center!important;
+  justify-content:center!important;
+  width:100%!important;
+  height:18px!important;
+  min-height:18px!important;
+  max-width:100%!important;
+  margin:0!important;
+  padding:0!important;
+  overflow:hidden!important;
+  text-overflow:ellipsis!important;
+  white-space:nowrap!important;
+  line-height:18px!important;
+  font-size:.58rem!important;
+  font-weight:950!important;
+  vertical-align:middle!important
+}
+.bottom-nav .mastaba-show-nav-v1029 small,
+.bottom-nav .mastaba-show-nav-v1032 small,
+.bottom-nav .mastaba-show-nav-v1033 small{
+  font-size:.58rem!important;
+  line-height:18px!important;
+  font-family:inherit!important
+}
 
 /* Predict score metadata: stadium, actual score, and label now share one centered column. */
 #view-predict .match-card .score-area{
@@ -11850,29 +11904,44 @@ html[dir="rtl"] html[data-theme] body #app #view-rankings .stats-table tr.curren
   text-align:center!important;justify-content:center!important;justify-items:center!important;align-items:center!important
 }
 
-/* X2 uses identical vertical geometry before, during, and after activation. */
+/* X2: the glyph itself now overfills the bar and is clipped identically during/after animation.
+   This removes the font-metric gap that made the container fill the bar while the visible X2 did not. */
 .double-power.active .double-x2-large,
 .double-power.active.activating .double-x2-large,
 .double-power.active.activating.x2-ready .double-x2-large{
-  display:flex!important;align-items:center!important;justify-content:center!important;
-  top:0!important;bottom:0!important;height:100%!important;margin:0!important;
-  transform:none!important;line-height:.72!important;font-size:6.1rem!important;
-  animation:doubleX2MobileV1039 .18s ease-out .18s both!important;
+  display:flex!important;
+  align-items:center!important;
+  justify-content:center!important;
+  position:absolute!important;
+  top:-7px!important;
+  bottom:-7px!important;
+  height:calc(100% + 14px)!important;
+  margin:0!important;
+  padding:0!important;
+  transform:none!important;
+  font-size:7.8rem!important;
+  line-height:.54!important;
+  font-weight:1000!important;
+  letter-spacing:-.06em!important;
+  overflow:visible!important;
+  animation:doubleX2MobileV1040 .18s ease-out .18s both!important;
   transform-origin:center center!important
 }
 html[dir="rtl"] .double-power.active .double-x2-large,
 html[dir="rtl"] .double-power.active.activating .double-x2-large,
 html[dir="rtl"] .double-power.active.activating.x2-ready .double-x2-large{
-  top:0!important;bottom:0!important;transform:none!important
+  top:-7px!important;
+  bottom:-7px!important;
+  transform:none!important
 }
-@keyframes doubleX2MobileV1039{
+@keyframes doubleX2MobileV1040{
   0%{opacity:0;translate:12px 0;scale:.84 1}
   100%{opacity:1;translate:0 0;scale:1 1}
 }
 html[dir="rtl"] .double-power.active .double-x2-large{
-  animation-name:doubleX2MobileRtlV1039!important
+  animation-name:doubleX2MobileRtlV1040!important
 }
-@keyframes doubleX2MobileRtlV1039{
+@keyframes doubleX2MobileRtlV1040{
   0%{opacity:0;translate:-12px 0;scale:.84 1}
   100%{opacity:1;translate:0 0;scale:1 1}
 }
