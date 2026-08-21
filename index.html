@@ -8546,7 +8546,7 @@ render=function(){
   renderV1019Base();
   const nav=$('#adminNav');
   if(nav)nav.style.display=(currentUser().admin||hasLeagueAdminRoleV19())?'flex':'none';
-  if(state.view==='admin')renderAdmin();
+  if(state.view==='admin'&&!window.__adminWorkspaceV1095)renderAdmin();
   requestAnimationFrame(()=>{installRankGlidersV19();positionProfileTabLineV19();syncBottomNavGlider()});
 };
 
@@ -13362,7 +13362,7 @@ function detectRememberChoiceV1064(){if(window.localStorage.getItem(AUTH_STORAGE
 function syncRememberInputsV1064(){['#authRememberLoginV1064','#authRememberSignupV1064'].forEach(sel=>{const el=qV1064(sel);if(el)el.checked=!!rememberChoiceV1064})}
 function currentRememberChoiceV1064(mode){const el=qV1064(mode==='signup'?'#authRememberSignupV1064':'#authRememberLoginV1064');return el?!!el.checked:!!rememberChoiceV1064}
 function authRedirectUrlV1064(){const url=new URL(window.location.href);url.hash='';url.search='';return url.toString()}
-async function buildSupabaseClientV1064(remember){rememberChoiceV1064=!!remember;localStorage.setItem(AUTH_REMEMBER_KEY_V1064,rememberChoiceV1064?'1':'0');const storage=createStorageAdapterV1064(rememberChoiceV1064?'local':'session');mastabaSandboxV1064=window.supabase.createClient(MASTABA_SANDBOX_URL,MASTABA_SANDBOX_PUBLISHABLE_KEY,{auth:{persistSession:true,autoRefreshToken:true,detectSessionInUrl:true,storage,storageKey:AUTH_STORAGE_KEY_V1064}});window.mastabaSandboxV1064=mastabaSandboxV1064;if(authSubscriptionV1064?.subscription?.unsubscribe)authSubscriptionV1064.subscription.unsubscribe();authSubscriptionV1064=mastabaSandboxV1064.auth.onAuthStateChange((event,session)=>{if(event==='SIGNED_OUT'||!session){window.localStorage.removeItem(AUTH_STORAGE_KEY_V1064);window.sessionStorage.removeItem(AUTH_STORAGE_KEY_V1064);return showAuthV1064()}if(['SIGNED_IN','TOKEN_REFRESHED','USER_UPDATED','INITIAL_SESSION','PASSWORD_RECOVERY'].includes(event))setTimeout(()=>enterAppV1064(session),0)});return mastabaSandboxV1064}
+async function buildSupabaseClientV1064(remember){rememberChoiceV1064=!!remember;localStorage.setItem(AUTH_REMEMBER_KEY_V1064,rememberChoiceV1064?'1':'0');const storage=createStorageAdapterV1064(rememberChoiceV1064?'local':'session');mastabaSandboxV1064=window.supabase.createClient(MASTABA_SANDBOX_URL,MASTABA_SANDBOX_PUBLISHABLE_KEY,{auth:{persistSession:true,autoRefreshToken:true,detectSessionInUrl:true,storage,storageKey:AUTH_STORAGE_KEY_V1064}});window.mastabaSandboxV1064=mastabaSandboxV1064;if(authSubscriptionV1064?.subscription?.unsubscribe)authSubscriptionV1064.subscription.unsubscribe();authSubscriptionV1064=mastabaSandboxV1064.auth.onAuthStateChange((event,session)=>{if(event==='SIGNED_OUT'||!session){window.localStorage.removeItem(AUTH_STORAGE_KEY_V1064);window.sessionStorage.removeItem(AUTH_STORAGE_KEY_V1064);return showAuthV1064()}if(event==='TOKEN_REFRESHED'&&activeAuthUserV1064===session?.user?.id&&document.body.classList.contains('auth-ready-v1064'))return;if(['SIGNED_IN','USER_UPDATED','INITIAL_SESSION','PASSWORD_RECOVERY'].includes(event))setTimeout(()=>enterAppV1064(session),0)});return mastabaSandboxV1064}
 function slugFromTextV1064(text){return (text||'').toLowerCase().replace(/[^a-z0-9]+/g,'_').replace(/^_+|_+$/g,'').slice(0,18)||'user'}
 function makeHiddenUsernameV1064(displayName,email){const base=slugFromTextV1064(displayName)||slugFromTextV1064((email||'').split('@')[0]);const suffix=Math.random().toString(36).slice(2,6);return `${base}_${suffix}`.slice(0,24)}
 function normalizeTextV1064(text){return (text||'').trim().toLowerCase().replace(/\s+/g,' ')}
@@ -13727,7 +13727,7 @@ async function ensureAdminPoolV1077(){
     state.fixturePool=pool.sort((a,b)=>new Date(a.kickoff)-new Date(b.kickoff));
     adminPoolLoadedV1077=true;
   }catch(e){console.error('Admin fixture feed failed',e)}
-  finally{adminPoolLoadingV1077=false;if(state.view==='admin')render()}
+  finally{adminPoolLoadingV1077=false;if(state.view==='admin')window.adminPoolReadyV1095?.()}
 }
 window.ensureAdminPoolV1077=ensureAdminPoolV1077;
 
@@ -14712,7 +14712,7 @@ async function loadAdminOpsV1085(force=false){
   const fixtureCount=(state.fixtures||[]).length,users=[...profileMap.values()].map(p=>{const m=membership[p.id],s=statuses[p.id]||{},r=rivals[p.id]||{};const rows=Number(s.prediction_rows||0),subs=Number(s.submitted_rows||0);return{user_id:p.id,display_name:p.display_name||'Mastaba Player',primary_team_key:p.primary_team_key,theme_key:p.theme_key,active:p.active!==false,registered_at:p.created_at,is_private_member:!!m,member_role:m?.member_role||null,joined_at:m?.joined_at||null,scoring_from_gameweek:m?.scoring_from_gameweek||null,club_1:r.club_1||null,club_2:r.club_2||null,prediction_rows:rows,submitted_rows:subs,draft_rows:Number(s.draft_rows||0),double_rows:Number(s.double_rows||0),last_saved_at:s.last_saved_at||null,last_submitted_at:s.last_submitted_at||null,submission_status:rows===0?'not_started':fixtureCount>0&&rows===fixtureCount&&subs===fixtureCount?'submitted':'draft'}}).sort((a,b)=>(b.is_private_member-a.is_private_member)||new Date(b.registered_at)-new Date(a.registered_at));
   const codes=[...new Set((state.fixtures||[]).flatMap(f=>[f.home,f.away]))],ready=codes.filter(c=>(players[c]||[]).length>0),playerCount=ready.reduce((n,c)=>n+(players[c]||[]).length,0);
   adminOpsV1085.data={privateLeagueId:privateLeague.id,gameweek:{id:ctx.gw.id,number:Number(ctx.gw.gameweek_number),deadline_at:ctx.gw.deadline_at,fixture_count:fixtureCount},users,health:{registered_total:Number(totalR.count||users.length),api_used:Number(apiR.data?.requests_used||0),api_limit:Number(apiR.data?.daily_limit||7500),selected_teams:codes.length,player_pool_teams:ready.length,player_pool_players:playerCount,public_league_status:publicLeague?.status||'setup',private_member_count:(membersR.data||[]).length}};adminOpsV1085.loaded=true;adminOpsV1085.lastLoaded=Date.now();applyRivalryRowsV1085(rivalR.data||[]);
- }catch(e){console.error('Admin operations load failed',e);adminOpsV1085.error=e?.message||String(e)}finally{adminOpsV1085.loading=false;if(state.view==='admin'&&currentUser()?.admin){enhanceAdminV1085();setTimeout(()=>window.enhanceAdminV1094?.(),0)}}
+ }catch(e){console.error('Admin operations load failed',e);adminOpsV1085.error=e?.message||String(e)}finally{adminOpsV1085.loading=false;if(state.view==='admin'&&currentUser()?.admin){if(window.__adminWorkspaceV1095)window.refreshAdminDataPanelsV1095?.();else{enhanceAdminV1085();setTimeout(()=>window.enhanceAdminV1094?.(),0)}}}
 }
 window.refreshAdminOpsV1085=async function(){adminOpsV1085.loaded=false;await loadAdminOpsV1085(true)};
 window.setAdminUserSearchV1085=function(v){adminOpsV1085.search=String(v||'');clearTimeout(adminSearchTimerV1085);adminSearchTimerV1085=setTimeout(()=>{adminOpsV1085.loaded=false;loadAdminOpsV1085(true)},220)};
@@ -14722,13 +14722,13 @@ window.copyMissingSubmissionReminderV1085=async function(){const d=adminOpsV1085
 function healthV1085(){if(!adminOpsV1085.loaded)return`<div class="admin-loading-v1085">${L('Loading Production health…','جاري تحميل حالة الإنتاج…')}</div>`;const h=adminOpsV1085.data.health||{},g=adminOpsV1085.data.gameweek||{},poolOk=Number(h.player_pool_teams)===Number(h.selected_teams)&&Number(h.selected_teams)>0,apiPct=Number(h.api_limit)?Math.round(Number(h.api_used)/Number(h.api_limit)*100):0;return`<div class="admin-health-grid-v1085"><div class="admin-health-card-v1085"><strong>${Number(h.registered_total||0)}</strong><small>${L('Registered Users','مستخدم مسجل')}</small></div><div class="admin-health-card-v1085"><strong class="${poolOk?'admin-health-good-v1085':'admin-health-warn-v1085'}">${Number(h.player_pool_teams||0)}/${Number(h.selected_teams||0)} ${L('teams','فريق')}</strong><small>${L(`Player Cache · ${Number(h.player_pool_players||0)} players`,`كاش اللاعبين · ${Number(h.player_pool_players||0)} لاعب`)}</small></div><div class="admin-health-card-v1085"><strong>${Number(h.api_used||0).toLocaleString()} / ${Number(h.api_limit||7500).toLocaleString()}</strong><small>${L(`API Today · ${apiPct}%`,`API اليوم · ${apiPct}%`)}</small></div><div class="admin-health-card-v1085"><strong>${fmtV1085(g.deadline_at,true)}</strong><small>${L('Prediction Deadline','موعد قفل التوقعات')}</small></div><div class="admin-health-card-v1085"><strong class="${String(h.public_league_status)==='active'?'admin-health-warn-v1085':'admin-health-good-v1085'}">${String(h.public_league_status)==='active'?L('Active','شغال'):L('Waiting','منتظر')}</strong><small>${L('Public League','الدوري العام')}</small></div></div>`}
 function clubOptionsV1085(selected){return Object.entries(RIVALRY_OPTIONS_V1085).map(([k,n])=>`<option value="${k}" ${selected===k?'selected':''}>${escV1085(n)}</option>`).join('')}
 function userManagerV1085(){if(adminOpsV1085.error)return`<div class="panel admin-users-panel"><div class="admin-error-v1085">${escV1085(adminOpsV1085.error)}</div></div>`;if(!adminOpsV1085.loaded)return`<div class="panel admin-users-panel"><div class="admin-loading-v1085">${L('Loading registered Production users…','جاري تحميل مستخدمي الإنتاج…')}</div></div>`;const users=adminOpsV1085.data.users||[],me=window.prodCtxV1073?.user?.id,gwCount=Number(adminOpsV1085.data?.gameweek?.fixture_count||0);return`<div class="panel admin-users-panel"><div class="admin-ops-head-v1085"><div><h3>${L('Registered Users','المستخدمون المسجلون')}</h3><small>${L('Latest registrations are shown first. Search finds older users without loading the entire Public League.','أحدث التسجيلات تظهر الأول. البحث يلاقي المستخدمين الأقدم من غير تحميل الدوري العام كله.')}</small></div><button class="btn btn-ghost admin-ops-refresh-v1085" onclick="refreshAdminOpsV1085()">${L('Refresh','تحديث')}</button></div><input class="admin-user-search-v1085" value="${escV1085(adminOpsV1085.search)}" placeholder="${L('Search registered user…','ابحث عن مستخدم مسجل…')}" oninput="setAdminUserSearchV1085(this.value)"><div class="admin-reg-list-v1085">${users.map(u=>{const slot=(state.users||[]).find(x=>x.authUserId===u.user_id)?.id||null,isMe=u.user_id===me;return`<div class="admin-reg-card-v1085 ${u.is_private_member?'':'waiting'}"><div class="admin-reg-top-v1085"><span class="admin-reg-avatar-v1085">${initialsV1085(u.display_name)}</span><div><strong>${escV1085(u.display_name)}</strong><small>${L('Registered','سجل')} ${fmtV1085(u.registered_at,true)} · ${u.active?L('Active','نشط'):L('Inactive','غير نشط')}</small>${activityBadgeV1086(u,gwCount)}</div><span class="admin-member-pill-v1085 ${u.is_private_member?'in':'out'}">${u.is_private_member?L('Mastaba Member','عضو المصطبة'):L('Waiting','منتظر')}</span></div>${u.is_private_member?`<div class="admin-rivalry-edit-v1085"><label>${L('Rivalry Clubs','أندية Rivalry')}</label><div class="admin-rivalry-row-v1085"><select id="rv1-${u.user_id}">${clubOptionsV1085(u.club_1||'BAR')}</select><select id="rv2-${u.user_id}">${clubOptionsV1085(u.club_2||'AHL')}</select><button class="btn btn-secondary" onclick="saveAdminRivalryV1085('${u.user_id}')">${L('Save Rivals','حفظ')}</button></div><div class="admin-start-row-v1085"><span>${L('Scoring begins from Gameweek','احتساب النقاط يبدأ من الجولة')}</span><input id="sgw-${u.user_id}" type="number" min="1" value="${Number(u.scoring_from_gameweek||1)}"><button class="btn btn-ghost" onclick="saveAdminScoringStartV1085('${u.user_id}')">${L('Save Start','حفظ البداية')}</button></div></div>`:''}<div class="admin-reg-actions-v1085">${u.is_private_member?(isMe?'':`<button class="btn btn-danger" onclick="setAdminMemberV1085('${u.user_id}',false)">${L('Remove from Mastaba','إزالة من المصطبة')}</button>`):`<button class="btn btn-primary" onclick="setAdminMemberV1085('${u.user_id}',true)">${L('Add to Mastaba','إضافة للمصطبة')}</button>`}${slot&&!isMe?`<button class="btn btn-secondary" onclick="adminViewAs('${slot}')">${L('View as User','عرض كمستخدم')}</button>`:''}${isMe?'':`<button class="btn btn-ghost" onclick="toggleAdminProfileV1085('${u.user_id}',${u.active?'false':'true'})">${u.active?L('Deactivate','إيقاف'):L('Reactivate','إعادة التفعيل')}</button>`}</div></div>`}).join('')}</div></div>`}
-window.userManagerV1085Public=userManagerV1085;
+window.userManagerV1085Public=userManagerV1085;window.healthV1085Public=healthV1085;
 window.setAdminMemberV1085=async function(userId,join){const ctx=window.prodCtxV1073,d=adminOpsV1085.data;if(!ctx||!d)return;if(!join&&!confirm(L('Remove this user from the private Mastaba League? Their history will be kept.','إزالة المستخدم من دوري المصطبة الخاص؟ تاريخه هيفضل محفوظ.')))return;try{let r;if(join)r=await ctx.supa.from('mastaba_league_members').insert({league_id:d.privateLeagueId,user_id:userId,member_role:'member',scoring_from_gameweek:Number(state.week)||1});else r=await ctx.supa.from('mastaba_league_members').delete().eq('league_id',d.privateLeagueId).eq('user_id',userId);if(r.error)throw r.error;toast(join?L('Added to Mastaba League.','تمت الإضافة لدوري المصطبة.'):L('Removed from Mastaba League.','تمت الإزالة من دوري المصطبة.'),'good');setTimeout(()=>location.reload(),450)}catch(e){console.error(e);toast(e?.message||L('Could not update league membership.','تعذر تحديث العضوية.'),'warn')}};
 window.saveAdminRivalryV1085=async function(userId){const ctx=window.prodCtxV1073,c1=document.getElementById(`rv1-${userId}`)?.value,c2=document.getElementById(`rv2-${userId}`)?.value;if(!ctx||!c1||!c2||c1===c2)return toast(L('Choose two different Rivalry Clubs.','اختار ناديين مختلفين للـRivalry.'),'warn');try{const {error}=await ctx.supa.from('mastaba_rivalry_clubs').upsert({user_id:userId,club_1:c1,club_2:c2,updated_at:new Date().toISOString()},{onConflict:'user_id'});if(error)throw error;const slot=(state.users||[]).find(u=>u.authUserId===userId)?.id;if(slot&&typeof MASTABA_SUPPORTER_CLUBS_V1051!=='undefined')MASTABA_SUPPORTER_CLUBS_V1051[slot]=[c1,c2];toast(L('Rivalry Clubs saved.','تم حفظ أندية Rivalry.'),'good');await loadAdminOpsV1085(true);render()}catch(e){console.error(e);toast(e?.message||L('Could not save Rivalry Clubs.','تعذر حفظ أندية Rivalry.'),'warn')}};
 window.saveAdminScoringStartV1085=async function(userId){const ctx=window.prodCtxV1073,d=adminOpsV1085.data,n=Math.max(1,Number(document.getElementById(`sgw-${userId}`)?.value||1));if(!ctx||!d)return;try{const {error}=await ctx.supa.from('mastaba_league_members').update({scoring_from_gameweek:n}).eq('league_id',d.privateLeagueId).eq('user_id',userId);if(error)throw error;toast(L(`Scoring start set to GW${n}.`,`بداية احتساب النقاط اتحددت من الجولة ${n}.`),'good');await loadAdminOpsV1085(true)}catch(e){console.error(e);toast(e?.message||L('Could not update scoring start.','تعذر تحديث بداية النقاط.'),'warn')}};
 window.toggleAdminProfileV1085=async function(userId,active){const ctx=window.prodCtxV1073;if(!ctx)return;try{const {error}=await ctx.supa.from('mastaba_profiles').update({active:!!active,updated_at:new Date().toISOString()}).eq('id',userId);if(error)throw error;toast(active?L('User reactivated.','تم إعادة تفعيل المستخدم.'):L('User deactivated.','تم إيقاف المستخدم.'),'good');await loadAdminOpsV1085(true)}catch(e){console.error(e);toast(e?.message||L('Could not update user.','تعذر تحديث المستخدم.'),'warn')}};
 window.loadAdminOpsV1085=loadAdminOpsV1085;
-function enhanceAdminV1085(){if(state.view!=='admin'||!currentUser()?.admin)return;const view=document.querySelector('#view-admin');if(!view)return;const oldUsers=view.querySelector('.admin-users-panel');if(oldUsers)oldUsers.outerHTML=userManagerV1085();view.querySelectorAll('.admin-ops-v1085').forEach(x=>x.remove());const focus=view.querySelector('.admin-focus-panel');if(focus)focus.insertAdjacentHTML('afterend',`<div class="admin-ops-v1085"><div class="section-title admin-section-title">${L('Gameweek Submission Tracker','متابعة إرسال التوقعات')}</div><div class="panel">${submissionTrackerV1085()}</div><div class="section-title admin-section-title">${L('Production Health','حالة الإنتاج')}</div><div class="panel">${healthV1085()}</div></div>`);if(!adminOpsV1085.loaded&&!adminOpsV1085.loading)setTimeout(()=>loadAdminOpsV1085(),0)}
+function enhanceAdminV1085(){if(window.__adminWorkspaceV1095)return;if(state.view!=='admin'||!currentUser()?.admin)return;const view=document.querySelector('#view-admin');if(!view)return;const oldUsers=view.querySelector('.admin-users-panel');if(oldUsers)oldUsers.outerHTML=userManagerV1085();view.querySelectorAll('.admin-ops-v1085').forEach(x=>x.remove());const focus=view.querySelector('.admin-focus-panel');if(focus)focus.insertAdjacentHTML('afterend',`<div class="admin-ops-v1085"><div class="section-title admin-section-title">${L('Gameweek Submission Tracker','متابعة إرسال التوقعات')}</div><div class="panel">${submissionTrackerV1085()}</div><div class="section-title admin-section-title">${L('Production Health','حالة الإنتاج')}</div><div class="panel">${healthV1085()}</div></div>`);if(!adminOpsV1085.loaded&&!adminOpsV1085.loading)setTimeout(()=>loadAdminOpsV1085(),0)}
 window.enhanceAdminV1085=enhanceAdminV1085;const renderAdminBaseV1085=window.renderAdmin||renderAdmin;window.renderAdmin=renderAdmin=function(){const out=renderAdminBaseV1085();setTimeout(enhanceAdminV1085,0);return out};
 const hydrateBaseV1085=window.hydrateProductionV1073;window.hydrateProductionV1073=async function(profile,user,supa){const ok=await hydrateBaseV1085(profile,user,supa);await loadRivalryAssignmentsV1085(supa);if(currentUser()?.admin)await loadAdminOpsV1085(true);return ok};
 /* V10.94: Admin data refresh is intentional/manual; removed timed full-panel repaint. */
@@ -15432,11 +15432,13 @@ const teamLabelV1094=k=>TEAM_LABELS_V1094[String(k||'').toLowerCase()]||String(k
 const providerLabelV1094=p=>({google:'Google',apple:'Apple',email:'Email'}[String(p||'').toLowerCase()]||String(p||'Account').replace(/\b\w/g,m=>m.toUpperCase()));
 const langLabelV1094=l=>String(l||'').toLowerCase()==='ar'?L('Arabic','العربية'):String(l||'').toLowerCase()==='en'?L('English','الإنجليزية'):String(l||L('Unknown','غير معروف')).toUpperCase();
 
+window.fmtAdminDateV1094=fmtAdminDateV1094;
 function fmtAdminDateV1094(v,neverText){
   if(!v)return neverText||L('Never','أبدًا');
   const d=new Date(v);if(!Number.isFinite(d.getTime()))return neverText||'—';
   return new Intl.DateTimeFormat(state.lang==='ar'?'ar-EG':'en-US',{month:'short',day:'numeric',year:'numeric',hour:'numeric',minute:'2-digit'}).format(d);
 }
+window.fmtAdminDateV1094=fmtAdminDateV1094;
 function relativeActivityV1094(v){
   if(!v)return L('Never signed in','لم يسجل دخول');
   const ms=Date.now()-new Date(v).getTime(),day=86400000;
@@ -15469,7 +15471,7 @@ async function adminFetchV1094(path='',options={}){
   return j;
 }
 async function loadAdminAccountsV1094(force=false){
-  if(!currentUser()?.admin||adminAccountsV1094.loading)return;
+  if(!(currentUser()?.admin||window.hasMastabaToolsAccessV1095?.())||adminAccountsV1094.loading)return;
   if(!force&&adminAccountsV1094.data&&Date.now()-adminAccountsV1094.lastLoaded<15000){enhanceAdminV1094();return}
   adminAccountsV1094.loading=true;adminAccountsV1094.error=null;enhanceAdminV1094();
   try{
@@ -15478,7 +15480,7 @@ async function loadAdminAccountsV1094(force=false){
     adminAccountsV1094.data=await adminFetchV1094(`?${qs}`);
     adminAccountsV1094.lastLoaded=Date.now();
   }catch(e){console.error('Admin account directory failed',e);adminAccountsV1094.error=e?.message||String(e)}
-  finally{adminAccountsV1094.loading=false;enhanceAdminV1094()}
+  finally{adminAccountsV1094.loading=false;if(window.__adminWorkspaceV1095)window.refreshAdminDataPanelsV1095?.();else enhanceAdminV1094()}
 }
 window.loadAdminAccountsV1094=loadAdminAccountsV1094;
 window.refreshAdminAccountsV1094=()=>loadAdminAccountsV1094(true);
@@ -15558,7 +15560,7 @@ function accountDirectoryV1094(){
   if(adminAccountsV1094.error&&!d)return`<div class="panel admin-v1094-panel admin-accounts-v1094"><div class="admin-v1094-error">${escV1094(adminAccountsV1094.error)}</div></div>`;
   const users=d?.users||[],total=Number(d?.stats?.registered_total||0),filtered=Number(d?.total_filtered||0),page=Number(d?.page||1),pages=Number(d?.total_pages||1);
   return`<div class="panel admin-v1094-panel admin-accounts-v1094">
-    <div class="admin-v1094-head"><div><h3>${L('Website Account Directory','دليل حسابات الموقع')} · ${total.toLocaleString()}</h3><small>${L('Admin-only Auth information. Search email, display name, username, or sign-in provider.','بيانات Auth للأدمن فقط. ابحث بالإيميل أو الاسم أو اسم المستخدم أو طريقة الدخول.')}</small></div><button class="btn btn-ghost admin-v1094-refresh" onclick="refreshAdminAccountsV1094()">${L('Refresh','تحديث')}</button></div>
+    <div class="admin-v1094-head"><div><h3>${L('Website Account Directory','دليل حسابات الموقع')} · ${total.toLocaleString()}</h3><small>${L('Management-only account information. Search account, display name, username, or sign-in provider.','بيانات Auth للأدمن فقط. ابحث بالإيميل أو الاسم أو اسم المستخدم أو طريقة الدخول.')}</small></div><button class="btn btn-ghost admin-v1094-refresh" onclick="refreshAdminAccountsV1094()">${L('Refresh','تحديث')}</button></div>
     <div class="admin-v1094-searchrow"><input class="admin-v1094-search" value="${escV1094(adminAccountsV1094.search)}" placeholder="${L('Search email or account…','ابحث بالإيميل أو الحساب…')}" oninput="setAdminAccountSearchV1094(this.value)"><span class="admin-v1094-pill">${filtered.toLocaleString()} ${L('found','نتيجة')}</span></div>
     <div class="admin-v1094-list">${users.map(u=>{
       const status=u.active?L('Active','نشط'):L('Deactivated','موقوف');
@@ -15580,7 +15582,7 @@ function accountDirectoryV1094(){
           <div class="admin-v1094-detail"><strong>${L('Last Sign-in','آخر دخول')}</strong>${escV1094(fmtAdminDateV1094(u.last_sign_in_at,L('Never','أبدًا')))} · ${escV1094(relativeActivityV1094(u.last_sign_in_at))}</div>
           <div class="admin-v1094-detail"><strong>${L('Current Gameweek','الجولة الحالية')}</strong>${escV1094(gw)}${u.last_submitted_at?` · ${L('submitted','مرسل')}`:''}</div>
         </div>
-        ${u.is_admin?'':`<div class="admin-v1094-actions">
+        ${u.is_admin||!d?.can_manage_accounts?'':`<div class="admin-v1094-actions">
           <button class="btn ${u.active?'btn-ghost':'btn-secondary'}" onclick="adminAccountActionV1094('${u.user_id}','${u.active?'deactivate':'reactivate'}')">${u.active?L('Deactivate Account','إيقاف الحساب'):L('Reactivate Account','إعادة تفعيل الحساب')}</button>
           <button class="btn btn-danger" onclick="adminAccountActionV1094('${u.user_id}','delete_spam')">${L('Delete Spam Account','حذف حساب مزعج')}</button>
         </div>`}
@@ -15589,7 +15591,9 @@ function accountDirectoryV1094(){
   </div>`;
 }
 
+window.accountDirectoryV1094=accountDirectoryV1094;window.audienceAnalyticsV1094=audienceAnalyticsV1094;
 function enhanceAdminV1094(){
+  if(window.__adminWorkspaceV1095)return;
   if(state.view!=='admin'||!currentUser()?.admin)return;
   const view=document.querySelector('#view-admin');if(!view)return;
   view.querySelectorAll('.admin-v1094-panel').forEach(x=>x.remove());
@@ -15637,6 +15641,377 @@ document.addEventListener('click',e=>{
 },{passive:true});
 
 setTimeout(()=>{if(state.view==='admin'&&currentUser()?.admin)loadAdminAccountsV1094(false)},300);
+})();
+</script>
+
+
+<style id="mastaba-v1095-admin-workspace-style">
+/* V10.95 — stable, theme-safe Mastaba management workspace. */
+html #view-admin .admin-workspace-v1095{
+  --adm-bg:#f5f7fb;
+  --adm-card:#ffffff;
+  --adm-card-2:#f8fafc;
+  --adm-text:#172554;
+  --adm-muted:#64748b;
+  --adm-line:#d9e1ee;
+  --adm-accent:#243b78;
+  --adm-accent-soft:#e8eefc;
+  --adm-good:#19764c;
+  --adm-warn:#9a6218;
+  --adm-bad:#a82929;
+  color:var(--adm-text)!important;
+  width:100%;
+  min-width:0;
+}
+html #view-admin .admin-workspace-v1095,
+html #view-admin .admin-workspace-v1095 *{box-sizing:border-box}
+html #view-admin .admin-workspace-v1095 .page-title,
+html #view-admin .admin-workspace-v1095 .page-sub,
+html #view-admin .admin-workspace-v1095 h1,
+html #view-admin .admin-workspace-v1095 h2,
+html #view-admin .admin-workspace-v1095 h3,
+html #view-admin .admin-workspace-v1095 h4,
+html #view-admin .admin-workspace-v1095 strong,
+html #view-admin .admin-workspace-v1095 b,
+html #view-admin .admin-workspace-v1095 label,
+html #view-admin .admin-workspace-v1095 .admin-v1094-metric strong,
+html #view-admin .admin-workspace-v1095 .admin-v1094-team-name,
+html #view-admin .admin-workspace-v1095 .admin-v1094-team-value{
+  color:var(--adm-text)!important;
+}
+html #view-admin .admin-workspace-v1095 small,
+html #view-admin .admin-workspace-v1095 .muted,
+html #view-admin .admin-workspace-v1095 .page-sub,
+html #view-admin .admin-workspace-v1095 .admin-v1094-head small,
+html #view-admin .admin-workspace-v1095 .admin-v1094-metric small,
+html #view-admin .admin-workspace-v1095 .admin-v1094-detail,
+html #view-admin .admin-workspace-v1095 .admin-v1094-privacy{
+  color:var(--adm-muted)!important;
+}
+html #view-admin .admin-workspace-v1095 .panel,
+html #view-admin .admin-workspace-v1095 .admin-live-note,
+html #view-admin .admin-workspace-v1095 .admin-user-card,
+html #view-admin .admin-workspace-v1095 .admin-v1094-user,
+html #view-admin .admin-workspace-v1095 .admin-v1094-box,
+html #view-admin .admin-workspace-v1095 .admin-v1094-metric,
+html #view-admin .admin-workspace-v1095 .selected-fixtures-summary,
+html #view-admin .admin-workspace-v1095 .fixture-choice,
+html #view-admin .admin-workspace-v1095 .admin-match{
+  background:var(--adm-card)!important;
+  color:var(--adm-text)!important;
+  border-color:var(--adm-line)!important;
+  box-shadow:none!important;
+}
+html #view-admin .admin-workspace-v1095 input,
+html #view-admin .admin-workspace-v1095 select,
+html #view-admin .admin-workspace-v1095 textarea,
+html #view-admin .admin-workspace-v1095 .fixture-search-box,
+html #view-admin .admin-workspace-v1095 .fixture-league-filter{
+  background:#fff!important;
+  color:var(--adm-text)!important;
+  border-color:var(--adm-line)!important;
+  -webkit-text-fill-color:var(--adm-text)!important;
+}
+html #view-admin .admin-workspace-v1095 input::placeholder{color:#94a3b8!important}
+html #view-admin .admin-workspace-v1095 .btn-primary{
+  background:var(--adm-accent)!important;color:#fff!important;border-color:var(--adm-accent)!important;
+}
+html #view-admin .admin-workspace-v1095 .btn-primary *{color:#fff!important}
+html #view-admin .admin-workspace-v1095 .btn-secondary,
+html #view-admin .admin-workspace-v1095 .btn-ghost{
+  background:#fff!important;color:var(--adm-accent)!important;border-color:var(--adm-line)!important;
+}
+html #view-admin .admin-workspace-v1095 .btn-danger{
+  background:#fff!important;color:var(--adm-bad)!important;border-color:#e4b7b7!important;
+}
+html #view-admin .admin-workspace-v1095 .admin-v1094-pill{
+  background:var(--adm-card-2)!important;color:var(--adm-text)!important;border-color:var(--adm-line)!important;
+}
+html #view-admin .admin-workspace-v1095 .admin-v1094-pill.good{color:var(--adm-good)!important}
+html #view-admin .admin-workspace-v1095 .admin-v1094-pill.warn{color:var(--adm-warn)!important}
+html #view-admin .admin-workspace-v1095 .admin-v1094-pill.bad{color:var(--adm-bad)!important}
+html #view-admin .admin-workspace-v1095 .admin-v1094-bar{background:#e6ebf3!important}
+html #view-admin .admin-workspace-v1095 .admin-v1094-bar>span{background:var(--adm-accent)!important}
+html #view-admin .admin-workspace-v1095 .admin-round-tab{
+  background:#fff!important;color:var(--adm-text)!important;border-color:var(--adm-line)!important;
+}
+html #view-admin .admin-workspace-v1095 .admin-round-tab.active,
+html #view-admin .admin-workspace-v1095 .fixture-day.active{
+  background:var(--adm-accent)!important;color:#fff!important;border-color:var(--adm-accent)!important;
+}
+html #view-admin .admin-workspace-v1095 .admin-round-tab.active *,
+html #view-admin .admin-workspace-v1095 .fixture-day.active *{color:#fff!important}
+
+.admin-workspace-head-v1095{margin-bottom:14px}
+.admin-workspace-head-v1095 .page-title{margin-bottom:4px!important}
+.admin-role-badge-v1095{
+  display:inline-flex;align-items:center;gap:6px;margin-top:8px;padding:6px 9px;border:1px solid var(--adm-line);
+  border-radius:999px;background:#fff;color:var(--adm-accent)!important;font-size:.65rem;font-weight:1000;
+}
+.admin-tabs-v1095{
+  position:relative;display:flex;gap:0;margin:8px 0 18px;border-bottom:1px solid var(--adm-line);
+  overflow-x:auto;scrollbar-width:none;background:transparent!important;
+}
+.admin-tabs-v1095::-webkit-scrollbar{display:none}
+.admin-tab-v1095{
+  position:relative;flex:1 0 auto;min-width:120px;border:0!important;background:transparent!important;
+  color:var(--adm-muted)!important;padding:12px 10px 13px;font:inherit;font-size:.76rem;font-weight:1000;
+  white-space:nowrap;cursor:pointer;
+}
+.admin-tab-v1095.active{color:var(--adm-accent)!important}
+.admin-tab-line-v1095{
+  position:absolute;bottom:-1px;height:3px;border-radius:999px;background:var(--adm-accent);
+  transition:left .26s ease,width .26s ease;
+}
+.admin-pane-v1095{display:none;min-width:0}
+.admin-pane-v1095.active{
+  display:block;animation:adminPaneInV1095 .28s cubic-bezier(.2,.8,.2,1) both;
+}
+.admin-pane-v1095.from-right{--slide:20px}
+.admin-pane-v1095.from-left{--slide:-20px}
+@keyframes adminPaneInV1095{from{opacity:.15;transform:translateX(var(--slide,12px))}to{opacity:1;transform:translateX(0)}}
+@media(prefers-reduced-motion:reduce){
+  .admin-pane-v1095.active{animation:none}
+  .admin-tab-line-v1095{transition:none}
+}
+.admin-block-title-v1095{
+  margin:19px 0 9px;color:var(--adm-text)!important;font-size:.9rem;font-weight:1000;
+  border-bottom:1px solid var(--adm-line);padding-bottom:8px;
+}
+.admin-block-title-v1095:first-child{margin-top:0}
+.admin-readonly-note-v1095{
+  margin:0 0 12px;padding:10px 12px;border:1px solid var(--adm-line);border-radius:13px;
+  background:var(--adm-accent-soft)!important;color:var(--adm-text)!important;font-size:.7rem;font-weight:800;line-height:1.4;
+}
+.admin-tracker-summary-v1095{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px;margin-bottom:10px}
+.admin-tracker-chip-v1095{background:var(--adm-card-2);border:1px solid var(--adm-line);border-radius:13px;padding:10px}
+.admin-tracker-chip-v1095 strong{display:block;font-size:1.08rem}
+.admin-tracker-chip-v1095 span{display:block;margin-top:3px;color:var(--adm-muted)!important;font-size:.59rem;font-weight:900}
+.admin-tracker-list-v1095{display:grid;gap:8px}
+.admin-tracker-row-v1095{
+  display:grid;grid-template-columns:minmax(0,1fr) auto;gap:9px;align-items:center;
+  padding:10px 11px;border:1px solid var(--adm-line);border-radius:13px;background:#fff!important;
+}
+.admin-tracker-row-v1095 .name{font-size:.76rem;font-weight:1000;color:var(--adm-text)!important}
+.admin-tracker-row-v1095 .sub{margin-top:2px;font-size:.59rem;color:var(--adm-muted)!important}
+.admin-status-v1095{padding:6px 8px;border-radius:999px;font-size:.58rem;font-weight:1000;border:1px solid}
+.admin-status-v1095.submitted{color:var(--adm-good)!important;border-color:#afd9c6;background:#f0fbf6!important}
+.admin-status-v1095.draft{color:var(--adm-warn)!important;border-color:#e4cca8;background:#fff9ef!important}
+.admin-status-v1095.missing{color:var(--adm-bad)!important;border-color:#e6bcbc;background:#fff5f5!important}
+.admin-game-body-v1095,.admin-prod-dynamic-v1095,.admin-analytics-body-v1095{min-width:0}
+.admin-accounts-slot-v1095 .admin-v1094-panel,
+.admin-analytics-body-v1095 .admin-v1094-panel{margin-bottom:0!important}
+.admin-analytics-body-v1095 .admin-v1094-panel{background:#fff!important}
+.admin-analytics-body-v1095 .admin-v1094-head{align-items:center}
+.admin-analytics-body-v1095 .admin-v1094-metrics{margin-top:4px}
+@media(max-width:600px){
+  .admin-tab-v1095{min-width:112px;font-size:.69rem;padding-inline:8px}
+  .admin-tracker-summary-v1095{grid-template-columns:1fr 1fr}
+  html #view-admin .admin-workspace-v1095 .admin-v1094-metric strong{font-size:1.18rem!important}
+}
+</style>
+
+<script id="mastaba-v1095-admin-workspace">
+(function(){
+'use strict';
+window.__adminWorkspaceV1095=true;
+
+function isPrivateMastabaMemberV1095(){
+  try{
+    const u=currentUser();if(!u)return false;
+    if(u.admin)return true;
+    return (memberLeagues(u.id)||[]).some(l=>String(l.id)==='mastaba'||String(l.slug||'')==='mastaba');
+  }catch{return false}
+}
+window.hasMastabaToolsAccessV1095=isPrivateMastabaMemberV1095;
+
+function canFullAdminV1095(){return !!currentUser()?.admin}
+function activeTabV1095(){
+  let t=String(state.adminWorkspaceTabV1095||'');
+  const allowed=canFullAdminV1095()?['game','production','analytics']:['production','analytics'];
+  if(!allowed.includes(t))t=canFullAdminV1095()?'game':'production';
+  state.adminWorkspaceTabV1095=t;
+  return t;
+}
+function tabLabelV1095(t){
+  return t==='game'?L('Game Setup','إعداد الجولة'):t==='production'?L('Production Management','إدارة الإنتاج'):L('Analytics','الإحصائيات');
+}
+function tabsHTMLV1095(){
+  const active=activeTabV1095();
+  const tabs=canFullAdminV1095()?['game','production','analytics']:['production','analytics'];
+  return `<div class="admin-tabs-v1095" role="tablist">${tabs.map(t=>`<button class="admin-tab-v1095 ${active===t?'active':''}" data-admin-tab-v1095="${t}" onclick="switchAdminWorkspaceTabV1095('${t}')">${tabLabelV1095(t)}</button>`).join('')}<span class="admin-tab-line-v1095"></span></div>`;
+}
+function positionAdminLineV1095(){
+  const root=document.querySelector('#view-admin .admin-tabs-v1095');if(!root)return;
+  const btn=root.querySelector('.admin-tab-v1095.active'),line=root.querySelector('.admin-tab-line-v1095');if(!btn||!line)return;
+  line.style.left=`${btn.offsetLeft}px`;line.style.width=`${btn.offsetWidth}px`;
+}
+function switchAdminWorkspaceTabV1095(tab){
+  const allowed=canFullAdminV1095()?['game','production','analytics']:['production','analytics'];
+  if(!allowed.includes(tab))return;
+  const old=activeTabV1095(),dir=allowed.indexOf(tab)>=allowed.indexOf(old)?'from-right':'from-left';
+  state.adminWorkspaceTabV1095=tab;save();
+  document.querySelectorAll('#view-admin .admin-tab-v1095').forEach(b=>b.classList.toggle('active',b.dataset.adminTabV1095===tab));
+  document.querySelectorAll('#view-admin .admin-pane-v1095').forEach(p=>{
+    const on=p.dataset.adminPaneV1095===tab;
+    p.classList.toggle('active',on);p.classList.remove('from-right','from-left');if(on)p.classList.add(dir);
+  });
+  positionAdminLineV1095();
+  if(tab==='game')refreshAdminGameSetupV1095();
+  if(tab==='production')refreshAdminProductionV1095();
+  if(tab==='analytics')refreshAdminAnalyticsV1095();
+}
+window.switchAdminWorkspaceTabV1095=switchAdminWorkspaceTabV1095;
+
+function gameSetupHTMLV1095(){
+  if(!canFullAdminV1095())return '';
+  const target=adminSetupTarget==='current'?'current':'next',isCurrent=target==='current';
+  const selected=isCurrent?state.fixtures:(state.nextFixtures||[]);
+  const title=isCurrent?L(`Current Gameweek ${state.week}`,`الجولة الحالية ${state.week}`):L(`Upcoming Gameweek ${state.week+1}`,`الجولة الجاية ${state.week+1}`);
+  const subtitle=isCurrent
+    ?L('Edit the active round before it locks. Changes apply immediately.','عدّل الجولة الحالية قبل القفل. التغييرات بتتطبق فورًا.')
+    :(state.nextPublished?L('Published — you can still update the fixture list.','منشورة — تقدر تعدّل قائمة الماتشات.') : L('Choose the matches, then publish the upcoming Gameweek.','اختار الماتشات وبعدين انشر الجولة الجاية.'));
+  return `<div class="admin-live-note"><strong>${L('Fixture Browser','متصفح الماتشات')}</strong><span>${L('Search teams, competitions or stadiums, or browse day-by-day. Fixture-feed updates load without rebuilding this page.','ابحث عن الفرق أو البطولات أو الملاعب، أو تصفح حسب اليوم. تحديثات جدول الماتشات بتظهر من غير إعادة تحميل الصفحة.')}</span></div>
+    <div class="admin-round-tabs">
+      <button class="admin-round-tab ${isCurrent?'active':''}" onclick="setAdminSetupTarget('current')">${L('Current Gameweek','الجولة الحالية')}<small>GW ${state.week} · ${state.fixtures.length} ${L('matches','ماتش')}</small></button>
+      <button class="admin-round-tab ${!isCurrent?'active':''}" onclick="setAdminSetupTarget('next')">${L('Upcoming Gameweek','الجولة الجاية')}<small>GW ${state.week+1} · ${(state.nextFixtures||[]).length} ${L('selected','مختارة')}</small></button>
+    </div>
+    <div class="panel admin-focus-panel admin-round-panel"><div class="panel-head"><div><h3>${title}</h3><small class="muted">${subtitle}</small></div><span class="selection-count">${selected.length} ${L('selected','مختارة')}</span></div>${selectedFixtureSummary(target)}${adminFixtureSelector(target)}${!isCurrent?`<button class="btn btn-primary btn-wide admin-publish-btn" onclick="publishNextGameweek()">${state.nextPublished?L('Update Upcoming Gameweek','تحديث الجولة الجاية'):L('Publish Upcoming Gameweek','نشر الجولة الجاية')}</button>`:''}</div>`;
+}
+function refreshAdminGameSetupV1095(){
+  const host=document.querySelector('#view-admin .admin-game-body-v1095');if(!host||!canFullAdminV1095())return;
+  const y=window.scrollY;host.innerHTML=gameSetupHTMLV1095();requestAnimationFrame(()=>window.scrollTo({top:y,left:0,behavior:'auto'}));
+}
+window.refreshAdminGameSetupV1095=refreshAdminGameSetupV1095;
+window.adminPoolReadyV1095=()=>{if(state.view==='admin'&&activeTabV1095()==='game')refreshAdminGameSetupV1095()};
+
+function trackerHTMLV1095(){
+  const d=window.adminAccountsV1094?.data;
+  if(window.adminAccountsV1094?.loading&&!d)return `<div class="panel"><div class="admin-v1094-loading">${L('Loading Gameweek activity…','جاري تحميل نشاط الجولة…')}</div></div>`;
+  if(window.adminAccountsV1094?.error&&!d)return `<div class="panel"><div class="admin-v1094-error">${String(window.adminAccountsV1094.error)}</div></div>`;
+  const users=(d?.users||[]).filter(u=>u.is_private_member);
+  const submitted=users.filter(u=>Number(u.prediction_rows||0)>0&&Number(u.submitted_rows||0)>=Number(u.prediction_rows||0)).length;
+  const drafts=users.filter(u=>Number(u.prediction_rows||0)>0&&Number(u.submitted_rows||0)<Number(u.prediction_rows||0)).length;
+  const missing=Math.max(0,users.length-submitted-drafts);
+  return `<div class="panel">
+    <div class="admin-tracker-summary-v1095">
+      <div class="admin-tracker-chip-v1095"><strong>${users.length}</strong><span>${L('Mastaba Members','أعضاء المصطبة')}</span></div>
+      <div class="admin-tracker-chip-v1095"><strong>${submitted}</strong><span>${L('Submitted','أرسلوا')}</span></div>
+      <div class="admin-tracker-chip-v1095"><strong>${drafts}</strong><span>${L('Draft / Incomplete','مسودة / غير مكتمل')}</span></div>
+      <div class="admin-tracker-chip-v1095"><strong>${missing}</strong><span>${L('Not Started','لم يبدأ')}</span></div>
+    </div>
+    <div class="admin-tracker-list-v1095">${users.map(u=>{
+      const rows=Number(u.prediction_rows||0),sub=Number(u.submitted_rows||0);
+      const status=rows>0&&sub>=rows?'submitted':rows>0?'draft':'missing';
+      const label=status==='submitted'?L('Submitted','تم الإرسال'):status==='draft'?L('Draft / Incomplete','مسودة / غير مكتمل'):L('No Activity','لا يوجد نشاط');
+      const detail=rows?`${sub}/${rows} ${L('submitted picks','توقعات مرسلة')}`:L('No saved prediction rows yet','لا توجد توقعات محفوظة بعد');
+      return `<div class="admin-tracker-row-v1095"><div><div class="name">${escapeHTML(u.display_name||'Mastaba User')}</div><div class="sub">${detail}${u.last_submitted_at?` · ${L('last submit','آخر إرسال')} ${window.fmtAdminDateV1094(u.last_submitted_at,'—')}`:''}</div></div><span class="admin-status-v1095 ${status}">${label}</span></div>`;
+    }).join('')||`<div class="muted">${L('No private Mastaba members found.','لا يوجد أعضاء في المصطبة الخاصة.')}</div>`}</div>
+  </div>`;
+}
+window.trackerHTMLV1095=trackerHTMLV1095;
+
+function accountSlotHTMLV1095(){
+  return typeof window.accountDirectoryV1094==='function'?window.accountDirectoryV1094():`<div class="panel"><div class="admin-v1094-loading">${L('Loading account directory…','جاري تحميل دليل الحسابات…')}</div></div>`;
+}
+function analyticsSlotHTMLV1095(){
+  return typeof window.audienceAnalyticsV1094==='function'?window.audienceAnalyticsV1094():`<div class="panel"><div class="admin-v1094-loading">${L('Loading analytics…','جاري تحميل الإحصائيات…')}</div></div>`;
+}
+function adminOpsManagementHTMLV1095(){
+  if(!canFullAdminV1095())return '';
+  const manager=typeof window.userManagerV1085Public==='function'?window.userManagerV1085Public():`<div class="panel"><div class="admin-v1094-loading">${L('Loading Mastaba League management…','جاري تحميل إدارة دوري المصطبة…')}</div></div>`;
+  const health=typeof window.healthV1085Public==='function'?window.healthV1085Public():'';
+  const matches=`<div class="admin-grid">${(state.fixtures||[]).map(adminMatch).join('')}</div>`;
+  return `<div class="admin-block-title-v1095">${L('Mastaba League Management','إدارة دوري المصطبة')}</div>${manager}
+    <div class="admin-block-title-v1095">${L('Production Health','حالة الإنتاج')}</div><div class="panel">${health||L('Production health is loading…','جاري تحميل حالة الإنتاج…')}</div>
+    <div class="admin-block-title-v1095">${L('Match Controls','تحكم الماتشات')}</div>${matches}`;
+}
+function productionHTMLV1095(){
+  const readonly=!canFullAdminV1095()?`<div class="admin-readonly-note-v1095">${L('Mastaba member access is read-only. Game setup, league configuration and account actions remain restricted to the main Admin.','وصول أعضاء المصطبة للعرض فقط. إعداد الجولة وإدارة الدوري وإجراءات الحسابات متاحة للأدمن الرئيسي فقط.')}</div>`:'';
+  return `${readonly}<div class="admin-block-title-v1095">${L('Gameweek Submission Tracker','متابعة إرسال التوقعات')}</div><div class="admin-tracker-slot-v1095">${trackerHTMLV1095()}</div>
+    <div class="admin-block-title-v1095">${L('Account Directory','دليل الحسابات')}</div><div class="admin-accounts-slot-v1095">${accountSlotHTMLV1095()}</div>
+    <div class="admin-prod-adminonly-v1095">${adminOpsManagementHTMLV1095()}</div>`;
+}
+function refreshAdminProductionV1095(){
+  const pane=document.querySelector('#view-admin [data-admin-pane-v1095="production"]');if(!pane)return;
+  const y=window.scrollY;
+  const tracker=pane.querySelector('.admin-tracker-slot-v1095');if(tracker)tracker.innerHTML=trackerHTMLV1095();
+  const accounts=pane.querySelector('.admin-accounts-slot-v1095');if(accounts)accounts.innerHTML=accountSlotHTMLV1095();
+  const adminOnly=pane.querySelector('.admin-prod-adminonly-v1095');if(adminOnly)adminOnly.innerHTML=adminOpsManagementHTMLV1095();
+  requestAnimationFrame(()=>window.scrollTo({top:y,left:0,behavior:'auto'}));
+}
+window.refreshAdminProductionV1095=refreshAdminProductionV1095;
+function refreshAdminAnalyticsV1095(){
+  const host=document.querySelector('#view-admin .admin-analytics-body-v1095');if(!host)return;
+  const y=window.scrollY;host.innerHTML=analyticsSlotHTMLV1095();requestAnimationFrame(()=>window.scrollTo({top:y,left:0,behavior:'auto'}));
+}
+window.refreshAdminAnalyticsV1095=refreshAdminAnalyticsV1095;
+window.refreshAdminDataPanelsV1095=function(){
+  if(state.view!=='admin'||!isPrivateMastabaMemberV1095())return;
+  refreshAdminProductionV1095();refreshAdminAnalyticsV1095();
+};
+
+function renderAdminV1095(){
+  const view=document.querySelector('#view-admin');if(!view)return;
+  if(!isPrivateMastabaMemberV1095()){
+    view.innerHTML=`<div class="notice">${L('Management Access Only','الوصول للإدارة فقط')}</div>`;return;
+  }
+  const admin=canFullAdminV1095(),active=activeTabV1095();
+  view.innerHTML=`<div class="admin-workspace-v1095">
+    <div class="admin-workspace-head-v1095"><h1 class="page-title">${admin?L('Admin','الإدارة'):L('Mastaba Tools','أدوات المصطبة')}</h1><p class="page-sub">${admin?L('Game setup, Production management and audience analytics.','إعداد الجولة وإدارة الإنتاج وإحصائيات الجمهور.'):L('Shared read-only Mastaba operations and audience intelligence.','أدوات المصطبة المشتركة للعرض وإحصائيات الجمهور.')}</p><span class="admin-role-badge-v1095">${admin?L('Main Admin · Full Access','الأدمن الرئيسي · وصول كامل'):L('Mastaba Member · Read Only','عضو المصطبة · عرض فقط')}</span></div>
+    ${tabsHTMLV1095()}
+    ${admin?`<section class="admin-pane-v1095 ${active==='game'?'active':''}" data-admin-pane-v1095="game"><div class="admin-game-body-v1095">${gameSetupHTMLV1095()}</div></section>`:''}
+    <section class="admin-pane-v1095 ${active==='production'?'active':''}" data-admin-pane-v1095="production">${productionHTMLV1095()}</section>
+    <section class="admin-pane-v1095 ${active==='analytics'?'active':''}" data-admin-pane-v1095="analytics"><div class="admin-analytics-body-v1095">${analyticsSlotHTMLV1095()}</div></section>
+  </div>`;
+  requestAnimationFrame(positionAdminLineV1095);
+  if(typeof window.loadAdminAccountsV1094==='function')setTimeout(()=>window.loadAdminAccountsV1094(false),0);
+  if(admin&&typeof window.loadAdminOpsV1085==='function')setTimeout(()=>window.loadAdminOpsV1085(false),0);
+  if(admin&&typeof window.ensureAdminPoolV1077==='function')setTimeout(()=>window.ensureAdminPoolV1077(),0);
+}
+window.renderAdmin=renderAdmin=renderAdminV1095;
+window.renderAdminWorkspaceV1095=renderAdminV1095;
+
+window.setAdminSetupTarget=function(target){
+  adminSetupTarget=target==='next'?'next':'current';
+  refreshAdminGameSetupV1095();
+};
+let adminSearchTimerV1095=null;
+window.setAdminFixtureQuery=function(target,value){
+  adminBrowserState[target].q=value;
+  clearTimeout(adminSearchTimerV1095);
+  adminSearchTimerV1095=setTimeout(()=>{
+    const y=window.scrollY;refreshAdminGameSetupV1095();
+    requestAnimationFrame(()=>{
+      window.scrollTo({top:y,left:0,behavior:'auto'});
+      const input=document.querySelector('#view-admin .fixture-search-box');
+      if(input){try{input.focus({preventScroll:true})}catch{input.focus()}const end=input.value.length;try{input.setSelectionRange(end,end)}catch{}}
+    });
+  },120);
+};
+window.setAdminFixtureLeague=function(target,value){adminBrowserState[target].league=value;refreshAdminGameSetupV1095()};
+window.setAdminFixtureDay=function(target,value){adminBrowserState[target].date=value;adminBrowserState[target].q='';refreshAdminGameSetupV1095()};
+
+/* Any legacy render() call while Admin is already mounted becomes a targeted refresh.
+   This is the final guardrail against scroll jumps / flashing from old async code paths. */
+const renderBaseV1095=window.render||render;
+window.render=render=function(){
+  const mounted=state.view==='admin'&&document.querySelector('#view-admin .admin-workspace-v1095');
+  const langSame=document.documentElement.lang===state.lang;
+  if(mounted&&langSame){
+    refreshAdminDataPanelsV1095();
+    if(activeTabV1095()==='game')refreshAdminGameSetupV1095();
+    const nav=document.querySelector('#adminNav');if(nav)nav.style.display=isPrivateMastabaMemberV1095()?'flex':'none';
+    return;
+  }
+  const out=renderBaseV1095();
+  const nav=document.querySelector('#adminNav');if(nav)nav.style.display=isPrivateMastabaMemberV1095()?'flex':'none';
+  return out;
+};
+
+/* Keep nav access correct even after older render wrappers run. */
+setTimeout(()=>{const nav=document.querySelector('#adminNav');if(nav)nav.style.display=isPrivateMastabaMemberV1095()?'flex':'none'},0);
+window.addEventListener('resize',()=>requestAnimationFrame(positionAdminLineV1095),{passive:true});
 })();
 </script>
 
