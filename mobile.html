@@ -14920,5 +14920,152 @@ document.addEventListener('visibilitychange',()=>{if(document.visibilityState===
 })();
 </script>
 
+
+<script id="mastaba-v1088-shared-live-snapshot">
+/* V10.88: one centrally-generated, CDN-cached live snapshot for all users.
+   - Removes per-browser Production table polling.
+   - Removes sandbox deterministic "Global" percentages from Production.
+   - Auto-switches As Things Stand to a newly-live fixture.
+*/
+(function(){
+const LIVE_SNAPSHOT_BASE_V1088='https://bnwjtrtlwnlbldfhaggg.supabase.co/storage/v1/object/public/mastaba-live/current.json';
+const ZERO_CONSENSUS_V1088=()=>({H:0,D:0,A:0,total:0});
+state.productionConsensusV1088=state.productionConsensusV1088||{};
+let liveSnapshotTimerV1088=null,lastSnapshotGeneratedV1088='';
+
+function snapshotPhaseV1088(r){
+  const s=String(r?.fixture_status||'NS').toUpperCase();
+  if(r?.result_final||['FT','AET','PEN'].includes(s))return'final';
+  if(!['NS','TBD','PST','CANC','ABD','AWD','WO'].includes(s)||Date.now()>=new Date(r?.kickoff_at||0).getTime())return'live';
+  return'upcoming';
+}
+function normalizeConsensusV1088(v){
+  if(!v)return ZERO_CONSENSUS_V1088();
+  return{H:Number(v.H||0),D:Number(v.D||0),A:Number(v.A||0),total:Number(v.total||0)};
+}
+function currentStoryLiveV1088(){return (state.fixtures||[]).some(f=>f.phase==='live')}
+function storyLiveIndexV1088(){const fs=homeStoryFixturesV21();return fs.findIndex(f=>f.phase==='live')}
+function fixtureSignatureV1088(f){return [f.phase,f.liveScore?.home,f.liveScore?.away,f.result?.home,f.result?.away,f.liveFirstTeam,f.liveFirstScorer,f.result?.firstTeam,f.result?.firstScorer].join('|')}
+
+function applyLiveSnapshotV1088(snap){
+  const ctx=window.prodCtxV1073;
+  if(!snap?.gameweek||!Array.isArray(snap.fixtures))return false;
+  if(ctx?.gw?.id&&String(snap.gameweek.id)!==String(ctx.gw.id))return false;
+  const hadLive=currentStoryLiveV1088();
+  let changed=false;
+  for(const r of snap.fixtures){
+    const f=fixtureById(r.id);if(!f)continue;
+    const before=fixtureSignatureV1088(f),ph=snapshotPhaseV1088(r);
+    const h=r.home_goals==null?0:Number(r.home_goals),a=r.away_goals==null?0:Number(r.away_goals);
+    f.phase=ph;
+    if(ph==='live'){
+      f.liveScore={home:h,away:a};
+      f.liveFirstTeam=r.first_scoring_team_id?teamCodeV1083(r.first_scoring_team_id):null;
+      f.liveFirstScorer=r.first_scorer_id?String(r.first_scorer_id):null;
+    }else if(ph==='final'){
+      f.result={home:h,away:a,firstTeam:r.first_scoring_team_id?teamCodeV1083(r.first_scoring_team_id):'none',firstScorer:r.first_scorer_id?String(r.first_scorer_id):'none'};
+      f.liveScore=null;
+      f.liveFirstTeam=null;
+      f.liveFirstScorer=null;
+    }
+    if(r.picks){state.productionConsensusV1088[f.id]={league:normalizeConsensusV1088(r.picks.league),global:normalizeConsensusV1088(r.picks.global)}};
+    if(before!==fixtureSignatureV1088(f))changed=true;
+  }
+  const hasLive=currentStoryLiveV1088();
+  if(!hadLive&&hasLive){
+    const i=storyLiveIndexV1088();if(i>=0){const key=String(state.selectedHomeWeek??'overall');state.homeStoryIndexV21[key]=i;changed=true}
+  }
+  state.lastUpdate=snap.generated_at||new Date().toISOString();
+  lastSnapshotGeneratedV1088=String(snap.generated_at||'');
+  if(changed){save();render()}
+  else{
+    // Consensus can arrive without a score change; refresh only the lightweight insight surfaces.
+    if(state.view==='predict'&&typeof installMatchInsightsLaunchers==='function')installMatchInsightsLaunchers();
+    if(state.view==='home'&&document.querySelector('#view-home .ats-section-v25')&&typeof insertHomeStoryV25==='function')insertHomeStoryV25();
+  }
+  return true;
+}
+async function fetchLiveSnapshotV1088(){
+  try{
+    // Time-bucketed URL lets thousands of users share the same CDN object while still refreshing promptly.
+    const bucket=Math.floor(Date.now()/15000);
+    const r=await fetch(`${LIVE_SNAPSHOT_BASE_V1088}?v=${bucket}`,{cache:'default'});
+    if(!r.ok)throw new Error(`snapshot ${r.status}`);
+    const snap=await r.json();
+    if(String(snap?.generated_at||'')===lastSnapshotGeneratedV1088)return;
+    applyLiveSnapshotV1088(snap);
+  }catch(e){console.warn('Shared live snapshot refresh failed',e)}
+}
+function startSharedLiveV1088(){
+  if(liveDbTimerV1083){clearInterval(liveDbTimerV1083);liveDbTimerV1083=null}
+  if(liveSnapshotTimerV1088)clearInterval(liveSnapshotTimerV1088);
+  fetchLiveSnapshotV1088();
+  // Backend snapshot itself refreshes once/minute; 45s client reads keep latency low without hammering Supabase.
+  liveSnapshotTimerV1088=setInterval(fetchLiveSnapshotV1088,45000);
+}
+window.fetchLiveSnapshotV1088=fetchLiveSnapshotV1088;
+window.startSharedLiveV1088=startSharedLiveV1088;
+// Replace the old per-user DB poll entirely.
+window.startPrivateLiveV1083=startPrivateLiveV1083=startSharedLiveV1088;
+window.refreshPrivateLiveV1083=refreshPrivateLiveV1083=fetchLiveSnapshotV1088;
+
+const leagueConsensusBaseV1088=leagueConsensusFor;
+leagueConsensusFor=function(mid,past=false){
+  const prod=state.productionConsensusV1088?.[mid]?.league;
+  if(prod)return normalizeConsensusV1088(prod);
+  return leagueConsensusBaseV1088(mid,past);
+};
+deterministicGlobalConsensus=function(mid){
+  const prod=state.productionConsensusV1088?.[mid]?.global;
+  if(prod)return normalizeConsensusV1088(prod);
+  // Never invent platform-wide percentages in Production.
+  return window.prodCtxV1073?ZERO_CONSENSUS_V1088():leagueConsensusBaseV1088(mid,false);
+};
+picksForScopeV20=function(mid,past,scope){return scope==='global'?deterministicGlobalConsensus(mid):leagueConsensusFor(mid,past)};
+
+// Catch iOS/browser timer throttling immediately when the user returns to the app.
+document.addEventListener('visibilitychange',()=>{if(!document.hidden)fetchLiveSnapshotV1088()});
+window.addEventListener('focus',fetchLiveSnapshotV1088);
+
+// If Production hydration has already happened, start now; otherwise the replaced startPrivateLiveV1083
+// is invoked by the existing hydration flow.
+if(window.prodCtxV1073)setTimeout(startSharedLiveV1088,150);
+})();
+</script>
+
+
+<script id="mastaba-v1089-insight-live-refresh">
+/* V10.89: keep an already-open Matchday Insights drawer synchronized with
+   the shared live snapshot, without any additional API-Football calls. */
+(function(){
+  let openInsightV1089=null;
+  const baseOpen=window.openMatchdayInsights;
+  window.openMatchdayInsights=function(mid,past=false){
+    openInsightV1089={mid:String(mid),past:!!past};
+    return baseOpen?baseOpen(mid,past):undefined;
+  };
+  const baseClose=window.closeModal;
+  window.closeModal=function(){
+    openInsightV1089=null;
+    return baseClose?baseClose():undefined;
+  };
+  window.refreshOpenMatchInsightV1089=function(){
+    if(!openInsightV1089)return;
+    const root=document.getElementById('modalRoot');
+    if(!root||!root.querySelector('.strategy-sheet-v20')){openInsightV1089=null;return;}
+    if(typeof renderMatchInsightModal==='function'){
+      renderMatchInsightModal(openInsightV1089.mid,openInsightV1089.past);
+    }
+  };
+  // The snapshot updates state every ~45s. Watch the timestamp it already changes,
+  // rather than creating a second network poll.
+  let last=String(state.lastUpdate||'');
+  setInterval(()=>{
+    const now=String(state.lastUpdate||'');
+    if(now&&now!==last){last=now;window.refreshOpenMatchInsightV1089();}
+  },1000);
+})();
+</script>
+
 </body>
 </html>
