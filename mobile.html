@@ -6737,7 +6737,7 @@ html[data-theme="acmilan"] .league-insights-v22 .form-table th{background:#2a161
       <div class="auth-top-v1064">
         <div class="auth-brand-v1064">
           <div class="auth-brand-logo-wrap-v1064"><img class="auth-brand-logo-img-v1064" alt="Mastaba logo"></div>
-          <div class="auth-brand-copy-v1064"><strong>المصطبة</strong><small>Sandbox · V10.69</small></div>
+          <div class="auth-brand-copy-v1064"><strong>المصطبة</strong><small>Sandbox · V10.70</small></div>
         </div>
         <button id="authLangV1064" class="auth-lang-v1064" type="button" aria-label="Change language">ع</button>
       </div>
@@ -12368,7 +12368,10 @@ html:is([data-theme="mastaba"],[data-theme="barcelona"],[data-theme="realmadrid"
 /* ---------- V10.66 Mastaba-native Sandbox authentication ---------- */
 body.auth-pending-v1064 #app,body.auth-required-v1064 #app{display:none!important}
 body.auth-pending-v1064,body.auth-required-v1064{overflow:hidden!important}
+body.auth-pending-v1064 #authGateV1064{visibility:hidden!important;pointer-events:none!important}
 body.auth-ready-v1064 #authGateV1064{display:none!important}
+body.auth-pending-v1064:after{content:"المصطبة";position:fixed;inset:0;z-index:100001;display:grid;place-items:center;background:linear-gradient(132deg,#050608 0 48%,#12171f 48% 76%,#23090f 76% 100%);color:#f7f7f7;font-family:Inter,"Segoe UI",Tahoma,Arial,sans-serif;font-size:clamp(1.5rem,4vw,2.15rem);font-weight:1000;letter-spacing:.01em}
+body.auth-ready-v1064:after,body.auth-required-v1064:after{display:none!important}
 .auth-shell-v1064{position:fixed;inset:0;z-index:100000;overflow:auto;color:#f7f7f7;font-family:Inter,"Segoe UI",Tahoma,Arial,sans-serif;background:
  linear-gradient(155deg,transparent 0 41%,rgba(247,247,247,.025) 41% 43%,transparent 43%),
  linear-gradient(25deg,transparent 0 68%,rgba(181,22,45,.07) 68% 71%,transparent 71%),
