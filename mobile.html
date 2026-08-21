@@ -6847,7 +6847,7 @@ html[data-theme="acmilan"] .league-insights-v22 .form-table th{background:#2a161
   <script>
 'use strict';
 
-const STORAGE_KEY='almastaba-production-v10-73';
+const STORAGE_KEY='almastaba-production-v10-75';
 const $=(s,r=document)=>r.querySelector(s); const $$=(s,r=document)=>[...r.querySelectorAll(s)];
 const L=(en,ar)=>state.lang==='ar'?ar:en;
 const I18N={
@@ -7204,7 +7204,7 @@ function renderHome(){
    </div>
  </div>
  <div class="section-title home-bulletin-title">${L('Gameweek Bulletin','لوحة الجولة')}</div>${homeBulletinTickerHTML(homeWeek)}
- <div class="countdown-panel"><div class="count-card"><div class="stat-label">${L('Next Gameweek Starts In','الجولة الجاية تبدأ بعد')}</div><strong id="gwCountdown">${countdownText(homeKickoff())}</strong><div class="muted">${formatTime(homeKickoff().toISOString())}</div></div><div class="count-card deadline-card"><div class="stat-label">${L('Gameweek Deadline','موعد قفل الجولة')}</div><strong>${currentRoundComplete()&&state.nextPublished?'-1 HR':isRoundLocked()?L('CLOSED','مقفولة'):'-1 HR'}</strong><div class="muted">${currentRoundComplete()&&state.nextPublished?formatTime(homeDeadline().toISOString()):isRoundLocked()?L('No more changes','مفيش تعديلات تاني'):formatTime(deadline().toISOString())}</div></div></div>
+ <div class="countdown-panel"><div class="count-card"><div class="stat-label">${L('Next Gameweek Starts In','الجولة الجاية تبدأ بعد')}</div><strong id="gwCountdown">${countdownText(homeKickoff())}</strong><div class="muted">${formatTime(homeKickoff().toISOString())}</div></div><div class="count-card deadline-card"><div class="stat-label">${L(`Gameweek ${currentRoundComplete()&&state.nextPublished?Number(state.week)+1:state.week} Predictions Deadline`,`موعد قفل توقعات الجولة ${currentRoundComplete()&&state.nextPublished?Number(state.week)+1:state.week}`)}</div><strong>${formatTime((currentRoundComplete()&&state.nextPublished?homeDeadline():deadline()).toISOString())}</strong></div></div>
  <div class="grid grid-3" style="margin-top:14px"><div class="stat-card home-gameweek-card selector-only"><div class="stat-value"><select class="home-week-select" aria-label="${L('Select Gameweek','اختار الجولة')}" onchange="setHomeWeek(this.value)">${homeGameweekOptionsHTML(homeWeek)}</select></div></div><div class="stat-card home-points-card"><div class="stat-label">${pointsLabel}</div><div class="stat-value">${gameweekPointsFor(u.id,homeWeek)}</div></div><div class="stat-card rank-stat league-rank-card"><div class="stat-label rank-heading-line"><span>${rankLabel} |</span>${leagueControl}</div><div class="stat-value">#${rank}</div></div></div>
  ${winner?`<div class="section-title week-prince-title">برنس الجولة</div><div class="week-winner"><div class="avatar large" id="winnerAvatar"></div><div class="week-winner-copy"><small>${L('Gameweek','الجولة')} ${winnerWeek}</small><strong>${winner.name}</strong><span>${winner.points} ${L('Pts','نقطة')}</span></div></div>`:''}
  ${state.fixtures.every(f=>f.phase==='final')?awardsHTML(state.homeLeagueId):''}`;
@@ -7282,7 +7282,7 @@ window.clearLeagueSearch=function(){leagueDiscoveryUI.q='';renderLeagues()}
 window.joinPublicLeague=function(id){const src=discoverableLeagues.find(l=>l.id===id);if(!src)return;const hadNoLeagues=memberLeagues(state.currentUser).length===0;let existing=(state.leagues||[]).find(l=>l.id===id);if(!existing){existing={id:src.id,nameEn:src.nameEn,nameAr:src.nameAr,members:[],visibility:'public',competitions:[...src.competitions]};state.leagues.push(existing)}if(!existing.members.includes(state.currentUser))existing.members.push(state.currentUser);if(hadNoLeagues){state.homeLeagueId=id;state.selectedLeagueId=id}save();renderLeagues();toast(L('You joined the public league.','انضمّيت للدوري العام.'),'good')}
 window.requestPrivateLeague=function(){const code=($('#privateLeagueCode')?.value||'').trim().toUpperCase();if(!code)return toast(L('Enter an invite code first.','اكتب كود الدعوة الأول.'));if(code!=='MASTABA26')return toast(L('Invite code not found in this sandbox.','كود الدعوة مش موجود في الساندبوكس.'));state.joinRequests=state.joinRequests||[];if(!state.joinRequests.includes('private-demo'))state.joinRequests.push('private-demo');save();toast(L('Private league request sent for approval.','طلب الدوري الخاص اتبعت للموافقة.'),'good')}
 
-function renderPredict(){const past=state.selectedPredictWeek===1;const meta=state.roundMeta[state.currentUser]||{};const locked=isRoundLocked();const submitted=userSubmittedLocked();$('#view-predict').innerHTML=`
+function renderPredict(){const past=Number(state.selectedPredictWeek)<Number(state.week);const meta=state.roundMeta[state.currentUser]||{};const locked=isRoundLocked();const submitted=userSubmittedLocked();$('#view-predict').innerHTML=`
  <h1 class="page-title">${L('Gameweek Predictions','توقعات الجولة')}</h1>
  <p class="page-sub">${past?L('Review your previous Gameweek, points and league-member picks.','راجع توقعات الجولة اللي فاتت ونقاطك وتوقعات أعضاء الدوري.'):locked?L('This Gameweek is closed.','الجولة دي اتقفلت.'):submitted?L('Submitted successfully. Your picks are safe until you choose to edit them.','تم الإرسال بنجاح. توقعاتك متثبتة لحد ما تختار تعدلها.'):L('Save a Draft and return later, or Submit Predictions when you are ready.','احفظ Draft وارجع له بعدين، أو ابعت توقعاتك لما تخلص.')}</p>
  <div class="week-switcher"><button ${state.selectedPredictWeek<=1?'disabled':''} onclick="setPredictWeek(${state.selectedPredictWeek-1})">‹</button><div class="week-label"><select class="predict-week-select" aria-label="${L('Select Gameweek','اختار الجولة')}" onchange="setPredictWeek(this.value)">${gameweekOptionsHTML(state.selectedPredictWeek)}</select></div><button ${state.selectedPredictWeek>=state.week?'disabled':''} onclick="setPredictWeek(${state.selectedPredictWeek+1})">›</button></div>
@@ -13262,6 +13262,7 @@ renderRankings=function(){
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
 
+<!-- Mastaba production build v10.75 -->
 <script id="v1073-production-ops">
 (function(){
 'use strict';
