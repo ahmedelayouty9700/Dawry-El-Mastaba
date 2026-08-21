@@ -14384,7 +14384,7 @@ async function loadCentralAvailabilityV1083(supa){
 }
 async function loadCentralPlayerPoolV1083(supa){
   const tids=[...new Set((state.fixtures||[]).flatMap(f=>[Number(f.homeTeamId),Number(f.awayTeamId)]).filter(Boolean))];if(!tids.length)return;
-  const cacheKey=`mastaba_central_players_v1083_${window.prodCtxV1073?.gw?.id||state.week}`;
+  const cacheKey=`mastaba_central_players_v1084_${window.prodCtxV1073?.gw?.id||state.week}`;
   let data=null;
   try{const c=JSON.parse(localStorage.getItem(cacheKey)||'null');if(c&&Date.now()-Number(c.ts||0)<6*3600000&&Array.isArray(c.rows))data=c.rows}catch{}
   if(!data){const r=await supa.from('mastaba_team_player_pool').select('team_id,player_id,player_name,position,squad_number,stats,stats_refreshed_at').in('team_id',tids).eq('active',true).order('player_name',{ascending:true});if(r.error){console.warn('Central player pool read failed',r.error);return}data=r.data||[];try{localStorage.setItem(cacheKey,JSON.stringify({ts:Date.now(),rows:data}))}catch{}}
@@ -14580,5 +14580,44 @@ html:is([data-theme="mastaba"],[data-theme="barcelona"],[data-theme="realmadrid"
 html:is([data-theme="mastaba"],[data-theme="barcelona"],[data-theme="realmadrid"],[data-theme="acmilan"],[data-theme="arsenal"],[data-theme="liverpool"],[data-theme="manunited"]) body #app :is(.highlights-title,.week-prince-title):before,html:is([data-theme="mastaba"],[data-theme="barcelona"],[data-theme="realmadrid"],[data-theme="acmilan"],[data-theme="arsenal"],[data-theme="liverpool"],[data-theme="manunited"]) body #app :is(.highlights-title,.week-prince-title):after{display:none!important;content:none!important}
 
 </style>
+
+
+<script id="mastaba-v1084-competition-stats-fix">
+(function(){
+'use strict';
+function zeroV1084(){return{apps:0,bench:0,goals:0,assists:0,xg:null,xa:null}}
+function compLabelV1084(mid,fallback){
+  const f=fixtureById(mid);
+  return window.canonicalCompetitionV1080?window.canonicalCompetitionV1080(f):String(fallback||f?.competition||'Competition');
+}
+function statForV1084(p,comp,mid){
+  if(comp==='ALL')return p?.stats?.ALL||zeroV1084();
+  const f=fixtureById(mid),canonical=compLabelV1084(mid,comp),raw=String(f?.competition||'').trim();
+  // Competition tabs are intentionally strict. Never borrow ALL totals when the
+  // selected competition has not started or has no provider stats yet.
+  return p?.stats?.[canonical]||p?.stats?.[raw]||p?.stats?.[comp]||zeroV1084();
+}
+window.playerRow=function(p,comp,mid){
+  const st=statForV1084(p,comp,mid),disabled=['out','suspended'].includes(p.status);
+  const flag=p.status==='doubtful'?`<span class="availability-icon doubtful" title="${L('Doubtful','مشكوك فيه')}">!</span>`:disabled?`<span class="availability-icon ${p.status}" title="${statusLabel(p.status)}">!</span>`:'';
+  const stat=v=>v==null?`<span class="player-stat-na-v1077">—</span>`:v;
+  const label=comp==='ALL'?L('All Competitions','كل البطولات'):compLabelV1084(mid,comp);
+  return`<button class="player-row ${disabled?'disabled':''}" ${disabled?'disabled':''} onclick="pickScorer('${mid}','${p.id}')"><span class="player-name-cell"><span class="player-name-copy"><strong>${escapeHTML(p.name)}</strong><small>${escapeHTML(label)}</small></span></span><span class="player-cell player-pos-cell">${playerPositionGroup(p.pos)}</span><span class="player-cell player-stat-cell">${stat(st.apps)}</span><span class="player-cell player-stat-cell">${stat(st.bench)}</span><span class="player-cell player-stat-cell">${stat(st.goals)}</span><span class="player-cell player-stat-cell">${stat(st.assists)}</span><span class="player-cell player-stat-cell">${stat(st.xg)}</span><span class="player-cell player-stat-cell">${stat(st.xa)}</span><span class="player-cell">${flag}</span></button>`;
+};
+window.openPlayerDrawer=function(mid,team,competition){
+  const root=$('#modalRoot'),canonical=compLabelV1084(mid,competition);
+  root.innerHTML=`<div class="player-drawer"><div class="drawer-card"><div class="drawer-handle"></div><div class="panel-head"><div><h3>${L('First Goalscorer','أول لاعب يسجل')} — ${escapeHTML(TEAM[team]?.name||team)}</h3><div class="stat-context">${L('Players are ordered by goals in this competition. Ties are broken by position: forwards, midfielders, defenders, then goalkeepers.','الترتيب حسب أهداف البطولة دي، وعند التعادل: مهاجمين ثم وسط ثم مدافعين ثم حراس.')}</div></div><button class="icon-button" onclick="closeModal()">×</button></div><div class="player-comp-tabs"><button class="player-comp-tab active" data-pcomp="${escapeHTML(canonical)}">${escapeHTML(canonical)}</button><button class="player-comp-tab" data-pcomp="ALL">${L('All Competitions','كل البطولات')}</button></div><div class="player-filterbar"><input class="player-search" id="playerSearch" placeholder="${L('Search player…','ابحث عن لاعب…')}"><select id="playerPosFilter"><option value="ALL">${L('All Positions','كل المراكز')}</option><option value="FW">FW</option><option value="MID">MID</option><option value="CB">CB</option><option value="RB">RB</option><option value="LB">LB</option><option value="GK">GK</option></select><select id="playerAvailabilityFilter"><option value="ALL">${L('All Players','كل اللاعبين')}</option><option value="available">${L('Available','متاح')}</option><option value="doubtful">${L('Doubtful','مشكوك فيه')}</option><option value="unavailable">${L('Unavailable','غائب/موقوف')}</option></select></div><div class="player-table-shell"><div class="player-table-head"><button data-psort="name">${L('Player','اللاعب')}</button><button data-psort="pos">${L('Pos','مركز')}</button><button data-psort="apps">${L('Apps','لعب')}</button><button data-psort="bench">SUB</button><button data-psort="goals">G</button><button data-psort="assists">A</button><button data-psort="xg">xG</button><button data-psort="xa">xA</button><span></span></div><div class="player-list" id="playerList"></div><div class="player-table-note">${L('Stats shown are for the selected competition only. Use All Competitions to see combined totals.','الإحصائيات المعروضة للبطولة المختارة فقط. اختار كل البطولات لمشاهدة الإجمالي.')}</div></div></div></div>`;
+  let comp=canonical,sortKey='goals',sortDir='desc',posFilter='ALL',availabilityFilter='ALL';
+  const rank=p=>{const g=playerPositionGroup(p?.pos);if(g==='FW')return 0;if(g==='MID')return 1;if(['CB','RB','LB'].includes(g))return 2;if(g==='GK')return 3;return 4};
+  const valueFor=(p,key)=>{const st=statForV1084(p,comp,mid);if(key==='name')return normalizeSearchText(p.name);if(key==='pos')return rank(p);return Number(st?.[key]??0)};
+  const compareDefault=(a,b)=>{let d=Number(statForV1084(b,comp,mid)?.goals||0)-Number(statForV1084(a,comp,mid)?.goals||0);if(!d)d=rank(a)-rank(b);if(!d)d=String(a.name||'').localeCompare(String(b.name||''));return d};
+  const draw=()=>{const q=normalizeSearchText($('#playerSearch').value||'');let list=(players[team]||[]).filter(p=>normalizeSearchText(p.name).includes(q)).filter(p=>posFilter==='ALL'||playerPositionGroup(p.pos)===posFilter).filter(p=>availabilityFilter==='ALL'||(availabilityFilter==='unavailable'?['out','suspended'].includes(p.status):p.status===availabilityFilter));if(sortKey==='goals'&&sortDir==='desc')list.sort(compareDefault);else list.sort((a,b)=>{const av=valueFor(a,sortKey),bv=valueFor(b,sortKey);let d=typeof av==='string'?String(av).localeCompare(String(bv)):av-bv;if(!d&&sortKey!=='name')d=String(a.name||'').localeCompare(String(b.name||''));return sortDir==='asc'?d:-d});$('#playerList').innerHTML=list.map(p=>playerRow(p,comp,mid)).join('')||`<div class="notice" style="margin:10px">${L('No players match these filters.','مفيش لعيبة مطابقة للفلاتر دي.')}</div>`;$$('[data-psort]').forEach(b=>{b.classList.toggle('sort-active',b.dataset.psort===sortKey);b.dataset.arrow=b.dataset.psort===sortKey?(sortDir==='asc'?'↑':'↓'):''})};
+  draw();$('#playerSearch').oninput=draw;$('#playerPosFilter').onchange=e=>{posFilter=e.target.value;draw()};$('#playerAvailabilityFilter').onchange=e=>{availabilityFilter=e.target.value;draw()};
+  $$('[data-pcomp]').forEach(b=>b.onclick=()=>{$$('[data-pcomp]').forEach(x=>x.classList.remove('active'));b.classList.add('active');comp=b.dataset.pcomp;sortKey='goals';sortDir='desc';draw()});
+  $$('[data-psort]').forEach(b=>b.onclick=()=>{if(sortKey===b.dataset.psort)sortDir=sortDir==='asc'?'desc':'asc';else{sortKey=b.dataset.psort;sortDir=['name','pos'].includes(sortKey)?'asc':'desc'}draw()});
+};
+})();
+</script>
+
 </body>
 </html>
