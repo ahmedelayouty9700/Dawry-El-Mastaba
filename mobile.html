@@ -13892,5 +13892,106 @@ lockProductionTitleV1077();
 })();
 </script>
 
+
+<!-- mastaba-v1078-jersey-back -->
+<style id="mastaba-v1078-jersey-style">
+
+/* ===== V10.78 — generic jersey backs replace player headshots ===== */
+.player-photo,.scorer-headshot{overflow:visible!important;background:transparent!important;border:0!important;border-radius:0!important;color:inherit!important}
+.mastaba-jersey-v1078{
+  --jersey-main:#25364f;--jersey-trim:#f4f6f8;--jersey-text:#fff;
+  position:relative;display:flex;flex-direction:column;align-items:center;justify-content:flex-start;
+  width:100%;height:100%;box-sizing:border-box;padding:21% 13% 8%;
+  color:var(--jersey-text);font-weight:1000;text-align:center;line-height:1;
+  filter:drop-shadow(0 2px 2px rgba(0,0,0,.18));
+  isolation:isolate;
+}
+.mastaba-jersey-v1078::before{
+  content:"";position:absolute;inset:0;z-index:-1;background:var(--jersey-main);
+  clip-path:polygon(28% 7%,39% 0,61% 0,72% 7%,96% 19%,83% 40%,72% 33%,72% 100%,28% 100%,28% 33%,17% 40%,4% 19%);
+  border-radius:9% 9% 5% 5%;
+}
+.mastaba-jersey-v1078::after{
+  content:"";position:absolute;z-index:0;left:40%;right:40%;top:0;height:9%;
+  background:var(--jersey-trim);border-radius:0 0 50% 50%;opacity:.95;
+}
+.mastaba-jersey-name-v1078{position:relative;z-index:1;width:76%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;text-transform:uppercase;letter-spacing:.02em;font-size:clamp(4px,15%,9px);text-shadow:0 1px 1px rgba(0,0,0,.34)}
+.mastaba-jersey-number-v1078{position:relative;z-index:1;margin-top:8%;font-size:clamp(12px,43%,28px);font-weight:1000;line-height:.82;text-shadow:0 1px 1px rgba(0,0,0,.38);font-variant-numeric:tabular-nums}
+.player-name-cell .player-photo{background:transparent!important}
+.player-name-cell .mastaba-jersey-name-v1078{font-size:5.5px}
+.player-name-cell .mastaba-jersey-number-v1078{font-size:17px;margin-top:5%}
+.scorer-headshot .mastaba-jersey-name-v1078{font-size:7px}
+.scorer-headshot .mastaba-jersey-number-v1078{font-size:23px;margin-top:6%}
+@media(max-width:560px){
+  .player-name-cell .mastaba-jersey-name-v1078{font-size:5px}
+  .player-name-cell .mastaba-jersey-number-v1078{font-size:15px}
+  .scorer-headshot .mastaba-jersey-name-v1078{font-size:6px}
+  .scorer-headshot .mastaba-jersey-number-v1078{font-size:19px}
+}
+
+</style>
+<script id="mastaba-v1078-jersey-script">
+
+(function(){
+'use strict';
+/* V10.78: deterministic generic jersey backs. No player-image rendering. */
+function escapeV1078(v){return typeof escapeHTML==='function'?escapeHTML(String(v??'')):String(v??'').replace(/[&<>\"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]))}
+function playerTeamV1078(p){
+  const id=String(p?.id??'');
+  for(const [code,list] of Object.entries(window.players||players||{})){
+    if((list||[]).some(x=>String(x?.id??'')===id))return code;
+  }
+  return'';
+}
+function surnameV1078(name){
+  const bits=String(name||'PLAYER').trim().split(/\s+/).filter(Boolean);
+  return bits.length?bits[bits.length-1]:'PLAYER';
+}
+function paletteV1078(code){
+  const teamName=String((window.TEAM||TEAM||{})?.[code]?.name||code||'').toLowerCase();
+  const rules=[
+    [/arsenal/,['#cf1f15','#ffffff','#ffffff']],
+    [/coventry/,['#69b9e6','#ffffff','#13263b']],
+    [/barcelona/,['#1c14bf','#d9b82e','#ffffff']],
+    [/real madrid/,['#f7f7f7','#edc130','#274793']],
+    [/ac milan|milan/,['#bf1b2d','#12171f','#ffffff']],
+    [/liverpool/,['#af181d','#f3f4f2','#ffffff']],
+    [/manchester united|man united/,['#9f160b','#fcff40','#ffffff']],
+    [/chelsea/,['#163b8f','#ffffff','#ffffff']],
+    [/manchester city|man city/,['#74b9e6','#ffffff','#162b49']],
+    [/tottenham|spurs/,['#f6f7f9','#18224b','#18224b']],
+    [/newcastle/,['#17191c','#ffffff','#ffffff']],
+    [/juventus/,['#f5f5f5','#151515','#151515']],
+    [/inter/,['#1754a7','#111111','#ffffff']],
+    [/napoli/,['#35a7dc','#ffffff','#ffffff']],
+    [/bayern/,['#cf1738','#ffffff','#ffffff']],
+    [/dortmund/,['#f4d400','#111111','#111111']],
+    [/paris|psg/,['#172d59','#d9233f','#ffffff']]
+  ];
+  for(const [re,p] of rules)if(re.test(teamName))return p;
+  return['#25364f','#f4f6f8','#ffffff'];
+}
+function jerseyV1078(p){
+  if(!p)return'—';
+  const code=playerTeamV1078(p),[main,trim,text]=paletteV1078(code);
+  const num=Number(p.number)>0?String(Number(p.number)):'';
+  const back=surnameV1078(p.name);
+  return `<span class="mastaba-jersey-v1078" style="--jersey-main:${main};--jersey-trim:${trim};--jersey-text:${text}" title="${escapeV1078(p.name||'Player')}${num?' #'+num:''}" aria-label="${escapeV1078(p.name||'Player')}${num?' number '+num:''}"><span class="mastaba-jersey-name-v1078">${escapeV1078(back)}</span>${num?`<span class="mastaba-jersey-number-v1078">${num}</span>`:''}</span>`;
+}
+window.mastabaJerseyV1078=jerseyV1078;
+window.playerHead=function(pid){
+  const p=playerById(pid);if(!p)return`<span class="scorer-headshot">—</span>`;
+  return`<span class="scorer-headshot">${jerseyV1078(p)}</span>`;
+};
+const fallbackStatsV1078=()=>({apps:0,bench:0,goals:0,assists:0,xg:null,xa:null});
+window.playerRow=function(p,comp,mid){
+  const st=p.stats?.[comp]||p.stats?.ALL||fallbackStatsV1078(),disabled=['out','suspended'].includes(p.status);
+  const flag=p.status==='doubtful'?`<span class="availability-icon doubtful" title="${L('Doubtful','مشكوك فيه')}">!</span>`:disabled?`<span class="availability-icon ${p.status}" title="${statusLabel(p.status)}">!</span>`:'';
+  const stat=v=>v==null?`<span class="player-stat-na-v1077">—</span>`:v;
+  return`<button class="player-row ${disabled?'disabled':''}" ${disabled?'disabled':''} onclick="pickScorer('${mid}','${p.id}')"><span class="player-name-cell"><span class="player-photo">${jerseyV1078(p)}</span><span class="player-name-copy"><strong>${escapeV1078(p.name)}</strong><small>${comp==='ALL'?L('All Competitions','كل البطولات'):escapeV1078(comp)}</small></span></span><span class="player-cell player-pos-cell">${playerPositionGroup(p.pos)}</span><span class="player-cell player-stat-cell">${stat(st.apps)}</span><span class="player-cell player-stat-cell">${stat(st.bench)}</span><span class="player-cell player-stat-cell">${stat(st.goals)}</span><span class="player-cell player-stat-cell">${stat(st.assists)}</span><span class="player-cell player-stat-cell">${stat(st.xg)}</span><span class="player-cell player-stat-cell">${stat(st.xa)}</span><span class="player-cell">${flag}</span></button>`;
+};
+})();
+
+</script>
 </body>
 </html>
