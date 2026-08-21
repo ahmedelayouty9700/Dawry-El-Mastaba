@@ -7478,15 +7478,20 @@ window.adminResetUser=function(uid){const u=state.users.find(x=>x.id===uid);if(!
 window.adminToggleUser=function(uid){const u=state.users.find(x=>x.id===uid);if(!u||u.admin)return;const makeActive=u.active===false;if(!makeActive&&!confirm(L(`Deactivate ${u.name}? Their history will be kept.`,`توقف ${u.name}؟ تاريخه هيفضل محفوظ.`)))return;u.active=makeActive;save();render();toast(makeActive?L('User reactivated.','تم إعادة تفعيل المستخدم.'):L('User deactivated.','تم إيقاف المستخدم.'),makeActive?'good':'warn')}
 function fixtureCompetitionPriority(name){
  const n=(name||'').toLowerCase();
- if(n.includes('premier league'))return 10;
- if(n.includes('fa cup')||n.includes('efl cup')||n.includes('carabao'))return 11;
- if(n.includes('laliga')||n.includes('la liga'))return 20;
- if(n.includes('copa del rey')||n.includes('supercopa'))return 21;
- if(n==='serie a'||n.includes('serie a'))return 30;
- if(n.includes('coppa italia')||n.includes('supercoppa'))return 31;
- if(n.includes('champions league'))return 40;
- if(n.includes('saudi'))return 50;
- if(n.includes('egypt'))return 60;
+ if(n.includes('english premier league'))return 10;
+ if(n.includes('fa cup')||n.includes('league cup')||n.includes('community shield'))return 11;
+ if(n==='la liga'||n.includes('laliga'))return 20;
+ if(n.includes('copa del rey')||n.includes('spanish super cup'))return 21;
+ if(n.includes('egyptian premier league'))return 30;
+ if(n.includes('egypt cup')||n.includes('egyptian super cup'))return 31;
+ if(n==='serie a'||n.includes('serie a'))return 40;
+ if(n.includes('coppa italia')||n.includes('italian super cup'))return 41;
+ if(n.includes('bundesliga'))return 50;
+ if(n==='ligue 1'||n.includes('ligue 1'))return 60;
+ if(n==='champions league')return 70;
+ if(n==='europa league')return 71;
+ if(n==='afcon')return 80;
+ if(n.includes('caf champions league'))return 81;
  return 90;
 }
 function fixtureCompetitionSort(a,b){const pa=fixtureCompetitionPriority(a),pb=fixtureCompetitionPriority(b);return pa-pb||String(a).localeCompare(String(b))}
@@ -7494,16 +7499,17 @@ function formatFixtureClock(iso){try{return new Intl.DateTimeFormat(state.lang==
 function adminFixtureSelector(target){
  const selected=target==='current'?state.fixtures:(state.nextFixtures||[]),ui=ensureAdminBrowser(target),pool=state.fixturePool||sandboxFixturePool();
  const dates=[...new Set(pool.map(f=>adminFixtureDateKey(f.kickoff)))].sort();
- const leagues=[...new Set(pool.map(f=>f.competition))].sort(fixtureCompetitionSort);
+ const leagues=[...new Set(pool.map(f=>adminCompetitionNameV1079(f)))].sort(fixtureCompetitionSort);
  const query=(ui.q||'').trim().toLowerCase();
  const filtered=pool.filter(f=>{
-   const hay=`${TEAM[f.home]?.name||''} ${TEAM[f.home]?.short||''} ${TEAM[f.away]?.name||''} ${TEAM[f.away]?.short||''} ${f.competition} ${f.stadium}`.toLowerCase();
+   const displayCompetition=adminCompetitionNameV1079(f);
+   const hay=`${TEAM[f.home]?.name||''} ${TEAM[f.home]?.short||''} ${TEAM[f.away]?.name||''} ${TEAM[f.away]?.short||''} ${displayCompetition} ${f.competition} ${f.stadium}`.toLowerCase();
    const matchQ=!query||hay.includes(query);
    const matchDate=query?true:adminFixtureDateKey(f.kickoff)===ui.date;
-   const matchLeague=ui.league==='all'||f.competition===ui.league;
+   const matchLeague=ui.league==='all'||displayCompetition===ui.league;
    return matchQ&&matchDate&&matchLeague
  });
- const grouped={};filtered.forEach(f=>(grouped[f.competition]??=[]).push(f));
+ const grouped={};filtered.forEach(f=>{const label=adminCompetitionNameV1079(f);(grouped[label]??=[]).push(f)});
  return`<div class="fixture-browser">
    <div class="fixture-browser-search"><input class="fixture-search-box" value="${escapeHTML(ui.q||'')}" placeholder="${L('Search team, league or stadium…','ابحث باسم فريق، بطولة أو ملعب…')}" oninput="setAdminFixtureQuery('${target}',this.value)"><select class="fixture-league-filter" onchange="setAdminFixtureLeague('${target}',this.value)"><option value="all">${L('All Leagues','كل البطولات')}</option>${leagues.map(x=>`<option value="${x}" ${ui.league===x?'selected':''}>${x}</option>`).join('')}</select></div>
    <div class="fixture-day-strip">${dates.map(d=>`<button class="fixture-day ${ui.date===d&&!query?'active':''}" onclick="setAdminFixtureDay('${target}','${d}')"><small>${adminFixtureDateLabel(d).split(' ')[0]}</small><b>${adminFixtureDateLabel(d).replace(/^\S+\s*/,'')}</b></button>`).join('')}</div>
@@ -7511,7 +7517,23 @@ function adminFixtureSelector(target){
    <div class="fixture-selector grouped">${Object.keys(grouped).length?Object.entries(grouped).sort((a,b)=>fixtureCompetitionSort(a[0],b[0])).map(([league,fs])=>`<div class="fixture-league-group"><div class="fixture-league-title"><strong>${league}</strong><span>${fs.length} ${L('fixtures','ماتش')}</span></div>${fs.sort((a,b)=>new Date(a.kickoff)-new Date(b.kickoff)).map(f=>{const checked=selected.some(x=>x.id===f.id);const disabled=target==='current'&&isRoundLocked();return`<label class="fixture-choice fixture-choice-livescore ${checked?'selected':''} ${disabled?'disabled':''}"><span class="fixture-kickoff">${formatFixtureClock(f.kickoff)}</span><span class="fixture-team-stack"><span class="fixture-team-line"><span class="fixture-team-logo"><img src="${TEAM[f.home].logo}" alt=""></span><b>${TEAM[f.home].name}</b></span><span class="fixture-team-line"><span class="fixture-team-logo"><img src="${TEAM[f.away].logo}" alt=""></span><b>${TEAM[f.away].name}</b></span><small class="fixture-stadium">${f.stadium}</small></span><span class="fixture-checkbox-wrap"><input type="checkbox" ${checked?'checked':''} ${disabled?'disabled':''} onchange="toggleAdminFixture('${f.id}','${target}',this.checked)"><span class="fixture-check-label">${checked?L('Selected','مختار'):L('Add','إضافة')}</span></span></label>`}).join('')}</div>`).join(''):`<div class="fixture-empty">${L('No fixtures match these filters.','مفيش ماتشات مطابقة للبحث ده.')}</div>`}</div>
   </div>`
 }
-window.setAdminFixtureQuery=function(target,value){adminBrowserState[target].q=value;renderAdmin()}
+let adminFixtureQueryTimerV1079=null;
+window.setAdminFixtureQuery=function(target,value){
+  adminBrowserState[target].q=value;
+  clearTimeout(adminFixtureQueryTimerV1079);
+  const scrollY=window.scrollY;
+  adminFixtureQueryTimerV1079=setTimeout(()=>{
+    renderAdmin();
+    requestAnimationFrame(()=>{
+      window.scrollTo({top:scrollY,left:0,behavior:'auto'});
+      const input=document.querySelector('#view-admin .fixture-search-box');
+      if(input){
+        try{input.focus({preventScroll:true})}catch{input.focus()}
+        const end=input.value.length;try{input.setSelectionRange(end,end)}catch{}
+      }
+    });
+  },120);
+}
 window.setAdminFixtureLeague=function(target,value){adminBrowserState[target].league=value;renderAdmin()}
 window.setAdminFixtureDay=function(target,value){adminBrowserState[target].date=value;adminBrowserState[target].q='';renderAdmin()}
 window.toggleAdminFixture=function(mid,target,checked){const pool=(state.fixturePool||sandboxFixturePool()).find(f=>f.id===mid);if(!pool)return;if(target==='current'&&isRoundLocked())return toast(L('The current Gameweek is locked.','الجولة الحالية مقفولة.'),'warn');const key=target==='current'?'fixtures':'nextFixtures';state[key]=state[key]||[];if(checked&&!state[key].some(f=>f.id===mid)){state[key].push(clone(pool));state[key].sort((a,b)=>new Date(a.kickoff)-new Date(b.kickoff));if(target==='current'){state.users.forEach(u=>{state.predictions[u.id]=state.predictions[u.id]||{};state.predictions[u.id][mid]={home:0,away:0,firstTeam:'none',firstScorer:'none',double:false,touched:false}})}}else if(!checked){state[key]=state[key].filter(f=>f.id!==mid);if(target==='current')state.users.forEach(u=>{delete state.predictions[u.id]?.[mid];delete state.savedDrafts[u.id]?.[mid];delete state.officialPredictions[u.id]?.[mid]})}if(target==='next')state.nextPublished=false;save();render()}
@@ -13479,7 +13501,41 @@ bootAuthV1064();
 (function(){
 'use strict';
 const V1077_EDGE='https://bnwjtrtlwnlbldfhaggg.supabase.co/functions/v1/mastaba-football';
-const V1077_SUPPORTED=/Premier League|FA Cup|EFL Cup|League Cup|Carabao|LaLiga|La Liga|Copa del Rey|Supercopa|Serie A|Coppa Italia|Supercoppa|Champions League|Saudi Pro League|King'?s Cup|Egyptian Premier League|Egypt Cup/i;
+/* V10.79: strict prediction-competition whitelist. Exact country + competition pairs prevent unrelated leagues with duplicate names from entering Admin. */
+const V1077_SUPPORTED_COMPETITIONS=new Set([
+  'England|Premier League','England|FA Cup','England|League Cup','England|EFL Cup','England|Carabao Cup','England|Community Shield',
+  'Spain|La Liga','Spain|LaLiga','Spain|Copa del Rey','Spain|Super Cup','Spain|Supercopa',
+  'Egypt|Premier League','Egypt|Egyptian Premier League','Egypt|Cup','Egypt|Egypt Cup','Egypt|Super Cup',
+  'Italy|Serie A','Italy|Coppa Italia','Italy|Super Cup','Italy|Supercoppa',
+  'Germany|Bundesliga',
+  'France|Ligue 1',
+  'World|UEFA Champions League','World|Champions League','Europe|UEFA Champions League','Europe|Champions League',
+  'World|UEFA Europa League','World|Europa League','Europe|UEFA Europa League','Europe|Europa League',
+  'World|Africa Cup of Nations','Africa|Africa Cup of Nations','World|AFCON','Africa|AFCON',
+  'World|CAF Champions League','Africa|CAF Champions League'
+]);
+function supportedCompetitionV1079(x){
+  const name=String(x?.league?.name||'').trim(),country=String(x?.league?.country||'').trim();
+  return V1077_SUPPORTED_COMPETITIONS.has(`${country}|${name}`);
+}
+function supportedStateFixtureV1079(f){
+  const name=String(f?.competition||'').trim(),country=String(f?.competitionCountry||f?.apiPayload?.league?.country||'').trim();
+  return V1077_SUPPORTED_COMPETITIONS.has(`${country}|${name}`);
+}
+function adminCompetitionNameV1079(f){
+  const n=String(f?.competition||'').trim(),c=String(f?.competitionCountry||f?.apiPayload?.league?.country||'').trim();
+  if(c==='England'&&n==='Premier League')return'English Premier League';
+  if(c==='Egypt'&&(n==='Premier League'||n==='Egyptian Premier League'))return'Egyptian Premier League';
+  if(c==='Egypt'&&(n==='Cup'||n==='Egypt Cup'))return'Egypt Cup';
+  if(c==='Egypt'&&n==='Super Cup')return'Egyptian Super Cup';
+  if(c==='Spain'&&(n==='Super Cup'||n==='Supercopa'))return'Spanish Super Cup';
+  if(c==='Italy'&&(n==='Super Cup'||n==='Supercoppa'))return'Italian Super Cup';
+  if((c==='World'||c==='Europe')&&(n==='UEFA Champions League'||n==='Champions League'))return'Champions League';
+  if((c==='World'||c==='Europe')&&(n==='UEFA Europa League'||n==='Europa League'))return'Europa League';
+  if((c==='World'||c==='Africa')&&(n==='Africa Cup of Nations'||n==='AFCON'))return'AFCON';
+  return n;
+}
+window.adminCompetitionNameV1079=adminCompetitionNameV1079;
 let adminPoolLoadingV1077=false,adminPoolLoadedV1077=false;
 let nextGwV1077=null,adminSlotV1077=null,viewAsTargetV1077=null;
 
@@ -13704,12 +13760,12 @@ async function ensureAdminPoolV1077(){
     const dates=[];const start=new Date();
     for(let i=0;i<10;i++){const d=new Date(start);d.setDate(d.getDate()+i);dates.push(d.toISOString().slice(0,10))}
     const results=await Promise.allSettled(dates.map(date=>edgeV1077('fixtures',{date})));
-    const existingByApi=new Map([...(state.fixtures||[]),...(state.nextFixtures||[])].map(f=>[Number(f.apiFixtureId),f]));
-    const pool=[...(state.fixtures||[]),...(state.nextFixtures||[])];
+    const existingByApi=new Map([...(state.fixtures||[]),...(state.nextFixtures||[])].filter(supportedStateFixtureV1079).map(f=>[Number(f.apiFixtureId),f]));
+    const pool=[...(state.fixtures||[]),...(state.nextFixtures||[])].filter(supportedStateFixtureV1079);
     for(const r of results){
       if(r.status!=='fulfilled')continue;
       for(const x of (r.value?.response||[])){
-        if(!V1077_SUPPORTED.test(String(x?.league?.name||'')))continue;
+        if(!supportedCompetitionV1079(x))continue;
         const f=providerFixtureV1077(x);if(!f)continue;
         const old=existingByApi.get(Number(f.apiFixtureId));
         if(old)continue;
