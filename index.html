@@ -7528,7 +7528,7 @@ function detailedTable(arr){return`<div class="table-wrap"><table class="stats-t
 window.setRankMode=m=>{state.selectedRankMode=m;save();render()};window.setRankWeek=v=>{state.selectedRankWeek=Number(v);save();render()};window.setStatsView=v=>{state.statsView=v;save();render()};function paintAvatars(){state.users.forEach(u=>{renderAvatar($(`#lb-${u.id}`),u);renderAvatar($(`#dlb-${u.id}`),u)})}
 
 function renderRules(){const rows=[
- [L('Correct Winner / Outcome','الفائز / النتيجة الصحيحة'),'5'],[L('Correct Goal Difference','فارق الأهداف الصحيح'),'3'],[L('Correct Home Team Goals','أهداف صاحب الأرض الصحيحة'),'1'],[L('Correct Away Team Goals','أهداف الضيف الصحيحة'),'1'],[L('Exact Score Bonus','بونص النتيجة بالظبط'),'5'],[L('First Team to Score','أول فريق يسجل'),'2'],[L('First Goalscorer','أول لاعب يسجل'),'3']
+ [L('Correct Outcome','النتيجة الصحيحة'),'5'],[L('Correct Goal Difference','فارق الأهداف الصحيح'),'3'],[L('Correct Home Team Goals','أهداف صاحب الأرض الصحيحة'),'1'],[L('Correct Away Team Goals','أهداف الضيف الصحيحة'),'1'],[L('Exact Score Bonus','بونص النتيجة بالظبط'),'5'],[L('First Team to Score','أول فريق يسجل'),'2'],[L('First Goalscorer','أول لاعب يسجل'),'3']
  ];$('#view-rules').innerHTML=`<h1 class="page-title">${L('Prediction Rules','قواعد التوقعات')}</h1><p class="page-sub">${L('The full المصطبة scoring system and Gameweek rules.','نظام نقاط المصطبة كامل وقواعد كل جولة.')}</p><div class="rules-grid"><div class="rule-card"><h3>${L('Match Scoring','نقاط الماتش')}</h3><table class="scoring-table"><thead><tr><th>${L('Rule','القاعدة')}</th><th>${L('Points','النقاط')}</th></tr></thead><tbody>${rows.map(r=>`<tr><td>${r[0]}</td><td><span class="points-pill">+${r[1]}</span></td></tr>`).join('')}</tbody></table><p style="margin-top:12px">${L('A perfect match prediction is worth 20 base points. Draws use the exact same scoring formula as every other result: a correct non-exact draw naturally earns 8 scoreline points — 5 for the correct outcome plus 3 for the correct goal difference of zero.','التوقع الكامل للماتش يساوي 20 نقطة أساسية. التعادل بيتحسب بنفس معادلة أي نتيجة: التعادل الصحيح غير المطابق ياخد طبيعيًا 8 نقاط للسكور — 5 للنتيجة الصحيحة + 3 لفارق الأهداف صفر.')}</p></div><div class="rule-card"><h3>${L('Double Points','دبل بوينتس')}</h3><p>${L('You may activate Double Points on one match per Gameweek. It doubles the full match score, including any Risky Prediction bonus. A perfect 20-point match can become 40, and a +10 Risky bonus on that doubled match is doubled too. Once selected, Double Points is disabled on every other match unless you move it before submitting.','تقدر تفعّل الدبل بوينتس على ماتش واحد بس في كل جولة. بيضاعف إجمالي نقاط الماتش، بما فيها بونص المجازفة. يعني 20 ممكن تبقى 40، ولو كسبت +10 مجازفة في نفس الماتش بالدبل فهي كمان بتتضاعف. أول ما تختاره، الدبل بيتقفل في باقي الماتشات إلا لو غيرته قبل الإرسال.')}</p></div><div class="rule-card"><h3>${L('Risky Prediction Bonus','بونص التوقع المجازف')}</h3><p>${L('If at least five of seven users choose one outcome, the minority outcome becomes risky. An outcome chosen by only one user is also risky. If that minority outcome is correct, the user earns +10. If Double Points is active on that match, the +10 Risky bonus is included before doubling.','لو 5 من 7 أو أكتر اختاروا نفس النتيجة، الاختيار الأقلية يبقى مجازفة. ولو شخص واحد بس اختار نتيجة مختلفة فهي كمان مجازفة. لو الاختيار المختلف طلع صح، ياخد +10. ولو الدبل متفعل على نفس الماتش، بونص المجازفة +10 بيتضاف قبل المضاعفة وبيتضاعف مع باقي نقاط الماتش.')}</p></div><div class="rule-card"><h3>${L('Perfect Gameweek','الجولة الكاملة')}</h3><p>${L('Get every match outcome in the Gameweek correct and receive a +15 bonus. Exact scores are not required for this bonus.','لو جبت نتيجة كل الماتشات في الجولة صح، تاخد +15. مش لازم السكور يكون بالظبط للبونص ده.')}</p></div><div class="rule-card"><h3>${L('Goalscorer Rules','قواعد أول هداف')}</h3><p>${L('For 0–0, No Team to Score and No Goalscorer are selected automatically and can earn their bonuses. Own goals do not count as First Goalscorer. If you predict only one team to score, the scorer list is restricted to that team.','لو توقعت 0–0، لا يوجد فريق يسجل ولا يوجد هداف بيتحددوا تلقائيًا ويقدروا يكسبوا البونص. الأهداف العكسية لا تُحسب كأول هداف. ولو توقعت فريق واحد بس يسجل، قائمة الهدافين بتبقى من الفريق ده بس.')}</p></div><div class="rule-card"><h3>${L('Deadline & Privacy','الموعد والخصوصية')}</h3><p>${L('The entire Gameweek locks one minute before the first selected match kicks off. A saved Draft becomes the official prediction if the deadline passes. Other users’ predictions stay hidden until each match kicks off. All kickoff times are shown in the user’s selected timezone.','الجولة كلها بتتقفل قبل بداية أول ماتش مختار بدقيقة. لو عندك Draft محفوظ وعدّى الموعد، بيتحول لتوقعك الرسمي. توقعات باقي الناس بتفضل مخفية لحد بداية كل ماتش. كل المواعيد بتظهر حسب المنطقة الزمنية للمستخدم.')}</p></div></div>`}
 
 
@@ -12724,8 +12724,7 @@ function stealOutcomeV1043(event){
   const winnerId=attackerScore>targetScore?attackerId:targetId,pool=attackerScore+targetScore;
   assigned[attackerId]=winnerId===attackerId?pool:0;
   assigned[targetId]=winnerId===targetId?pool:0;
-  if(event.targetWasFirst&&winnerId!==targetId)assigned[targetId]=-10;
-  return{scores,assigned,tie:false,winnerId,pool,targetPenalty:event.targetWasFirst&&winnerId!==targetId};
+  return{scores,assigned,tie:false,winnerId,pool,targetPenalty:false};
 }
 function redemptionOutcomeV1043(event){
   const current=baseWeekPointsV1043(event.actorId,event.week);
@@ -13000,7 +12999,7 @@ function stealEventHTMLV1043(e){
   if(o.tie){resultText=L('The scores are tied — if it stays this way, both players keep their own points.','السكور متعادل — لو استمر كده، كل لاعب يحتفظ بنقاطه.');big=L('NO STEAL','مفيش سرقة')}
   else{
     resultText=final
-      ?L(`${userName(o.winnerId)} wins and takes the full ${o.pool}-point pool${o.targetPenalty?'. The #1 target takes -10':''}.`,`${userName(o.winnerId)} كسب وياخد كل الـ ${o.pool} نقطة${o.targetPenalty?'، والمتصدر المستهدف ياخد -10':''}.`)
+      ?L(`${userName(o.winnerId)} wins and takes the full ${o.pool}-point pool. The loser gets 0.`,`${userName(o.winnerId)} كسب وياخد كل الـ ${o.pool} نقطة. الخاسر ياخد 0.`)
       :L(`${userName(o.winnerId)} is currently winning the Steal.`,`${userName(o.winnerId)} متقدم حاليًا في الـ Steal.`);
     big=final?`${o.pool} PTS`:L('LIVE','مباشر');
   }
@@ -13045,7 +13044,7 @@ function personalAlertsHTMLV1043(){
     stealEventsV1043().forEach(e=>{
       const attacker=e.attackers[0];
       if(e.targetId===uid){
-        alerts.push(`<div class="wc-personal-alert-v1043" style="--alert:#e52f49">🚨 <strong>${L('YOU ARE BEING STOLEN FROM','في حد بيسرق منك')}</strong> · ${L(`${userName(attacker)} has played Steal against you${e.targetWasFirst?'. Losing this as the #1 target means -10, not 0':''}.`,`${userName(attacker)} لعب Steal ضدك${e.targetWasFirst?'، ولو خسرت كمتصدر هتاخد -10 مش 0':''}.`)}</div>`);
+        alerts.push(`<div class="wc-personal-alert-v1043" style="--alert:#e52f49">🚨 <strong>${L('YOU ARE BEING STOLEN FROM','في حد بيسرق منك')}</strong> · ${L(`${userName(attacker)} has played Steal against you. The loser gets 0.`,`${userName(attacker)} لعب Steal ضدك. الخاسر ياخد 0.`)}</div>`);
       }else if(attacker===uid){
         alerts.push(`<div class="wc-personal-alert-v1043" style="--alert:#e52f49">⚔ <strong>${L('YOUR STEAL IS LIVE','Steal بتاعك شغال')}</strong> · ${L(`Target: ${userName(e.targetId)}.`,`الهدف: ${userName(e.targetId)}.`)}</div>`);
       }
@@ -13108,7 +13107,7 @@ renderRules=function(){
   const grid=$('#view-rules .rules-grid');if(!grid||grid.querySelector('.wc-rule-card-v1043'))return;
   grid.insertAdjacentHTML('beforeend',`
     <div class="rule-card wc-rule-card-v1043"><h3>${L('Mastaba League Power Cards','الكروت الخاصة بدوري المصطبة')}</h3><p>${L('Power Cards affect only the private seven-person Mastaba League. Steal has one use in Matchdays 1–19 and one in Matchdays 20–38. Surge and Redemption can each be used only once in the entire season. You may activate only one Power Card in a Gameweek. Mastaba Public League and every other league keep normal points.','الكروت الخاصة بتأثر فقط على دوري المصطبة الخاص المكوّن من 7 أشخاص. Steal له استخدام من ج1–19 واستخدام من ج20–38. Surge وRedemption لكل واحد فيهم استخدام واحد فقط في الموسم كله. تقدر تفعل كارت واحد فقط في أي جولة. دوري المصطبة العام وأي دوري تاني يحتفظ بالنقاط العادية.')}</p></div>
-    <div class="rule-card wc-rule-card-v1043"><h3>STEAL</h3><p>${L('Choose one available player. Once confirmed, the Steal cannot be cancelled or switched. Both players are locked out of any other Steal that Gameweek. The higher private-league Gameweek score takes both players’ points; the loser gets 0. If the target was #1 overall at lock and loses, the target gets -10 instead of 0. A player with Surge selected cannot be targeted.','اختار لاعب متاح. بعد تأكيد الـ Steal مينفعش يتلغي أو يتغير، والاتنين بيتقفلوا من أي Steal تاني في الجولة. الأعلى في نقاط الجولة داخل الدوري الخاص ياخد نقاط الاتنين والخاسر ياخد 0. لو الهدف كان المتصدر وقت القفل وخسر، ياخد -10 بدل 0. اللاعب اللي مختار Surge مينفعش يتعمل عليه Steal.')}</p></div>
+    <div class="rule-card wc-rule-card-v1043"><h3>STEAL</h3><p>${L('Choose one available player. Once confirmed, the Steal cannot be cancelled or switched. Both players are locked out of any other Steal that Gameweek. The higher private-league Gameweek score takes both players’ points; the loser gets 0. A player with Surge selected cannot be targeted.','اختار لاعب متاح. بعد تأكيد الـ Steal مينفعش يتلغي أو يتغير، والاتنين بيتقفلوا من أي Steal تاني في الجولة. الأعلى في نقاط الجولة داخل الدوري الخاص ياخد نقاط الاتنين والخاسر ياخد 0. اللاعب اللي مختار Surge مينفعش يتعمل عليه Steal.')}</p></div>
     <div class="rule-card wc-rule-card-v1043"><h3>SURGE · x1.5</h3><p>${L('Surge can be used once per season and multiplies your whole Gameweek by x1.5 in the private Mastaba League. While selected, you cannot be stolen from and you cannot use Double Points. Surge does not stack with an automatic Rivalry Match: a Rivalry fixture remains x1.5, never x2.25.','Surge له استخدام واحد في الموسم وبيضرب الجولة كلها x1.5 في دوري المصطبة الخاص. طول ما هو مختار، محدش يقدر يعمل عليك Steal ومينفعش تستخدم Double Points. Surge ما بيتراكمش مع Rivalry: ماتش Rivalry يفضل x1.5 ومش يبقى x2.25.')}</p></div>
     <div class="rule-card wc-rule-card-v1043"><h3>${L('RIVALRY MATCH · x1.5','ماتش RIVALRY · x1.5')}</h3><p>${L('Rivalry is automatic, not a Power Card. When supported clubs belonging to Mastaba members face each other, only the owners of those clubs receive x1.5 on that fixture in the private Mastaba League. Everyone else scores the match normally. If several members support the same club, each valid owner-v-owner pairing is shown separately, but each participant still receives only one x1.5 multiplier on that fixture — never x2.25.','Rivalry تلقائي ومش كارت. لما ناديين من أندية أعضاء المصطبة يلعبوا ضد بعض، أصحاب الناديين فقط بياخدوا x1.5 على الماتش داخل دوري المصطبة الخاص. باقي الناس نقاطهم عادية. لو أكتر من عضو بيشجع نفس النادي، كل مواجهة صحيحة بين مالكين بتظهر لوحدها، لكن كل لاعب بياخد x1.5 مرة واحدة فقط على نفس الماتش ومش x2.25.')}</p></div>
     <div class="rule-card wc-rule-card-v1043"><h3>${L('Rivalry Clubs','أندية Rivalry')}</h3><p>${L('Ayooti: Barcelona + Inter · Mahdy: AC Milan + Al Ahly · Mohamed Saad: Arsenal + Al Ahly · Ramy Saad: Liverpool + Al Ahly · Radwan: Manchester United + Al Ahly · Manar: Real Madrid + Zamalek · 3alawy: Real Madrid + Al Ahly.','عيوطي: برشلونة + إنتر · الدوود: ميلان + الأهلي · سعد: أرسنال + الأهلي · رامي: ليفربول + الأهلي · رضوان: مانشستر يونايتد + الأهلي · منار: ريال مدريد + الزمالك · علاوي: ريال مدريد + الأهلي.')}</p></div>
@@ -14545,7 +14544,8 @@ async function refreshPrivateLiveV1083(){
       ctx.supa.from('mastaba_predictions').select('*').eq('gameweek_id',ctx.gw.id)
     ]);if(fxR.error)throw fxR.error;if(pR.error)throw pR.error;
     let changed=false;
-    for(const r of fxR.data||[]){const f=fixtureById(r.id);if(!f)continue;const ph=phaseV1083(r);const h=r.home_goals==null?0:Number(r.home_goals),a=r.away_goals==null?0:Number(r.away_goals);const sig=`${f.phase}|${f.result?.home}|${f.result?.away}|${f.liveScore?.home}|${f.liveScore?.away}|${f.result?.firstScorer}`;f.phase=ph;if(ph==='final')f.result={home:h,away:a,firstTeam:r.first_scoring_team_id?teamCodeV1083(r.first_scoring_team_id):'none',firstScorer:r.first_scorer_id?String(r.first_scorer_id):'none'};else if(ph==='live')f.liveScore={home:h,away:a};const nowSig=`${f.phase}|${f.result?.home}|${f.result?.away}|${f.liveScore?.home}|${f.liveScore?.away}|${f.result?.firstScorer}`;if(sig!==nowSig)changed=true}
+    for(const r of fxR.data||[]){const f=fixtureById(r.id);if(!f)continue;const ph=phaseV1083(r);const h=r.home_goals==null?0:Number(r.home_goals),a=r.away_goals==null?0:Number(r.away_goals);
+    f.liveClockStatusV1091=String(r?.clock?.status||r?.fixture_status||'');f.liveClockElapsedV1091=r?.elapsed??null;f.livePeriodStartedAtV1091=r?.clock?.period_started_at||null;f.livePeriodBaseMinuteV1091=r?.clock?.base_minute??null;f.liveStatusChangedAtV1091=r?.clock?.status_changed_at||null;const sig=`${f.phase}|${f.result?.home}|${f.result?.away}|${f.liveScore?.home}|${f.liveScore?.away}|${f.result?.firstScorer}`;f.phase=ph;if(ph==='final')f.result={home:h,away:a,firstTeam:r.first_scoring_team_id?teamCodeV1083(r.first_scoring_team_id):'none',firstScorer:r.first_scorer_id?String(r.first_scorer_id):'none'};else if(ph==='live')f.liveScore={home:h,away:a};const nowSig=`${f.phase}|${f.result?.home}|${f.result?.away}|${f.liveScore?.home}|${f.liveScore?.away}|${f.result?.firstScorer}`;if(sig!==nowSig)changed=true}
     const byId=Object.fromEntries((state.users||[]).filter(u=>u.authUserId).map(u=>[u.authUserId,u.id]));
     for(const row of pR.data||[]){const slot=byId[row.user_id],f=fixtureById(row.fixture_id);if(!slot||!f)continue;const pick=dbPickV1083(row,f);state.predictions[slot]=state.predictions[slot]||{};state.savedDrafts[slot]=state.savedDrafts[slot]||{};state.officialPredictions[slot]=state.officialPredictions[slot]||{};state.predictions[slot][f.id]=pick;state.savedDrafts[slot][f.id]={...pick};if(row.submitted)state.officialPredictions[slot][f.id]={...pick}}
     if(changed){state.lastUpdate=new Date().toISOString();save();render()}
@@ -14759,7 +14759,7 @@ function normalizeConsensusV1088(v){
 }
 function currentStoryLiveV1088(){return (state.fixtures||[]).some(f=>f.phase==='live')}
 function storyLiveIndexV1088(){const fs=homeStoryFixturesV21();return fs.findIndex(f=>f.phase==='live')}
-function fixtureSignatureV1088(f){return [f.phase,f.liveScore?.home,f.liveScore?.away,f.result?.home,f.result?.away,f.liveFirstTeam,f.liveFirstScorer,f.result?.firstTeam,f.result?.firstScorer].join('|')}
+function fixtureSignatureV1088(f){return [f.phase,f.liveScore?.home,f.liveScore?.away,f.result?.home,f.result?.away,f.liveFirstTeam,f.liveFirstScorer,f.result?.firstTeam,f.result?.firstScorer,f.liveClockStatusV1091,f.livePeriodStartedAtV1091,f.livePeriodBaseMinuteV1091].join('|')}
 
 function applyLiveSnapshotV1088(snap){
   const ctx=window.prodCtxV1073;
@@ -14771,6 +14771,11 @@ function applyLiveSnapshotV1088(snap){
     const f=fixtureById(r.id);if(!f)continue;
     const before=fixtureSignatureV1088(f),ph=snapshotPhaseV1088(r);
     const h=r.home_goals==null?0:Number(r.home_goals),a=r.away_goals==null?0:Number(r.away_goals);
+    f.liveClockStatusV1091=String(r?.clock?.status||r?.fixture_status||'');
+    f.liveClockElapsedV1091=r?.elapsed??null;
+    f.livePeriodStartedAtV1091=r?.clock?.period_started_at||null;
+    f.livePeriodBaseMinuteV1091=r?.clock?.base_minute??null;
+    f.liveStatusChangedAtV1091=r?.clock?.status_changed_at||null;
     f.phase=ph;
     if(ph==='live'){
       f.liveScore={home:h,away:a};
@@ -14803,10 +14808,16 @@ async function fetchLiveSnapshotV1088(){
   try{
     // Time-bucketed URL lets thousands of users share the same CDN object while still refreshing promptly.
     const bucket=Math.floor(Date.now()/15000);
-    const r=await fetch(`${LIVE_SNAPSHOT_BASE_V1088}?v=${bucket}`,{cache:'default'});
+    let r=await fetch(`${LIVE_SNAPSHOT_BASE_V1088}?v=${bucket}`,{cache:'no-cache'});
     if(!r.ok)throw new Error(`snapshot ${r.status}`);
-    const snap=await r.json();
+    let snap=await r.json();
+    const generated=Date.parse(snap?.generated_at||'');
+    if(document.visibilityState==='visible'&&Number.isFinite(generated)&&Date.now()-generated>90000){
+      r=await fetch(`${LIVE_SNAPSHOT_BASE_V1088}?fresh=${Date.now()}`,{cache:'reload'});
+      if(r.ok)snap=await r.json();
+    }
     applyLiveSnapshotV1088(snap);
+    window.__mastabaLiveLastFetchV1092=Date.now();
   }catch(e){console.warn('Shared live snapshot refresh failed',e)}
 }
 function startSharedLiveV1088(){
@@ -14814,7 +14825,7 @@ function startSharedLiveV1088(){
   if(liveSnapshotTimerV1088)clearInterval(liveSnapshotTimerV1088);
   fetchLiveSnapshotV1088();
   // Backend snapshot itself refreshes once/minute; 45s client reads keep latency low without hammering Supabase.
-  liveSnapshotTimerV1088=setInterval(fetchLiveSnapshotV1088,45000);
+  liveSnapshotTimerV1088=setInterval(fetchLiveSnapshotV1088,30000);
 }
 window.fetchLiveSnapshotV1088=fetchLiveSnapshotV1088;
 window.startSharedLiveV1088=startSharedLiveV1088;
@@ -15025,5 +15036,190 @@ window.addEventListener('pageshow',resumeLatestLiveV1090);
 window.addEventListener('focus',resumeLatestLiveV1090);
 })();
 </script>
+
+<style id="mastaba-v1091-live-clock-style">
+.ats-date-v25 strong.ats-live-clock-v1091{
+  font-variant-numeric:tabular-nums;
+  letter-spacing:-.02em;
+  white-space:nowrap;
+}
+.ats-date-v25 strong.ats-live-clock-v1091[data-state="live"]{
+  font-size:1.12rem!important;
+  font-weight:1000!important;
+}
+.ats-date-v25 strong.ats-live-clock-v1091[data-state="pause"]{
+  font-size:.92rem!important;
+  letter-spacing:.04em;
+}
+</style>
+<script id="mastaba-v1091-order-clock">
+/* V10.91 — chronological ATS order + live-default selection + native match clock. */
+(function(){
+  // The carousel order never changes with match state: earliest kickoff is always Match 1.
+  homeStoryFixturesV21=function(){
+    const fs=homeBulletinConfig(state.selectedHomeWeek).fixtures||[];
+    return fs.slice().sort((a,b)=>new Date(a.kickoff)-new Date(b.kickoff));
+  };
+  window.homeStoryFixturesV21=homeStoryFixturesV21;
+
+  function statusV1091(f){
+    return String(f?.liveClockStatusV1091||'').toUpperCase();
+  }
+  function nativeClockV1091(f){
+    const s=statusV1091(f);
+    if(s==='HT')return {text:'HT',state:'pause'};
+    if(s==='BT')return {text:L('ET BREAK','استراحة إضافي'),state:'pause'};
+    if(s==='P')return {text:L('PENS','ركلات ترجيح'),state:'pause'};
+    if(s==='SUSP'||s==='INT')return {text:L('PAUSED','متوقف'),state:'pause'};
+    if(s==='PEN'&&f?.phase==='live')return {text:L('PENS','ركلات ترجيح'),state:'pause'};
+
+    const base=Number(f?.livePeriodBaseMinuteV1091);
+    const started=Date.parse(f?.livePeriodStartedAtV1091||'');
+    if(!Number.isFinite(base)||!Number.isFinite(started)){
+      const fallback=Number(f?.liveClockElapsedV1091);
+      if(Number.isFinite(fallback)&&fallback>0)return {text:`${fallback}′`,state:'live'};
+      return {text:L('LIVE','مباشر'),state:'live'};
+    }
+    const secs=Math.max(0,Math.floor((Date.now()-started)/1000));
+    const whole=Math.floor(secs/60);
+    let regulationEnd, firstMinute;
+    if(base===0){ regulationEnd=45; firstMinute=1; }
+    else if(base===45){ regulationEnd=90; firstMinute=46; }
+    else if(base===90){ regulationEnd=105; firstMinute=91; }
+    else { regulationEnd=120; firstMinute=106; }
+
+    const segmentLength=regulationEnd-base;
+    if(whole<segmentLength)return {text:`${firstMinute+whole}′`,state:'live'};
+    return {text:`${regulationEnd}+${whole-segmentLength+1}′`,state:'live'};
+  }
+  window.nativeClockV1091=nativeClockV1091;
+
+  let liveSetV1091='';
+  function syncATSStateV1091(){
+    try{
+      const fs=homeStoryFixturesV21();
+      const live=fs.filter(f=>f.phase==='live');
+      const sig=live.map(f=>f.id).join('|');
+      // Select the first chronological live match only when the live set changes.
+      // This keeps the live game as the default without fighting manual arrow navigation.
+      if(sig!==liveSetV1091){
+        liveSetV1091=sig;
+        if(live.length){
+          const idx=fs.findIndex(f=>f.id===live[0].id);
+          const key=String(state.selectedHomeWeek??'overall');
+          state.homeStoryIndexV21=state.homeStoryIndexV21||{};
+          state.homeStoryIndexV21[key]=idx;
+          if(state.view==='home'&&typeof insertHomeStoryV25==='function')insertHomeStoryV25();
+        }
+      }
+      const key=String(state.selectedHomeWeek??'overall');
+      const idx=Math.max(0,Math.min(fs.length-1,Number(state.homeStoryIndexV21?.[key]||0)));
+      const current=fs[idx];
+      const el=document.querySelector('#view-home .ats-section-v25 .ats-date-v25 strong');
+      if(el&&current?.phase==='live'){
+        const c=nativeClockV1091(current);
+        el.textContent=c.text;
+        el.classList.add('ats-live-clock-v1091');
+        el.dataset.state=c.state;
+      }else if(el){
+        el.classList.remove('ats-live-clock-v1091');
+        delete el.dataset.state;
+      }
+    }catch(e){}
+  }
+  window.syncATSStateV1091=syncATSStateV1091;
+
+  const insertBaseV1091=window.insertHomeStoryV25;
+  window.insertHomeStoryV25=insertHomeStoryV25=function(){
+    const out=insertBaseV1091?insertBaseV1091():undefined;
+    syncATSStateV1091();
+    return out;
+  };
+  // Keep legacy aliases pointed at the current renderer.
+  window.insertHomeStoryV23=insertHomeStoryV23=insertHomeStoryV25;
+  window.insertHomeStoryV22=insertHomeStoryV22=insertHomeStoryV25;
+  window.insertHomeStoryV21=insertHomeStoryV21=insertHomeStoryV25;
+
+  // Hydration fallback: clock anchors are already on the Production fixture row.
+  const hydrateBaseV1091=window.hydrateProductionV1073;
+  window.hydrateProductionV1073=async function(profile,user,supa){
+    const ok=await hydrateBaseV1091(profile,user,supa);
+    try{
+      for(const f of state.fixtures||[]){
+        const r=window.prodCtxV1073?.fxById?.[f.id];
+        if(!r)continue;
+        f.liveClockStatusV1091=r.fixture_status||f.liveClockStatusV1091||'';
+        f.liveClockElapsedV1091=r.elapsed??f.liveClockElapsedV1091??null;
+        f.livePeriodStartedAtV1091=r.live_period_started_at||f.livePeriodStartedAtV1091||null;
+        f.livePeriodBaseMinuteV1091=r.live_period_base_minute??f.livePeriodBaseMinuteV1091??null;
+        f.liveStatusChangedAtV1091=r.live_status_changed_at||f.liveStatusChangedAtV1091||null;
+      }
+    }catch(e){}
+    syncATSStateV1091();
+    return ok;
+  };
+
+  // Native clock: no network and no API usage.
+  clearInterval(window.__atsNativeClockV1091);
+  window.__atsNativeClockV1091=setInterval(syncATSStateV1091,1000);
+  document.addEventListener('visibilitychange',()=>{if(!document.hidden)setTimeout(syncATSStateV1091,50)});
+  window.addEventListener('pageshow',()=>setTimeout(syncATSStateV1091,50));
+  window.addEventListener('focus',()=>setTimeout(syncATSStateV1091,50));
+  setTimeout(syncATSStateV1091,200);
+})();
+</script>
+
+
+<script id="mastaba-v1092-live-self-heal">
+/* V10.92 — reliable automatic live refresh across every live-dependent surface. */
+(function(){
+  window.__mastabaLiveLastFetchV1092=window.__mastabaLiveLastFetchV1092||0;
+  let inFlightV1092=false;
+
+  async function liveHeartbeatV1092(force=false){
+    if(inFlightV1092)return;
+    if(!force&&document.visibilityState!=='visible')return;
+    const last=Number(window.__mastabaLiveLastFetchV1092||0);
+    if(!force&&Date.now()-last<30000)return;
+    inFlightV1092=true;
+    try{
+      if(typeof window.fetchLiveSnapshotV1088==='function'){
+        await window.fetchLiveSnapshotV1088();
+      }
+      // applyLiveSnapshotV1088 calls the app-wide render() whenever fixture data
+      // changes. These two calls cover modal/launcher surfaces outside that render tree.
+      if(typeof window.refreshOpenMatchInsightV1089==='function')window.refreshOpenMatchInsightV1089();
+      if(state.view==='predict'&&typeof installMatchInsightsLaunchers==='function')installMatchInsightsLaunchers();
+      if(typeof window.syncATSStateV1091==='function')window.syncATSStateV1091();
+    }finally{
+      inFlightV1092=false;
+    }
+  }
+  window.liveHeartbeatV1092=liveHeartbeatV1092;
+
+  clearInterval(window.__mastabaLiveWatchdogV1092);
+  window.__mastabaLiveWatchdogV1092=setInterval(()=>{
+    if(document.visibilityState==='visible'&&Date.now()-Number(window.__mastabaLiveLastFetchV1092||0)>40000){
+      liveHeartbeatV1092(true);
+    }
+  },5000);
+
+  document.addEventListener('visibilitychange',()=>{if(!document.hidden)liveHeartbeatV1092(true)});
+  window.addEventListener('focus',()=>liveHeartbeatV1092(true));
+  window.addEventListener('pageshow',()=>liveHeartbeatV1092(true));
+  window.addEventListener('online',()=>liveHeartbeatV1092(true));
+
+  // If the user is actively navigating after a browser timer was throttled,
+  // opportunistically catch up without waiting for the next scheduled heartbeat.
+  document.addEventListener('pointerdown',()=>{
+    if(document.visibilityState==='visible'&&Date.now()-Number(window.__mastabaLiveLastFetchV1092||0)>30000){
+      liveHeartbeatV1092(true);
+    }
+  },{passive:true});
+
+  setTimeout(()=>liveHeartbeatV1092(true),250);
+})();
+</script>
+
 </body>
 </html>
