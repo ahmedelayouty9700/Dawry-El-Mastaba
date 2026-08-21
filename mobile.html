@@ -13408,7 +13408,7 @@ async function hydrateProductionV1073(profile,user,supa){
  const fx=fixturesR.data||[];
  for(const f of fx){const hc=teamCodeV1073(f.home_team_id),ac=teamCodeV1073(f.away_team_id);TEAM[hc]={name:f.home_team_name,short:hc,logo:f.home_team_logo||''};TEAM[ac]={name:f.away_team_name,short:ac,logo:f.away_team_logo||''}}
  const uniqueTeamIds=[...new Set(fx.flatMap(f=>[f.home_team_id,f.away_team_id]))];
- await Promise.all(uniqueTeamIds.map(async tid=>{const code=teamCodeV1073(tid),sq=await getSquadV1073(tid);players[code]=sq.map(p=>({id:String(p.id),name:p.name,pos:posV1073(p.position),number:p.number??null,status:'available',stats:zeroStatsV1073()}))}));
+ uniqueTeamIds.forEach(tid=>{const code=teamCodeV1073(tid);players[code]=players[code]||[]});
  state.week=Number(gw.gameweek_number);state.selectedPredictWeek=state.week;state.selectedRankWeek=state.week;state.selectedHomeWeek='overall';state.nextPublished=false;state.nextFixtures=[];state.history=null;state.previousWeekPoints={};state.previousWeekStats={};state.rankOrderHistory=[];state.leaderHistory=[];state.lastPlaceHistory=[];state.roundLocked=false;state.forceDeadline=false;
  state.fixtures=fx.map(f=>{const phase=fixturePhaseV1073(f.fixture_status,f.kickoff_at);const result=(f.home_goals!=null&&f.away_goals!=null)?{home:Number(f.home_goals),away:Number(f.away_goals),firstTeam:f.first_scoring_team_id?teamCodeV1073(f.first_scoring_team_id):'none',firstScorer:f.first_scorer_id?String(f.first_scorer_id):'none'}:null;return{id:f.id,apiFixtureId:Number(f.api_fixture_id),competition:f.competition_name,home:teamCodeV1073(f.home_team_id),away:teamCodeV1073(f.away_team_id),homeTeamId:Number(f.home_team_id),awayTeamId:Number(f.away_team_id),stadium:f.venue_name||'',kickoff:f.kickoff_at,phase,result}});
  state.fixturePool=state.fixtures.map(x=>({...x}));state.predictions={};state.savedDrafts={};state.officialPredictions={};state.roundMeta={};
@@ -13780,7 +13780,7 @@ window.hydrateProductionV1073=async function(profile,user,supa){
     }
     state.fixturePool=[...(state.fixtures||[]),...(state.nextFixtures||[])];
   }catch(e){console.warn('Production admin hydration warning',e)}
-  await enrichPlayersV1077();
+  /* V10.81: player data is loaded lazily when a scorer menu is opened. */
   lockProductionTitleV1077();
   return ok;
 };
@@ -14328,5 +14328,100 @@ repairFixtureIdentityV1080();
 })();
 
 </script>
+
+
+<style id="mastaba-v1081-style">
+/* ===== V10.81 — lazy production player loading, text-first scorer picker, keyboard score flow ===== */
+.player-photo,.scorer-headshot{display:none!important}
+.selection-visual:empty{display:none!important}
+.selection-main{width:100%!important;min-width:0!important}
+.selection-text{flex:1 1 auto!important;min-width:0!important}
+.selection-value{white-space:normal!important;overflow:visible!important;text-overflow:clip!important;line-height:1.22!important}
+.player-name-cell{gap:0!important;padding:11px 14px!important}
+.player-name-copy{min-width:0!important;width:100%!important}
+.player-name-copy strong{font-size:.91rem!important;line-height:1.18!important;white-space:normal!important;overflow:visible!important;text-overflow:clip!important;word-break:normal!important}
+.player-name-copy small{margin-top:4px!important}
+.player-table-head,.player-row{grid-template-columns:minmax(220px,2fr) 52px 56px 56px 48px 48px 54px 54px 28px!important}
+.player-drawer .panel-head{position:sticky;top:-15px;z-index:12;background:#f6f3ee;padding-top:14px;padding-bottom:10px;border-bottom:1px solid rgba(23,32,53,.09)}
+.player-drawer{cursor:pointer}
+.player-drawer .drawer-card{cursor:default}
+.player-loading-v1081{display:grid;place-items:center;min-height:180px;text-align:center;padding:24px;color:#536072;font-weight:850}
+.player-loading-v1081 strong{display:block;color:#172035;font-size:1rem;margin-bottom:6px}
+.player-loading-spinner-v1081{width:28px;height:28px;border-radius:50%;border:3px solid #d5dbe3;border-top-color:#172b55;animation:mastabaSpinV1081 .75s linear infinite;margin:0 auto 12px}
+@keyframes mastabaSpinV1081{to{transform:rotate(360deg)}}
+.player-load-error-v1081{padding:18px;text-align:center}
+.player-load-error-v1081 .btn{margin-top:12px}
+.score-input:focus{outline:3px solid rgba(64,117,225,.28)!important;outline-offset:2px!important}
+@media(max-width:720px){
+  .player-table-head,.player-row{grid-template-columns:minmax(175px,1.8fr) 45px 47px 47px 42px 42px 48px 48px 26px!important}
+  .player-name-cell{padding:10px 11px!important}
+  .player-name-copy strong{font-size:.82rem!important}
+}
+</style>
+<script id="mastaba-v1081-script">
+(function(){
+'use strict';
+const EDGE_V1081='https://bnwjtrtlwnlbldfhaggg.supabase.co/functions/v1/mastaba-football';
+const loadedTeamsV1081=new Set();
+const loadingTeamsV1081=new Map();
+const statsZeroV1081=()=>({apps:0,bench:0,goals:0,assists:0,xg:null,xa:null});
+const safeN1081=v=>Number.isFinite(Number(v))?Number(v):0;
+const posV1081=p=>({Goalkeeper:'GK',Defender:'CB',Midfielder:'MID',Attacker:'FW'}[String(p||'')]||String(p||'MID').toUpperCase());
+function escV1081(v){return typeof escapeHTML==='function'?escapeHTML(String(v??'')):String(v??'').replace(/[&<>\"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','\"':'&quot;'}[c]))}
+function providerErrorsV1081(d){const e=d?.errors;if(!e)return[];if(Array.isArray(e))return e.filter(Boolean).map(String);if(typeof e==='object')return Object.values(e).filter(Boolean).map(String);return String(e).trim()?[String(e)]:[]}
+async function edgeV1081(endpoint,params={}){
+  const u=new URL(EDGE_V1081);u.searchParams.set('endpoint',endpoint);Object.entries(params).forEach(([k,v])=>{if(v!==undefined&&v!==null&&v!=='')u.searchParams.set(k,String(v))});
+  const r=await fetch(u.toString(),{cache:'no-store'});let j={};try{j=await r.json()}catch{}
+  if(!r.ok||j?.error)throw new Error(j?.message||j?.error||`Football data request failed (${r.status})`);
+  const d=j?.data||{};const errs=providerErrorsV1081(d);if(errs.length)throw new Error(errs.join('; '));return d;
+}
+function mergeSquadV1081(code,squad){
+  const old=new Map((players[code]||[]).map(p=>[String(p.id),p]));
+  for(const x of squad||[]){const id=String(x?.id||'');if(!id)continue;const p=old.get(id)||{id,name:x.name||'Player',pos:posV1081(x.position),number:x.number??null,status:'available',stats:{}};p.name=x.name||p.name;p.pos=posV1081(x.position||p.pos);if(x.number!=null)p.number=x.number;p.status=p.status||'available';p.stats=p.stats||{};p.stats.ALL=p.stats.ALL||statsZeroV1081();old.set(id,p)}
+  players[code]=[...old.values()];
+}
+function addStatV1081(a,s){a.apps+=safeN1081(s?.games?.appearences);a.bench+=safeN1081(s?.substitutes?.bench);a.goals+=safeN1081(s?.goals?.total);a.assists+=safeN1081(s?.goals?.assists);return a}
+function mergeStatsEntryV1081(code,entry,fixture){
+  const id=String(entry?.player?.id||'');if(!id)return;let p=(players[code]||[]).find(x=>String(x.id)===id);
+  if(!p){p={id,name:entry?.player?.name||'Player',pos:posV1081(entry?.statistics?.[0]?.games?.position),number:null,status:'available',stats:{}};(players[code]??=[]).push(p)}
+  p.name=entry?.player?.name||p.name;if(entry?.statistics?.[0]?.games?.position)p.pos=posV1081(entry.statistics[0].games.position);p.stats=p.stats||{};
+  const all=statsZeroV1081(),byComp={};(entry?.statistics||[]).forEach(st=>{addStatV1081(all,st);const c=st?.league?.name;if(c){byComp[c]=byComp[c]||statsZeroV1081();addStatV1081(byComp[c],st)}});p.stats={...p.stats,ALL:all,...byComp};if(fixture?.competition)p.stats[fixture.competition]=p.stats[fixture.competition]||statsZeroV1081();
+}
+function teamIdForV1081(f,code){if(code===f.home)return Number(f.homeTeamId);if(code===f.away)return Number(f.awayTeamId);return Number(String(code||'').replace(/^T/,''))||null}
+function seasonForV1081(f){const db=window.prodCtxV1073?.fxById?.[f?.id];return Number(db?.api_payload?.league?.season||f?.apiPayload?.league?.season||new Date(f?.kickoff||Date.now()).getUTCFullYear())}
+async function ensureTeamPlayersV1081(f,code){
+  if(loadedTeamsV1081.has(code)&&(players[code]||[]).length)return true;if(loadingTeamsV1081.has(code))return loadingTeamsV1081.get(code);
+  const task=(async()=>{const tid=teamIdForV1081(f,code);if(!tid)throw new Error('Team ID is unavailable.');let haveSquad=(players[code]||[]).length>0;
+    try{const d=await edgeV1081('players/squads',{team:tid});const sq=d?.response?.[0]?.players||[];if(sq.length){mergeSquadV1081(code,sq);haveSquad=true}}catch(e){console.warn('Squad request unavailable',tid,e)}
+    // Detailed stats are a fallback for missing squads and enrich the goals-first ordering when available.
+    try{let page=1,total=1;do{const d=await edgeV1081('players',{team:tid,season:seasonForV1081(f),page});for(const entry of (d?.response||[]))mergeStatsEntryV1081(code,entry,f);total=Math.max(1,Number(d?.paging?.total||1));page++}while(page<=total&&page<=4)}catch(e){console.warn('Player stats temporarily unavailable',tid,e)}
+    if(!(players[code]||[]).length&&!haveSquad)throw new Error(L('Player data is temporarily unavailable. Please try again.','بيانات اللعيبة غير متاحة مؤقتًا. حاول تاني.'));
+    // Availability is useful but never blocks the scorer list.
+    try{if(f?.apiFixtureId){const d=await edgeV1081('injuries',{fixture:f.apiFixtureId});for(const item of (d?.response||[])){const p=(players[code]||[]).find(x=>String(x.id)===String(item?.player?.id||''));if(!p)continue;const t=`${item?.player?.type||''} ${item?.player?.reason||''}`.toLowerCase();p.status=/suspend|red card|ban/.test(t)?'suspended':/doubt|question/.test(t)?'doubtful':'out'}}}catch(e){console.warn('Availability data temporarily unavailable',e)}
+    loadedTeamsV1081.add(code);return true})();loadingTeamsV1081.set(code,task);try{return await task}finally{loadingTeamsV1081.delete(code)}}
+window.ensureTeamPlayersV1081=ensureTeamPlayersV1081;
+function loadingDrawerV1081(team){const root=$('#modalRoot');root.innerHTML=`<div class="player-drawer" data-player-backdrop-v1081><div class="drawer-card"><div class="drawer-handle"></div><div class="panel-head"><div><h3>${L('First Goalscorer','أول لاعب يسجل')} — ${escV1081(TEAM[team]?.name||team)}</h3></div><button class="icon-button" onclick="closeModal()">×</button></div><div class="player-loading-v1081"><div><div class="player-loading-spinner-v1081"></div><strong>${L('Loading squad…','جاري تحميل قائمة اللعيبة…')}</strong><span>${L('This team will be cached after the first load.','الفريق هيتخزن بعد أول تحميل.')}</span></div></div></div></div>`}
+window.retryScorersV1081=async function(mid){closeModal();await window.openScorers(mid)};
+window.openScorers=async function(mid){
+  if(isRoundLocked()||userSubmittedLocked())return;const f=fixtureById(mid),p=getWorking(state.currentUser,mid)||{};p.touched=true;
+  if(p.home===''||p.away==='')return toast(L('Enter the score first.','اكتب النتيجة الأول.'),'warn');
+  if(Number(p.home)===0&&Number(p.away)===0){p.firstTeam='none';p.firstScorer='none';state.predictions[state.currentUser][mid]=p;markDirty(mid);save();refreshPredictionCard(mid);return}
+  if(Number(p.home)>0&&Number(p.away)===0)p.firstTeam=f.home;if(Number(p.away)>0&&Number(p.home)===0)p.firstTeam=f.away;
+  if(!p.firstTeam||p.firstTeam==='none')return toast(L('Choose the first team to score first.','اختار أول فريق هيسجل الأول.'),'warn');
+  state.predictions[state.currentUser][mid]=p;loadingDrawerV1081(p.firstTeam);
+  try{await ensureTeamPlayersV1081(f,p.firstTeam);if(document.querySelector('[data-player-backdrop-v1081]'))openPlayerDrawer(mid,p.firstTeam,f.competition)}catch(e){console.error(e);const root=$('#modalRoot');root.innerHTML=`<div class="player-drawer" data-player-backdrop-v1081><div class="drawer-card"><div class="drawer-handle"></div><div class="panel-head"><div><h3>${L('First Goalscorer','أول لاعب يسجل')}</h3></div><button class="icon-button" onclick="closeModal()">×</button></div><div class="player-load-error-v1081"><strong>${escV1081(e?.message||L('Player data could not be loaded.','تعذر تحميل بيانات اللعيبة.'))}</strong><br><button class="btn btn-primary" onclick="retryScorersV1081('${mid}')">${L('Retry','حاول تاني')}</button></div></div></div>`}
+};
+// Text-first player list: no headshots or jersey artwork.
+window.playerHead=function(){return''};
+window.playerRow=function(p,comp,mid){const st=p.stats?.[comp]||p.stats?.ALL||statsZeroV1081(),disabled=['out','suspended'].includes(p.status);const flag=p.status==='doubtful'?`<span class="availability-icon doubtful" title="${L('Doubtful','مشكوك فيه')}">!</span>`:disabled?`<span class="availability-icon ${p.status}" title="${statusLabel(p.status)}">!</span>`:'';const stat=v=>v==null?`<span class="player-stat-na-v1077">—</span>`:v;return`<button class="player-row ${disabled?'disabled':''}" ${disabled?'disabled':''} onclick="pickScorer('${mid}','${p.id}')"><span class="player-name-cell"><span class="player-name-copy"><strong>${escV1081(p.name)}</strong><small>${comp==='ALL'?L('All Competitions','كل البطولات'):escV1081(comp)}</small></span></span><span class="player-cell player-pos-cell">${playerPositionGroup(p.pos)}</span><span class="player-cell player-stat-cell">${stat(st.apps)}</span><span class="player-cell player-stat-cell">${stat(st.bench)}</span><span class="player-cell player-stat-cell">${stat(st.goals)}</span><span class="player-cell player-stat-cell">${stat(st.assists)}</span><span class="player-cell player-stat-cell">${stat(st.xg)}</span><span class="player-cell player-stat-cell">${stat(st.xa)}</span><span class="player-cell">${flag}</span></button>`};
+// Click the dark backdrop (or press Escape) to dismiss the scorer picker from any scroll position.
+document.addEventListener('pointerdown',e=>{const d=e.target.closest?.('.player-drawer');if(d&&e.target===d)closeModal()});
+document.addEventListener('keydown',e=>{if(e.key==='Escape'&&document.querySelector('.player-drawer'))closeModal()});
+// PC keyboard flow: Tab/Shift+Tab walks only through score number fields, skipping stepper arrows and action buttons.
+window.scoreTabV1081=function(e,el){if(e.key!=='Tab')return;const xs=[...document.querySelectorAll('.score-input:not(:disabled)')].filter(x=>x.offsetParent!==null);const i=xs.indexOf(el),n=e.shiftKey?i-1:i+1;if(i<0||n<0||n>=xs.length)return;e.preventDefault();xs[n].focus();try{xs[n].select()}catch{}};
+window.scoreStepper=scoreStepper=function(mid,side,val,disabled){const display=(val==null||val==='')?'':val;return`<div class="score-stepper"><input ${disabled?'disabled':''} class="score-input ${side}-score" data-side="${side}" inputmode="numeric" pattern="[0-9]*" value="${display}" placeholder="–" onfocus="scoreInputFocusV1038(this)" oninput="directScoreChanged('${mid}','${side}',this.value)" onblur="scoreInputBlurV1038('${mid}',this)" onkeydown="scoreTabV1081(event,this)"><span class="step-controls"><button tabindex="-1" ${disabled?'disabled':''} type="button" onclick="stepScore('${mid}','${side}',1)">▲</button><button tabindex="-1" ${disabled?'disabled':''} type="button" onclick="stepScore('${mid}','${side}',-1)">▼</button></span></div>`};
+})();
+</script>
+
 </body>
 </html>
