@@ -4,7 +4,7 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
   <meta name="theme-color" content="#12171f" />
-  <title>المصطبة — V10.85 PC Review</title>
+  <title>المصطبة</title>
 <script id="mastaba-device-route-v1077">(function(){
   var ua=navigator.userAgent||"";
   var uaDataMobile=!!(navigator.userAgentData&&navigator.userAgentData.mobile===true);
@@ -7223,7 +7223,7 @@ function rankBadge(rank,total){
 }
 function matchStarted(f){return f.phase==='live'||f.phase==='final'||Date.now()>=new Date(f.kickoff).getTime()}
 function riskyFor(uid,f){if(!matchStarted(f))return false;const active=activeUsers();const picks=active.map(u=>getOfficial(u.id,f.id)).filter(p=>p&&p.touched===true);if(picks.length<active.length)return false;const counts={H:0,D:0,A:0};picks.forEach(p=>counts[outcome(p.home,p.away)]++);const mine=getOfficial(uid,f.id);if(!mine)return false;const mineO=outcome(mine.home,mine.away),max=Math.max(...Object.values(counts));return counts[mineO]===1||(max>=5&&counts[mineO]<max)}
-function scorePrediction(uid,f){const p=getOfficial(uid,f.id),r=f.result;if(!p||p.touched!==true||!r||f.phase!=='final')return{total:0,base:0,risky:0,double:false,parts:[]};const po=outcome(p.home,p.away),ao=outcome(r.home,r.away),exact=Number(p.home)===Number(r.home)&&Number(p.away)===Number(r.away);let base=0;const parts=[];if(po===ao){const pts=(ao==='D'&&!exact)?8:5;base+=pts;parts.push([L(ao==='D'&&!exact?'Correct Draw, Wrong Score':'Correct Outcome',ao==='D'&&!exact?'تعادل صحيح والسكور غلط':'النتيجة الصحيحة'),pts])}if((Number(p.home)-Number(p.away))===(Number(r.home)-Number(r.away))){base+=3;parts.push([L('Correct Goal Difference','فارق الأهداف الصحيح'),3])}if(Number(p.home)===Number(r.home)){base+=1;parts.push([L('Correct Home Team Goals','أهداف صاحب الأرض الصحيحة'),1])}if(Number(p.away)===Number(r.away)){base+=1;parts.push([L('Correct Away Team Goals','أهداف الضيف الصحيحة'),1])}if(exact){base+=5;parts.push([L('Exact Score Bonus','بونص النتيجة بالظبط'),5])}if(p.firstTeam===r.firstTeam){base+=2;parts.push([L('First Team to Score','أول فريق يسجل'),2])}if(p.firstScorer===r.firstScorer){base+=3;parts.push([L('First Goalscorer','أول لاعب يسجل'),3])}let risky=0;if(riskyFor(uid,f)&&po===ao){risky=10;parts.push([L('Risky Prediction','التوقع المجازف'),10])}const doubled=!!p.double;const preDouble=base+risky;let total=doubled?preDouble*2:preDouble;if(doubled&&preDouble)parts.push([L('Double Points','دبل بوينتس'),preDouble]);return{total,base,risky,double:doubled,parts,exact,correctOutcome:po===ao,correctGD:(Number(p.home)-Number(p.away))===(Number(r.home)-Number(r.away)),teamGoals:(Number(p.home)===Number(r.home)?1:0)+(Number(p.away)===Number(r.away)?1:0)}}
+function scorePrediction(uid,f){const p=getOfficial(uid,f.id),r=f.result;if(!p||p.touched!==true||!r||f.phase!=='final')return{total:0,base:0,risky:0,double:false,parts:[]};const po=outcome(p.home,p.away),ao=outcome(r.home,r.away),exact=Number(p.home)===Number(r.home)&&Number(p.away)===Number(r.away);let base=0;const parts=[];if(po===ao){const pts=5;base+=pts;parts.push([L('Correct Outcome','النتيجة الصحيحة'),pts])}if((Number(p.home)-Number(p.away))===(Number(r.home)-Number(r.away))){base+=3;parts.push([L('Correct Goal Difference','فارق الأهداف الصحيح'),3])}if(Number(p.home)===Number(r.home)){base+=1;parts.push([L('Correct Home Team Goals','أهداف صاحب الأرض الصحيحة'),1])}if(Number(p.away)===Number(r.away)){base+=1;parts.push([L('Correct Away Team Goals','أهداف الضيف الصحيحة'),1])}if(exact){base+=5;parts.push([L('Exact Score Bonus','بونص النتيجة بالظبط'),5])}if(p.firstTeam===r.firstTeam){base+=2;parts.push([L('First Team to Score','أول فريق يسجل'),2])}if(p.firstScorer===r.firstScorer){base+=3;parts.push([L('First Goalscorer','أول لاعب يسجل'),3])}let risky=0;if(riskyFor(uid,f)&&po===ao){risky=10;parts.push([L('Risky Prediction','التوقع المجازف'),10])}const doubled=!!p.double;const preDouble=base+risky;let total=doubled?preDouble*2:preDouble;if(doubled&&preDouble)parts.push([L('Double Points','دبل بوينتس'),preDouble]);return{total,base,risky,double:doubled,parts,exact,correctOutcome:po===ao,correctGD:(Number(p.home)-Number(p.away))===(Number(r.home)-Number(r.away)),teamGoals:(Number(p.home)===Number(r.home)?1:0)+(Number(p.away)===Number(r.away)?1:0)}}
 function perfectRound(uid){if(state.fixtures.some(f=>f.phase!=='final'))return 0;return state.fixtures.every(f=>{const p=getOfficial(uid,f.id);return p&&outcome(p.home,p.away)===outcome(f.result.home,f.result.away)})?15:0}
 function currentWeekPoints(uid){return state.fixtures.reduce((s,f)=>s+scorePrediction(uid,f).total,0)+perfectRound(uid)}
 function weekStats(uid){let exact=0,gd=0,outcomes=0,teamGoals=0;state.fixtures.forEach(f=>{const s=scorePrediction(uid,f);if(f.phase!=='final')return;if(s.exact)exact++;if(s.correctGD)gd++;if(s.correctOutcome)outcomes++;teamGoals+=s.teamGoals||0});return{exact,gd,outcomes,teamGoals,total:currentWeekPoints(uid)}}
@@ -7528,8 +7528,8 @@ function detailedTable(arr){return`<div class="table-wrap"><table class="stats-t
 window.setRankMode=m=>{state.selectedRankMode=m;save();render()};window.setRankWeek=v=>{state.selectedRankWeek=Number(v);save();render()};window.setStatsView=v=>{state.statsView=v;save();render()};function paintAvatars(){state.users.forEach(u=>{renderAvatar($(`#lb-${u.id}`),u);renderAvatar($(`#dlb-${u.id}`),u)})}
 
 function renderRules(){const rows=[
- [L('Correct Winner / Outcome','الفائز / النتيجة الصحيحة'),'5'],[L('Correct Draw, Wrong Score','تعادل صحيح لكن النتيجة مش بالظبط'),'8'],[L('Correct Goal Difference','فارق الأهداف الصحيح'),'3'],[L('Correct Home Team Goals','أهداف صاحب الأرض الصحيحة'),'1'],[L('Correct Away Team Goals','أهداف الضيف الصحيحة'),'1'],[L('Exact Score Bonus','بونص النتيجة بالظبط'),'5'],[L('First Team to Score','أول فريق يسجل'),'2'],[L('First Goalscorer','أول لاعب يسجل'),'3']
- ];$('#view-rules').innerHTML=`<h1 class="page-title">${L('Prediction Rules','قواعد التوقعات')}</h1><p class="page-sub">${L('The full المصطبة scoring system and Gameweek rules.','نظام نقاط المصطبة كامل وقواعد كل جولة.')}</p><div class="rules-grid"><div class="rule-card"><h3>${L('Match Scoring','نقاط الماتش')}</h3><table class="scoring-table"><thead><tr><th>${L('Rule','القاعدة')}</th><th>${L('Points','النقاط')}</th></tr></thead><tbody>${rows.map(r=>`<tr><td>${r[0]}</td><td><span class="points-pill">+${r[1]}</span></td></tr>`).join('')}</tbody></table><p style="margin-top:12px">${L('A perfect match prediction is worth 20 base points. A correct non-exact draw receives 8 outcome points instead of the normal 5, and still receives the 3-point goal-difference bonus because every draw has a goal difference of zero.','التوقع الكامل للماتش يساوي 20 نقطة أساسية. لو توقعت تعادل صح بس السكور غلط، بتاخد 8 نقاط للنتيجة بدل 5، وكمان 3 نقاط لفارق الأهداف لأن كل تعادل فارق أهدافه صفر.')}</p></div><div class="rule-card"><h3>${L('Double Points','دبل بوينتس')}</h3><p>${L('You may activate Double Points on one match per Gameweek. It doubles the full match score, including any Risky Prediction bonus. A perfect 20-point match can become 40, and a +10 Risky bonus on that doubled match is doubled too. Once selected, Double Points is disabled on every other match unless you move it before submitting.','تقدر تفعّل الدبل بوينتس على ماتش واحد بس في كل جولة. بيضاعف إجمالي نقاط الماتش، بما فيها بونص المجازفة. يعني 20 ممكن تبقى 40، ولو كسبت +10 مجازفة في نفس الماتش بالدبل فهي كمان بتتضاعف. أول ما تختاره، الدبل بيتقفل في باقي الماتشات إلا لو غيرته قبل الإرسال.')}</p></div><div class="rule-card"><h3>${L('Risky Prediction Bonus','بونص التوقع المجازف')}</h3><p>${L('If at least five of seven users choose one outcome, the minority outcome becomes risky. An outcome chosen by only one user is also risky. If that minority outcome is correct, the user earns +10. If Double Points is active on that match, the +10 Risky bonus is included before doubling.','لو 5 من 7 أو أكتر اختاروا نفس النتيجة، الاختيار الأقلية يبقى مجازفة. ولو شخص واحد بس اختار نتيجة مختلفة فهي كمان مجازفة. لو الاختيار المختلف طلع صح، ياخد +10. ولو الدبل متفعل على نفس الماتش، بونص المجازفة +10 بيتضاف قبل المضاعفة وبيتضاعف مع باقي نقاط الماتش.')}</p></div><div class="rule-card"><h3>${L('Perfect Gameweek','الجولة الكاملة')}</h3><p>${L('Get every match outcome in the Gameweek correct and receive a +15 bonus. Exact scores are not required for this bonus.','لو جبت نتيجة كل الماتشات في الجولة صح، تاخد +15. مش لازم السكور يكون بالظبط للبونص ده.')}</p></div><div class="rule-card"><h3>${L('Goalscorer Rules','قواعد أول هداف')}</h3><p>${L('For 0–0, No Team to Score and No Goalscorer are selected automatically and can earn their bonuses. Own goals do not count as First Goalscorer. If you predict only one team to score, the scorer list is restricted to that team.','لو توقعت 0–0، لا يوجد فريق يسجل ولا يوجد هداف بيتحددوا تلقائيًا ويقدروا يكسبوا البونص. الأهداف العكسية لا تُحسب كأول هداف. ولو توقعت فريق واحد بس يسجل، قائمة الهدافين بتبقى من الفريق ده بس.')}</p></div><div class="rule-card"><h3>${L('Deadline & Privacy','الموعد والخصوصية')}</h3><p>${L('The entire Gameweek locks one minute before the first selected match kicks off. A saved Draft becomes the official prediction if the deadline passes. Other users’ predictions stay hidden until each match kicks off. All kickoff times are shown in the user’s selected timezone.','الجولة كلها بتتقفل قبل بداية أول ماتش مختار بدقيقة. لو عندك Draft محفوظ وعدّى الموعد، بيتحول لتوقعك الرسمي. توقعات باقي الناس بتفضل مخفية لحد بداية كل ماتش. كل المواعيد بتظهر حسب المنطقة الزمنية للمستخدم.')}</p></div></div>`}
+ [L('Correct Winner / Outcome','الفائز / النتيجة الصحيحة'),'5'],[L('Correct Goal Difference','فارق الأهداف الصحيح'),'3'],[L('Correct Home Team Goals','أهداف صاحب الأرض الصحيحة'),'1'],[L('Correct Away Team Goals','أهداف الضيف الصحيحة'),'1'],[L('Exact Score Bonus','بونص النتيجة بالظبط'),'5'],[L('First Team to Score','أول فريق يسجل'),'2'],[L('First Goalscorer','أول لاعب يسجل'),'3']
+ ];$('#view-rules').innerHTML=`<h1 class="page-title">${L('Prediction Rules','قواعد التوقعات')}</h1><p class="page-sub">${L('The full المصطبة scoring system and Gameweek rules.','نظام نقاط المصطبة كامل وقواعد كل جولة.')}</p><div class="rules-grid"><div class="rule-card"><h3>${L('Match Scoring','نقاط الماتش')}</h3><table class="scoring-table"><thead><tr><th>${L('Rule','القاعدة')}</th><th>${L('Points','النقاط')}</th></tr></thead><tbody>${rows.map(r=>`<tr><td>${r[0]}</td><td><span class="points-pill">+${r[1]}</span></td></tr>`).join('')}</tbody></table><p style="margin-top:12px">${L('A perfect match prediction is worth 20 base points. Draws use the exact same scoring formula as every other result: a correct non-exact draw naturally earns 8 scoreline points — 5 for the correct outcome plus 3 for the correct goal difference of zero.','التوقع الكامل للماتش يساوي 20 نقطة أساسية. التعادل بيتحسب بنفس معادلة أي نتيجة: التعادل الصحيح غير المطابق ياخد طبيعيًا 8 نقاط للسكور — 5 للنتيجة الصحيحة + 3 لفارق الأهداف صفر.')}</p></div><div class="rule-card"><h3>${L('Double Points','دبل بوينتس')}</h3><p>${L('You may activate Double Points on one match per Gameweek. It doubles the full match score, including any Risky Prediction bonus. A perfect 20-point match can become 40, and a +10 Risky bonus on that doubled match is doubled too. Once selected, Double Points is disabled on every other match unless you move it before submitting.','تقدر تفعّل الدبل بوينتس على ماتش واحد بس في كل جولة. بيضاعف إجمالي نقاط الماتش، بما فيها بونص المجازفة. يعني 20 ممكن تبقى 40، ولو كسبت +10 مجازفة في نفس الماتش بالدبل فهي كمان بتتضاعف. أول ما تختاره، الدبل بيتقفل في باقي الماتشات إلا لو غيرته قبل الإرسال.')}</p></div><div class="rule-card"><h3>${L('Risky Prediction Bonus','بونص التوقع المجازف')}</h3><p>${L('If at least five of seven users choose one outcome, the minority outcome becomes risky. An outcome chosen by only one user is also risky. If that minority outcome is correct, the user earns +10. If Double Points is active on that match, the +10 Risky bonus is included before doubling.','لو 5 من 7 أو أكتر اختاروا نفس النتيجة، الاختيار الأقلية يبقى مجازفة. ولو شخص واحد بس اختار نتيجة مختلفة فهي كمان مجازفة. لو الاختيار المختلف طلع صح، ياخد +10. ولو الدبل متفعل على نفس الماتش، بونص المجازفة +10 بيتضاف قبل المضاعفة وبيتضاعف مع باقي نقاط الماتش.')}</p></div><div class="rule-card"><h3>${L('Perfect Gameweek','الجولة الكاملة')}</h3><p>${L('Get every match outcome in the Gameweek correct and receive a +15 bonus. Exact scores are not required for this bonus.','لو جبت نتيجة كل الماتشات في الجولة صح، تاخد +15. مش لازم السكور يكون بالظبط للبونص ده.')}</p></div><div class="rule-card"><h3>${L('Goalscorer Rules','قواعد أول هداف')}</h3><p>${L('For 0–0, No Team to Score and No Goalscorer are selected automatically and can earn their bonuses. Own goals do not count as First Goalscorer. If you predict only one team to score, the scorer list is restricted to that team.','لو توقعت 0–0، لا يوجد فريق يسجل ولا يوجد هداف بيتحددوا تلقائيًا ويقدروا يكسبوا البونص. الأهداف العكسية لا تُحسب كأول هداف. ولو توقعت فريق واحد بس يسجل، قائمة الهدافين بتبقى من الفريق ده بس.')}</p></div><div class="rule-card"><h3>${L('Deadline & Privacy','الموعد والخصوصية')}</h3><p>${L('The entire Gameweek locks one minute before the first selected match kicks off. A saved Draft becomes the official prediction if the deadline passes. Other users’ predictions stay hidden until each match kicks off. All kickoff times are shown in the user’s selected timezone.','الجولة كلها بتتقفل قبل بداية أول ماتش مختار بدقيقة. لو عندك Draft محفوظ وعدّى الموعد، بيتحول لتوقعك الرسمي. توقعات باقي الناس بتفضل مخفية لحد بداية كل ماتش. كل المواعيد بتظهر حسب المنطقة الزمنية للمستخدم.')}</p></div></div>`}
 
 
 function profileThemeKeyV1051(u=currentUser()){return VISUAL_THEMES[u?.theme]?u.theme:(VISUAL_THEMES[u?.club]?u.club:'mastaba')}
@@ -7915,7 +7915,7 @@ function projectedPointsForV18(uid,f,past=false){
   const p=v18Prediction(uid,f.id,false);if(!p||!f.liveScore)return 0;
   const fake={...f,phase:'final',result:{home:f.liveScore.home,away:f.liveScore.away,firstTeam:f.liveFirstTeam||'__unknown__',firstScorer:f.liveFirstScorer||'__unknown__'}};
   const po=outcome(p.home,p.away),ao=outcome(fake.result.home,fake.result.away),exact=Number(p.home)===Number(fake.result.home)&&Number(p.away)===Number(fake.result.away);
-  let pts=0;if(po===ao)pts+=(ao==='D'&&!exact?8:5);if(Number(p.home)-Number(p.away)===Number(fake.result.home)-Number(fake.result.away))pts+=3;if(Number(p.home)===Number(fake.result.home))pts+=1;if(Number(p.away)===Number(fake.result.away))pts+=1;if(exact)pts+=5;
+  let pts=0;if(po===ao)pts+=5;if(Number(p.home)-Number(p.away)===Number(fake.result.home)-Number(fake.result.away))pts+=3;if(Number(p.home)===Number(fake.result.home))pts+=1;if(Number(p.away)===Number(fake.result.away))pts+=1;if(exact)pts+=5;
   if(p.double)pts*=2;return pts;
 }
 function liveSwingHTMLV1018(f,mid,past){
@@ -7926,7 +7926,7 @@ function liveSwingHTMLV1018(f,mid,past){
 }
 function scoreRouteValueV18(p,h,a){
   const po=outcome(p.home,p.away),ao=outcome(h,a),exact=Number(p.home)===h&&Number(p.away)===a;let pts=0;
-  if(po===ao)pts+=(ao==='D'&&!exact?8:5);
+  if(po===ao)pts+=5;
   if(Number(p.home)-Number(p.away)===h-a)pts+=3;
   if(Number(p.home)===h)pts+=1;if(Number(p.away)===a)pts+=1;
   if(exact)pts+=5;
@@ -8736,11 +8736,11 @@ function projectedPointsNowV20(uid,f,past=false){
   const p=getOfficial(uid,f.id)||getWorking(uid,f.id);if(!p||!f.liveScore)return 0;
   const h=Number(f.liveScore.home||0),a=Number(f.liveScore.away||0),po=outcome(p.home,p.away),ao=outcome(h,a);
   const exact=Number(p.home)===h&&Number(p.away)===a;let base=0;
-  if(po===ao)base+=(ao==='D'&&!exact?15:10);
-  if(Number(p.home)===h)base+=5;if(Number(p.away)===a)base+=5;
-  if(Number(p.home)-Number(p.away)===h-a)base+=5;if(exact)base+=5;
-  if(f.liveFirstTeam&&p.firstTeam===f.liveFirstTeam)base+=5;
-  if(f.liveFirstScorer&&p.firstScorer===f.liveFirstScorer)base+=10;
+  if(po===ao)base+=5;
+  if(Number(p.home)===h)base+=1;if(Number(p.away)===a)base+=1;
+  if(Number(p.home)-Number(p.away)===h-a)base+=3;if(exact)base+=5;
+  if(f.liveFirstTeam&&p.firstTeam===f.liveFirstTeam)base+=2;
+  if(f.liveFirstScorer&&p.firstScorer===f.liveFirstScorer)base+=3;
   return p.double?base*2:base;
 }
 function pluralGoalInstructionV20(team,count){
@@ -8768,7 +8768,7 @@ function bestCaseExplanationV20(f,p,best){
 }
 function consensusHTMLV1020(f,c,scope){
   const items=[[TEAM[f.home].short,c.H],[L('Draw','تعادل'),c.D],[TEAM[f.away].short,c.A]];
-  return`<section class="insight-section-v20"><div class="insight-kicker-v20">${L('How People Picked','الناس توقعت إيه')}</div><h4>${scope==='global'?L('Global Picks','توقعات الكل'):L('League Picks','توقعات الدوري')}</h4>${c.total===0?`<div class="insight-caption-v20">${L('Picks appear here after kickoff.','التوقعات بتظهر هنا بعد بداية الماتش.')}</div>`:items.map(([label,pct])=>`<div class="insight-pick-row-v20"><b>${label}</b><div class="insight-pick-track-v20"><div class="insight-pick-fill-v20" style="width:${pct}%"></div></div><strong>${pct}%</strong></div>`).join('')}<div class="insight-caption-v20">${scope==='league'?L(`${c.total||0} league picks included.`,`${c.total||0} توقع من الدوري داخل الحساب.`):L('Global view shows platform-wide prediction percentages in production; this sandbox uses a stable preview sample.','العرض العام في النسخة النهائية هيعرض نسب كل المنصة؛ الساندبوكس بيستخدم عينة ثابتة للمعاينة.')}</div></section>`;
+  return`<section class="insight-section-v20"><div class="insight-kicker-v20">${L('How People Picked','الناس توقعت إيه')}</div><h4>${scope==='global'?L('Global Picks','توقعات الكل'):L('League Picks','توقعات الدوري')}</h4>${c.total===0?`<div class="insight-caption-v20">${L('Picks appear here after kickoff.','التوقعات بتظهر هنا بعد بداية الماتش.')}</div>`:items.map(([label,pct])=>`<div class="insight-pick-row-v20"><b>${label}</b><div class="insight-pick-track-v20"><div class="insight-pick-fill-v20" style="width:${pct}%"></div></div><strong>${pct}%</strong></div>`).join('')}<div class="insight-caption-v20">${scope==='league'?L(`${c.total||0} league picks included.`,`${c.total||0} توقع من الدوري داخل الحساب.`):L('Global view shows the real platform-wide submitted prediction percentages.','العرض العام بيعرض النسب الحقيقية لتوقعات كل المستخدمين المرسلة على المنصة.')}</div></section>`;
 }
 function liveSwingHTMLV1020(f,mid,past){
   const league=leagueById(v18LeagueId()),rows=(league?.members||[]).map(uid=>({uid,pts:projectedPointsNowV20(uid,f,past)})).sort((a,b)=>b.pts-a.pts).slice(0,7);
@@ -12593,7 +12593,7 @@ function wcAvailableV1043(uid,type){
   if(selected&&selected!==type)return{ok:false,reason:'other_card',other:selected,half,rec};
   if(type==='redemption'){
     const rank=rawPrivateRankV1043(uid),ref=redemptionReferenceV1043(uid,half);
-    if(rank<6)return{ok:false,reason:'rank',rank,half,rec,ref};
+    if(rank!==6&&rank!==7)return{ok:false,reason:'rank',rank,half,rec,ref};
     if(!ref)return{ok:false,reason:'history',rank,half,rec,ref};
     return{ok:true,reason:'available',rank,half,rec,ref};
   }
@@ -12815,7 +12815,7 @@ function cardMetaV1043(type){
   return{
     steal:{icon:'⇄',title:'STEAL',copy:L('Choose one player. Once confirmed, both players are locked into the Steal and it cannot be cancelled.','اختار لاعب. بعد التأكيد، الاتنين بيتقفلوا في الـ Steal ومينفعش يتلغي.')},
     surge:{icon:'⇈',title:'SURGE',copy:L('One use per season. x1.5 your whole Gameweek. You cannot be stolen from, Double Points is disabled, and Rivalry does not stack.','استخدام واحد في الموسم. x1.5 على الجولة كلها. محدش يقدر يعمل عليك Steal، والدبل بيتقفل، وRivalry ما بيتراكمش.')},
-    redemption:{icon:'↻',title:'REDEMPTION',copy:L('One use per season. 6th/7th only. Beat your lowest GW score and that lowest score doubles.','استخدام واحد في الموسم. للسادس والسابع فقط. لو تعديت أقل جولة ليك، أقل جولة تتضاعف.')}
+    redemption:{icon:'↻',title:'REDEMPTION',copy:L('One use per season. 6th/7th only. If this Gameweek beats your lowest completed score from the season, that lowest Gameweek is replaced by the Redemption Gameweek score.','استخدام واحد في الموسم. للسادس والسابع فقط. لو الجولة دي تعدّت أقل جولة مكتملة ليك في الموسم، أقل جولة بتتبدل بنقاط الجولة دي.')}
   }[type];
 }
 function cardStateV1043(type){
@@ -12826,7 +12826,7 @@ function cardStateV1043(type){
   if(a.reason==='other_card'){
     if(type==='redemption'){
       const rank=rawPrivateRankV1043(state.currentUser),ref=redemptionReferenceV1043(state.currentUser,a.half);
-      if(rank<6)return{label:L('6th/7th only','للسادس والسابع فقط'),button:L('Locked','مقفول'),disabled:true};
+      if(rank!==6&&rank!==7)return{label:L('6th/7th only','للسادس والسابع فقط'),button:L('Locked','مقفول'),disabled:true};
       if(!ref)return{label:L('Needs earlier GW','محتاج جولة سابقة'),button:L('Locked','مقفول'),disabled:true};
     }
     return{label:L('Switch chip','غيّر الكارت'),button:L('Switch','غيّر'),disabled:false,switchable:true};
@@ -12849,7 +12849,7 @@ function selectedChipExplanationHTMLV1046(){
   if(choice==='steal'){
     body=L(`You selected ${userName(p.targetId)}. Your Steal is confirmed and exclusive: the higher Gameweek score takes both players’ points.`,`اخترت ${userName(p.targetId)}. الـ Steal اتأكد وبقى حصري بينكم: الأعلى في نقاط الجولة ياخد نقاط الاتنين.`);
   }else if(choice==='redemption'){
-    body=L(`Your lowest score is ${p.referenceScore} in Gameweek ${p.referenceWeek}. If this Gameweek finishes above ${p.referenceScore}, that old ${p.referenceScore} doubles to ${Number(p.referenceScore)*2}.`,`أقل جولة ليك هي ${p.referenceScore} نقطة في الجولة ${p.referenceWeek}. لو الجولة الحالية خلصت أعلى من ${p.referenceScore}، الـ ${p.referenceScore} القديمة تتضاعف لـ ${Number(p.referenceScore)*2}.`);
+    body=L(`Your lowest completed score is ${p.referenceScore} in Gameweek ${p.referenceWeek}. If this Gameweek finishes above ${p.referenceScore}, GW${p.referenceWeek} will be replaced by this Gameweek's score.`,`أقل جولة مكتملة ليك هي ${p.referenceScore} نقطة في الجولة ${p.referenceWeek}. لو الجولة الحالية خلصت أعلى، ج${p.referenceWeek} هتتبدل بنقاط الجولة الحالية.`);
   }
   return`<div class="wc-selection-summary-v1046"><span class="wc-summary-kicker-v1046">${L('Selected for this Gameweek','مختار للجولة دي')}</span><strong>${title}</strong><p>${body}</p></div>`;
 }
@@ -12944,7 +12944,7 @@ window.openWildcardV1043=function(type){
   }
   if(type==='redemption'){
     const ref=pending?{week:pending.referenceWeek,score:pending.referenceScore}:a.ref;
-    $('#modalRoot').innerHTML=`<div class="modal-backdrop" onclick="if(event.target===this)closeModal()"><div class="modal confirmation-modal"><div class="confirm-symbol" style="background:var(--theme-action);color:var(--theme-action-text)">↻</div><h3>REDEMPTION</h3><p>${L(`You are currently ${rawPrivateRankV1043(state.currentUser)}th. If activated, beat your worst score from this half of the season and that worst score will double.`,`أنت حاليًا في المركز ${rawPrivateRankV1043(state.currentUser)}. لو فعلته وجبت في الجولة دي أعلى من أسوأ جولة ليك في نص الموسم، أسوأ جولة هتتضاعف.`)}</p><div class="wc-modal-note-v1043">${L(`Current worst: Gameweek ${ref.week} · ${ref.score} pts. If this Gameweek is higher, that lowest Gameweek doubles.`,`أسوأ جولة حاليًا: الجولة ${ref.week} · ${ref.score} نقطة. لو الجولة دي أعلى، أقل جولة ليك هتتضاعف.`)}</div><div class="confirm-actions"><button class="btn btn-ghost" onclick="closeModal()">${L('Cancel','إلغاء')}</button>${pending?`<button class="btn btn-danger" onclick="cancelWildcardV1043('redemption')">${L('Remove Card','إلغاء الكارت')}</button>`:`<button class="btn btn-primary" onclick="armRedemptionV1043()">${L('Activate Redemption','فعّل Redemption')}</button>`}</div></div></div>`;
+    $('#modalRoot').innerHTML=`<div class="modal-backdrop" onclick="if(event.target===this)closeModal()"><div class="modal confirmation-modal"><div class="confirm-symbol" style="background:var(--theme-action);color:var(--theme-action-text)">↻</div><h3>REDEMPTION</h3><p>${L(`You are currently ${rawPrivateRankV1043(state.currentUser)}th. If activated, beat your lowest completed score from this season and that Gameweek will be replaced by your Redemption Gameweek score.`,`أنت حاليًا في المركز ${rawPrivateRankV1043(state.currentUser)}. لو فعلته وجبت في الجولة دي أعلى من أقل جولة مكتملة ليك في الموسم، الجولة الأقل هتتبدل بنقاط جولة Redemption.`)}</p><div class="wc-modal-note-v1043">${L(`Current season low: Gameweek ${ref.week} · ${ref.score} pts. If this Gameweek is higher, GW${ref.week} is replaced by this Gameweek's score.`,`أقل جولة في الموسم حاليًا: الجولة ${ref.week} · ${ref.score} نقطة. لو الجولة دي أعلى، ج${ref.week} هتتبدل بنقاط الجولة دي.`)}</div><div class="confirm-actions"><button class="btn btn-ghost" onclick="closeModal()">${L('Cancel','إلغاء')}</button>${pending?`<button class="btn btn-danger" onclick="cancelWildcardV1043('redemption')">${L('Remove Card','إلغاء الكارت')}</button>`:`<button class="btn btn-primary" onclick="armRedemptionV1043()">${L('Activate Redemption','فعّل Redemption')}</button>`}</div></div></div>`;
     return;
   }
   const members=privateMembersV1043().filter(uid=>uid!==state.currentUser);
@@ -13009,9 +13009,9 @@ function stealEventHTMLV1043(e){
 function redemptionEventHTMLV1043(e){
   const o=redemptionOutcomeV1043(e),final=allFinalV1043(),active=o.active;
   const text=active
-    ?L(`${userName(e.actorId)} has cleared the condition: ${o.current} is above ${o.reference}. GW${o.referenceWeek} doubles from ${o.reference} to ${o.doubled} (+${o.gain}).`,`${userName(e.actorId)} حقق الشرط: ${o.current} أعلى من ${o.reference}. ج${o.referenceWeek} تتضاعف من ${o.reference} إلى ${o.doubled} (+${o.gain}).`)
-    :L(`${userName(e.actorId)} needs to finish above ${o.reference} points. If successful, GW${o.referenceWeek} doubles from ${o.reference} to ${o.reference*2}.`,`${userName(e.actorId)} محتاج يخلص أعلى من ${o.reference} نقطة. لو نجح، ج${o.referenceWeek} تتضاعف من ${o.reference} إلى ${o.reference*2}.`);
-  return`<article class="wc-event-v1043 redemption"><div class="wc-event-head-v1043"><div class="wc-event-kicker-v1043">REDEMPTION</div><span>${L(`Activated from ${e.rankAtActivation}th`,`اتفعّل من المركز ${e.rankAtActivation}`)}</span></div><div class="wc-event-body-v1043"><div class="wc-redemption-line-v1043"><div class="wc-redemption-score-v1043"><small>${L(`LOWEST GW · GW${o.referenceWeek}`,`أقل جولة · ج${o.referenceWeek}`)}</small><b>${o.reference}</b></div><div class="wc-arrow-v1043">×2</div><div class="wc-redemption-score-v1043"><small>${L('IF UNLOCKED','لو اتحقق الشرط')}</small><b>${o.doubled}</b></div></div><div class="wc-modal-note-v1043">${L(`Current Gameweek: ${o.current} pts · must finish above ${o.reference}.`,`الجولة الحالية: ${o.current} نقطة · لازم تخلص أعلى من ${o.reference}.`)}</div></div>${statusBarV1043(final?L('FINAL REDEMPTION','REDEMPTION النهائي'):L('COMEBACK TRACKER','متابعة العودة'),text,active?`+${o.gain}`:'—')}</article>`;
+    ?L(`${userName(e.actorId)} has cleared the condition: ${o.current} is above ${o.reference}. GW${o.referenceWeek} is replaced from ${o.reference} to ${o.doubled} (+${o.gain}).`,`${userName(e.actorId)} حقق الشرط: ${o.current} أعلى من ${o.reference}. ج${o.referenceWeek} تتضاعف من ${o.reference} إلى ${o.doubled} (+${o.gain}).`)
+    :L(`${userName(e.actorId)} needs to finish above ${o.reference} points. If successful, GW${o.referenceWeek} is replaced by this Gameweek's score.`,`${userName(e.actorId)} محتاج يخلص أعلى من ${o.reference} نقطة. لو نجح، ج${o.referenceWeek} تتضاعف من ${o.reference} إلى ${o.reference*2}.`);
+  return`<article class="wc-event-v1043 redemption"><div class="wc-event-head-v1043"><div class="wc-event-kicker-v1043">REDEMPTION</div><span>${L(`Activated from ${e.rankAtActivation}th`,`اتفعّل من المركز ${e.rankAtActivation}`)}</span></div><div class="wc-event-body-v1043"><div class="wc-redemption-line-v1043"><div class="wc-redemption-score-v1043"><small>${L(`LOWEST GW · GW${o.referenceWeek}`,`أقل جولة · ج${o.referenceWeek}`)}</small><b>${o.reference}</b></div><div class="wc-arrow-v1043">→</div><div class="wc-redemption-score-v1043"><small>${L('IF UNLOCKED','لو اتحقق الشرط')}</small><b>${o.doubled}</b></div></div><div class="wc-modal-note-v1043">${L(`Current Gameweek: ${o.current} pts · must finish above ${o.reference}.`,`الجولة الحالية: ${o.current} نقطة · لازم تخلص أعلى من ${o.reference}.`)}</div></div>${statusBarV1043(final?L('FINAL REDEMPTION','REDEMPTION النهائي'):L('COMEBACK TRACKER','متابعة العودة'),text,active?`+${o.gain}`:'—')}</article>`;
 }
 
 
@@ -13051,7 +13051,7 @@ function personalAlertsHTMLV1043(){
       }
     });
     redemptionEventsV1043().forEach(e=>{
-      if(e.actorId===uid)alerts.push(`<div class="wc-personal-alert-v1043" style="--alert:#34b982">↻ <strong>REDEMPTION</strong> · ${L(`Beat ${e.referenceScore} this Gameweek and GW${e.referenceWeek} doubles to ${Number(e.referenceScore)*2}.`,`عدّي ${e.referenceScore} نقطة الجولة دي وج${e.referenceWeek} تتضاعف لـ ${Number(e.referenceScore)*2}.`)}</div>`);
+      if(e.actorId===uid)alerts.push(`<div class="wc-personal-alert-v1043" style="--alert:#34b982">↻ <strong>REDEMPTION</strong> · ${L(`Beat ${e.referenceScore} this Gameweek and GW${e.referenceWeek} is replaced by this Gameweek's score.`,`عدّي ${e.referenceScore} نقطة الجولة دي وج${e.referenceWeek} هتتبدل بنقاط الجولة دي.`)}</div>`);
     });
     surgeEventsV1051().forEach(e=>{if(e.actorId===uid)alerts.push(`<div class="wc-personal-alert-v1043" style="--alert:#3478df">⇈ <strong>SURGE</strong> · ${L('Your whole Gameweek is x1.5. You are protected from Steal and Double Points is disabled.','الجولة كلها x1.5. أنت محمي من Steal وDouble Points مقفول.')}</div>`)});
   }
@@ -13112,7 +13112,7 @@ renderRules=function(){
     <div class="rule-card wc-rule-card-v1043"><h3>SURGE · x1.5</h3><p>${L('Surge can be used once per season and multiplies your whole Gameweek by x1.5 in the private Mastaba League. While selected, you cannot be stolen from and you cannot use Double Points. Surge does not stack with an automatic Rivalry Match: a Rivalry fixture remains x1.5, never x2.25.','Surge له استخدام واحد في الموسم وبيضرب الجولة كلها x1.5 في دوري المصطبة الخاص. طول ما هو مختار، محدش يقدر يعمل عليك Steal ومينفعش تستخدم Double Points. Surge ما بيتراكمش مع Rivalry: ماتش Rivalry يفضل x1.5 ومش يبقى x2.25.')}</p></div>
     <div class="rule-card wc-rule-card-v1043"><h3>${L('RIVALRY MATCH · x1.5','ماتش RIVALRY · x1.5')}</h3><p>${L('Rivalry is automatic, not a Power Card. When supported clubs belonging to Mastaba members face each other, only the owners of those clubs receive x1.5 on that fixture in the private Mastaba League. Everyone else scores the match normally. If several members support the same club, each valid owner-v-owner pairing is shown separately, but each participant still receives only one x1.5 multiplier on that fixture — never x2.25.','Rivalry تلقائي ومش كارت. لما ناديين من أندية أعضاء المصطبة يلعبوا ضد بعض، أصحاب الناديين فقط بياخدوا x1.5 على الماتش داخل دوري المصطبة الخاص. باقي الناس نقاطهم عادية. لو أكتر من عضو بيشجع نفس النادي، كل مواجهة صحيحة بين مالكين بتظهر لوحدها، لكن كل لاعب بياخد x1.5 مرة واحدة فقط على نفس الماتش ومش x2.25.')}</p></div>
     <div class="rule-card wc-rule-card-v1043"><h3>${L('Rivalry Clubs','أندية Rivalry')}</h3><p>${L('Ayooti: Barcelona + Inter · Mahdy: AC Milan + Al Ahly · Mohamed Saad: Arsenal + Al Ahly · Ramy Saad: Liverpool + Al Ahly · Radwan: Manchester United + Al Ahly · Manar: Real Madrid + Zamalek · 3alawy: Real Madrid + Al Ahly.','عيوطي: برشلونة + إنتر · الدوود: ميلان + الأهلي · سعد: أرسنال + الأهلي · رامي: ليفربول + الأهلي · رضوان: مانشستر يونايتد + الأهلي · منار: ريال مدريد + الزمالك · علاوي: ريال مدريد + الأهلي.')}</p></div>
-    <div class="rule-card wc-rule-card-v1043"><h3>REDEMPTION</h3><p>${L('Only 6th and 7th place can activate Redemption. Mastaba freezes your lowest completed Gameweek score from the current half-season. If your Redemption Gameweek finishes higher than that score, the old lowest score doubles. Redemption has one use for the entire season.','فقط المركز السادس والسابع يقدروا يفعلوا Redemption. المصطبة بتثبت أقل جولة مكتملة ليك في نص الموسم الحالي. لو جولة Redemption خلصت أعلى من الرقم ده، أقل جولة القديمة تتضاعف. Redemption له استخدام واحد في الموسم كله.')}</p></div>`);
+    <div class="rule-card wc-rule-card-v1043"><h3>REDEMPTION</h3><p>${L('Only 6th and 7th place can activate Redemption. Mastaba freezes your lowest completed Gameweek score from the entire season to date. If your Redemption Gameweek finishes higher, that lowest Gameweek is replaced by the Redemption Gameweek score. Redemption has one use per season.','فقط المركز السادس والسابع يقدروا يفعلوا Redemption. المصطبة بتثبت أقل جولة مكتملة ليك في الموسم كله لحد لحظة التفعيل. لو جولة Redemption خلصت أعلى، أقل جولة بتتبدل بنقاط جولة Redemption. Redemption له استخدام واحد في كل موسم.')}</p></div>`);
 };
 
 /* Replace the Steal-only V10.42 lock hook with the unified Power Card lock finalizer. */
@@ -14468,28 +14468,52 @@ async function loadHistoricalPointsV1083(supa){
   ]);
   if(ptsR.error||gwsR.error)return;
   const gwNum=Object.fromEntries((gwsR.data||[]).map(g=>[g.id,Number(g.gameweek_number)]));
-  const previous={};(state.users||[]).forEach(u=>previous[u.id]=0);state.mastabaWeekScoresV1043=state.mastabaWeekScoresV1043||{};
-  for(const r of ptsR.data||[]){const slot=authSlotV1083(r.user_id),w=gwNum[r.gameweek_id];if(!slot||!w)continue;(state.mastabaWeekScoresV1043[w]??={})[slot]=Number(r.total_points||0);if(w<Number(state.week)&&r.finalized)previous[slot]=(previous[slot]||0)+Number(r.total_points||0)}
+  const previous={};(state.users||[]).forEach(u=>previous[u.id]=0);state.mastabaWeekScoresV1043={};
+  for(const r of ptsR.data||[]){
+    const slot=authSlotV1083(r.user_id),w=gwNum[r.gameweek_id];if(!slot||!w||!r.finalized)continue;
+    (state.mastabaWeekScoresV1043[w]??={})[slot]=Number(r.total_points||0);
+    if(w<Number(state.week))previous[slot]=(previous[slot]||0)+Number(r.total_points||0);
+  }
   state.previousWeekPoints=previous;
 }
-
 async function loadPowerChipsV1083(supa){
   const lid=await privateLeagueIdV1083(supa);if(!lid||!window.prodCtxV1073?.gw?.id)return;
-  const {data,error}=await supa.from('mastaba_power_chip_uses').select('*').eq('league_id',lid);if(error)return;
-  for(const u of state.users||[])ensureWcUserV1083(u.id);
+  const [chipR,gwsR]=await Promise.all([
+    supa.from('mastaba_power_chip_uses').select('*').eq('league_id',lid),
+    supa.from('mastaba_gameweeks').select('id,gameweek_number,opens_at,deadline_at,created_at')
+  ]);
+  if(chipR.error||gwsR.error)return;
+  const gwMap=Object.fromEntries((gwsR.data||[]).map(g=>[g.id,g]));
+  const now=new Date(),currentSeason=now.getUTCMonth()>=6?now.getUTCFullYear():now.getUTCFullYear()-1;
+  for(const u of state.users||[]){
+    state.mastabaWildcardsV1043=state.mastabaWildcardsV1043||{};
+    state.mastabaWildcardsV1043[u.id]=blankWcV1083();
+    state.mastabaWildcardChoiceV1045=state.mastabaWildcardChoiceV1045||{};
+    state.mastabaWildcardChoiceV1045[u.id]={};
+    ensureWcUserV1083(u.id);
+  }
   state.mastabaWildcardEventsV1043.steals=[];state.mastabaWildcardEventsV1043.surges=[];state.mastabaWildcardEventsV1043.redemptions=[];state.mastabaStealReservationsV1049=[];
-  for(const r of data||[]){
-    const slot=authSlotV1083(r.user_id);if(!slot||r.status==='cancelled')continue;const rec=ensureWcUserV1083(slot);const gw=(state.week===Number(window.prodCtxV1073?.gw?.gameweek_number))?Number(state.week):Number(state.week);const current=r.gameweek_id===window.prodCtxV1073.gw.id;
-    const half=Number(state.week)<=19?'first':'second';
-    if(r.status==='selected'&&current){state.mastabaWildcardChoiceV1045[slot][String(state.week)]=r.chip_type;rec.pending[r.chip_type]={week:Number(state.week),half,armedAt:r.selected_at,...(r.payload||{})};if(r.chip_type==='steal'){const target=authSlotV1083(r.payload?.target_user_id);if(target){rec.pending.steal.targetId=target;state.mastabaStealReservationsV1049.push({id:r.id,week:Number(state.week),attackerId:slot,targetId:target,half,status:'reserved',createdAt:r.selected_at})}}}
+  for(const r of chipR.data||[]){
+    if(Number(r.season_key||currentSeason)!==Number(currentSeason)||r.status==='cancelled')continue;
+    const slot=authSlotV1083(r.user_id),g=gwMap[r.gameweek_id];if(!slot||!g)continue;
+    const rec=ensureWcUserV1083(slot),gwNum=Number(g.gameweek_number),half=Number(r.season_half)===2?'second':'first',current=r.gameweek_id===window.prodCtxV1073.gw.id;
+    state.mastabaWildcardChoiceV1045[slot][String(gwNum)]=r.chip_type;
+    if(r.status==='selected'&&current){
+      rec.pending[r.chip_type]={week:gwNum,half,armedAt:r.selected_at,...(r.payload||{})};
+      if(r.chip_type==='steal'){
+        const target=authSlotV1083(r.payload?.target_user_id);if(target){rec.pending.steal.targetId=target;rec.pending.steal.irrevocable=true;markUsedV1043(slot,'steal',half);state.mastabaStealReservationsV1049.push({id:r.id,week:gwNum,attackerId:slot,targetId:target,half,status:'reserved',createdAt:r.selected_at})}
+      }
+    }
     if(r.status==='locked'||r.status==='resolved'){
-      if(r.chip_type==='surge')state.mastabaWildcardEventsV1043.surges.push({id:r.id,type:'surge',actorId:slot,week:Number(state.week),half,status:'locked',lockedAt:r.locked_at});
-      if(r.chip_type==='redemption')state.mastabaWildcardEventsV1043.redemptions.push({id:r.id,type:'redemption',actorId:slot,week:Number(state.week),half,status:'locked',lockedAt:r.locked_at,referenceWeek:Number(r.payload?.reference_week||0),referenceScore:Number(r.payload?.reference_score||0),rankAtActivation:Number(r.payload?.rank_at_activation||0)});
-      if(r.chip_type==='steal'){const target=authSlotV1083(r.payload?.target_user_id);if(target)state.mastabaWildcardEventsV1043.steals.push({id:r.id,type:'steal',attackers:[slot],targetId:target,week:Number(state.week),half,status:'locked',lockedAt:r.locked_at,targetWasFirst:!!r.payload?.target_was_first})}
+      markUsedV1043(slot,r.chip_type,half);
+      if(r.chip_type==='surge')state.mastabaWildcardEventsV1043.surges.push({id:r.id,type:'surge',actorId:slot,week:gwNum,half,status:r.status,lockedAt:r.locked_at,resolvedAt:r.resolved_at,result:r.result||null});
+      if(r.chip_type==='redemption')state.mastabaWildcardEventsV1043.redemptions.push({id:r.id,type:'redemption',actorId:slot,week:gwNum,half,status:r.status,lockedAt:r.locked_at,resolvedAt:r.resolved_at,referenceWeek:Number(r.payload?.reference_week||0),referenceScore:Number(r.payload?.reference_score||0),rankAtActivation:Number(r.payload?.rank_at_activation||0),result:r.result||null});
+      if(r.chip_type==='steal'){
+        const target=authSlotV1083(r.payload?.target_user_id);if(target)state.mastabaWildcardEventsV1043.steals.push({id:r.id,type:'steal',attackers:[slot],targetId:target,week:gwNum,half,status:r.status,lockedAt:r.locked_at,resolvedAt:r.resolved_at,targetWasFirst:!!r.payload?.target_was_first,result:r.result||null});
+      }
     }
   }
 }
-
 async function activeOwnChipV1083(supa,lid){const {data,error}=await supa.from('mastaba_power_chip_uses').select('*').eq('league_id',lid).eq('user_id',window.prodCtxV1073.user.id).eq('gameweek_id',window.prodCtxV1073.gw.id).neq('status','cancelled').maybeSingle();if(error)throw error;return data||null}
 async function persistChipV1083(type,payload={}){
   const ctx=window.prodCtxV1073;if(!ctx)throw new Error('Production is not ready.');const lid=await privateLeagueIdV1083(ctx.supa);if(!lid)throw new Error('Private league is unavailable.');
@@ -14782,7 +14806,6 @@ async function fetchLiveSnapshotV1088(){
     const r=await fetch(`${LIVE_SNAPSHOT_BASE_V1088}?v=${bucket}`,{cache:'default'});
     if(!r.ok)throw new Error(`snapshot ${r.status}`);
     const snap=await r.json();
-    if(String(snap?.generated_at||'')===lastSnapshotGeneratedV1088)return;
     applyLiveSnapshotV1088(snap);
   }catch(e){console.warn('Shared live snapshot refresh failed',e)}
 }
@@ -14816,6 +14839,7 @@ picksForScopeV20=function(mid,past,scope){return scope==='global'?deterministicG
 // Catch iOS/browser timer throttling immediately when the user returns to the app.
 document.addEventListener('visibilitychange',()=>{if(!document.hidden)fetchLiveSnapshotV1088()});
 window.addEventListener('focus',fetchLiveSnapshotV1088);
+window.addEventListener('pageshow',fetchLiveSnapshotV1088);
 
 // If Production hydration has already happened, start now; otherwise the replaced startPrivateLiveV1083
 // is invoked by the existing hydration flow.
@@ -14857,5 +14881,149 @@ if(window.prodCtxV1073)setTimeout(startSharedLiveV1088,150);
 })();
 </script>
 
+<script id="mastaba-v1090-scoring-consistency">
+/* V10.90 — one scoring formula everywhere + season-correct Redemption + robust live resume. */
+(function(){
+const scorelineV1090=(p,h,a)=>{
+  const ph=Number(p?.home),pa=Number(p?.away),ah=Number(h),aa=Number(a);
+  const po=outcome(ph,pa),ao=outcome(ah,aa),exact=ph===ah&&pa===aa;
+  const outcomePts=po===ao?5:0,gdPts=(ph-pa)===(ah-aa)?3:0,homePts=ph===ah?1:0,awayPts=pa===aa?1:0,exactPts=exact?5:0;
+  return{points:outcomePts+gdPts+homePts+awayPts+exactPts,outcomePts,gdPts,homePts,awayPts,exactPts,exact,correctOutcome:po===ao,po,ao};
+};
+window.scorelineV1090=scorelineV1090;
+
+// Risky belongs to the private seven-person Mastaba League only — never the growing Public League.
+riskyFor=function(uid,f){
+  const members=(typeof privateMembersV1043==='function'?privateMembersV1043():[]).filter(Boolean);
+  if(members.length!==7)return false;
+  const picks=members.map(id=>({uid:id,p:getOfficial(id,f.id)}));
+  if(picks.some(x=>!x.p||x.p.touched!==true))return false;
+  const counts={H:0,D:0,A:0};picks.forEach(x=>counts[outcome(x.p.home,x.p.away)]++);
+  const mine=picks.find(x=>x.uid===uid)?.p;if(!mine)return false;
+  const mineO=outcome(mine.home,mine.away),max=Math.max(counts.H,counts.D,counts.A);
+  return counts[mineO]===1||(max>=5&&counts[mineO]<max);
+};
+window.riskyFor=riskyFor;
+
+scorePrediction=function(uid,f){
+  const p=getOfficial(uid,f.id),r=f.result;
+  if(!p||p.touched!==true||!r||f.phase!=='final')return{total:0,base:0,risky:0,double:false,parts:[]};
+  const s=scorelineV1090(p,r.home,r.away),parts=[],add=(label,ar,pts)=>{if(pts)parts.push([L(label,ar),pts])};
+  add('Correct Outcome','النتيجة الصحيحة',s.outcomePts);add('Correct Goal Difference','فارق الأهداف الصحيح',s.gdPts);add('Correct Home Team Goals','أهداف صاحب الأرض الصحيحة',s.homePts);add('Correct Away Team Goals','أهداف الضيف الصحيحة',s.awayPts);add('Exact Score Bonus','بونص النتيجة بالظبط',s.exactPts);
+  let base=s.points;
+  const firstTeamCorrect=p.firstTeam===r.firstTeam,firstScorerCorrect=p.firstScorer===r.firstScorer;
+  if(firstTeamCorrect){base+=2;add('First Team to Score','أول فريق يسجل',2)}
+  if(firstScorerCorrect){base+=3;add('First Goalscorer','أول لاعب يسجل',3)}
+  let risky=0;if(riskyFor(uid,f)&&s.correctOutcome){risky=10;add('Risky Prediction','التوقع المجازف',10)}
+  const doubled=!!p.double,preDouble=base+risky,total=doubled?preDouble*2:preDouble;if(doubled&&preDouble)add('Double Points','دبل بوينتس',preDouble);
+  return{total,base,risky,double:doubled,parts,exact:s.exact,correctOutcome:s.correctOutcome,correctGD:!!s.gdPts,teamGoals:(s.homePts?1:0)+(s.awayPts?1:0)};
+};
+window.scorePrediction=scorePrediction;
+
+function liveAuxV1090(p,f,h,a,optimistic=false){
+  let pts=0;
+  if(Number(h)+Number(a)===0){
+    if(p.firstTeam==='none')pts+=2;
+    if(p.firstScorer==='none')pts+=3;
+  }else if(Number(f?.liveScore?.home||0)+Number(f?.liveScore?.away||0)===0&&optimistic){
+    if(p.firstTeam&&p.firstTeam!=='none')pts+=2;
+    if(p.firstScorer&&p.firstScorer!=='none')pts+=3;
+  }else{
+    if(f?.liveFirstTeam&&p.firstTeam===f.liveFirstTeam)pts+=2;
+    if(f?.liveFirstScorer&&p.firstScorer===f.liveFirstScorer)pts+=3;
+  }
+  return pts;
+}
+function liveProjectedV1090(uid,f,p,h,a,optimistic=false){
+  const s=scorelineV1090(p,h,a);let pts=s.points+liveAuxV1090(p,f,h,a,optimistic);
+  if(riskyFor(uid,f)&&s.correctOutcome)pts+=10;
+  return p.double?pts*2:pts;
+}
+projectedPointsForV18=function(uid,f,past=false){
+  if(past){const p=state.history?.predictions?.[uid]?.[f.id];return Number(p?.points||0)}
+  if(f.phase==='final')return scorePrediction(uid,f).total;
+  const p=v18Prediction(uid,f.id,false);if(!p||!f.liveScore)return 0;
+  return liveProjectedV1090(uid,f,p,Number(f.liveScore.home||0),Number(f.liveScore.away||0),false);
+};
+window.projectedPointsForV18=projectedPointsForV18;
+scoreRouteValueV18=function(p,h,a){return scorelineV1090(p,h,a).points};window.scoreRouteValueV18=scoreRouteValueV18;
+projectedPointsNowV20=function(uid,f,past=false){
+  if(past){const p=state.history?.predictions?.[uid]?.[f.id];return Number(p?.points||0)}
+  if(f.phase==='final')return scorePrediction(uid,f).total;
+  const p=getOfficial(uid,f.id)||getWorking(uid,f.id);if(!p||!f.liveScore)return 0;
+  return liveProjectedV1090(uid,f,p,Number(f.liveScore.home||0),Number(f.liveScore.away||0),false);
+};
+window.projectedPointsNowV20=projectedPointsNowV20;
+
+bestRouteFromHereV18=function(f,p){
+  if(!p||!f.liveScore)return null;
+  const ch=Number(f.liveScore.home||0),ca=Number(f.liveScore.away||0),uid=state.currentUser;
+  let best=null;const maxH=Math.max(ch,Number(p.home||0))+4,maxA=Math.max(ca,Number(p.away||0))+4;
+  for(let h=ch;h<=maxH;h++)for(let a=ca;a<=maxA;a++){
+    const pts=liveProjectedV1090(uid,f,p,h,a,true);
+    if(!best||pts>best.pts||(pts===best.pts&&(Math.abs(h-Number(p.home))+Math.abs(a-Number(p.away)))<(Math.abs(best.h-Number(p.home))+Math.abs(best.a-Number(p.away)))))best={h,a,pts};
+  }
+  return best;
+};
+window.bestRouteFromHereV18=bestRouteFromHereV18;
+
+// Redemption uses the lowest completed Gameweek across the whole current season, not a half-season.
+redemptionReferenceV1043=function(uid){
+  ensureWCStateV1043();
+  const candidates=Object.entries(state.mastabaWeekScoresV1043||{}).map(([w,map])=>({week:Number(w),score:Number(map?.[uid]??NaN)})).filter(x=>x.week<Number(state.week)&&Number.isFinite(x.score)).sort((a,b)=>a.score-b.score||a.week-b.week);
+  return candidates[0]||null;
+};
+window.redemptionReferenceV1043=redemptionReferenceV1043;
+redemptionOutcomeV1043=function(event){
+  const current=baseWeekPointsV1043(event.actorId,event.week),reference=Number(event.referenceScore||0),active=current>reference,gain=active?current-reference:0,replacement=active?current:reference;
+  return{current,gain,reference,replacement,doubled:replacement,active,referenceWeek:Number(event.referenceWeek||0)};
+};
+window.redemptionOutcomeV1043=redemptionOutcomeV1043;
+redemptionBonusV1043=function(uid,week=null){
+  return (state.mastabaWildcardEventsV1043?.redemptions||[]).reduce((sum,e)=>{
+    if(e.actorId!==uid||e.status==='resolved'||Number(e.week)>Number(state.week))return sum;
+    const o=redemptionOutcomeV1043(e);if(week!=null&&Number(o.referenceWeek)!==Number(week))return sum;return sum+o.gain;
+  },0);
+};
+window.redemptionBonusV1043=redemptionBonusV1043;
+privateGWPointsV1043=function(uid,week=state.selectedRankWeek){const w=Number(week);return wholeMastabaPointsV1060(baseWeekPointsV1043(uid,w)+scoreAlterDeltaV1043(uid,w)+redemptionBonusV1043(uid,w))};window.privateGWPointsV1043=privateGWPointsV1043;
+privateOverallPointsV1043=function(uid){const base=wholeMastabaPointsV1060(state.previousWeekPoints?.[uid])+wholeMastabaPointsV1060(privateNormalWeekPointsV1049(uid));return wholeMastabaPointsV1060(base+allScoreAlterDeltaV1043(uid)+redemptionBonusV1043(uid))};window.privateOverallPointsV1043=privateOverallPointsV1043;
+
+redemptionEventHTMLV1043=function(e){
+  const o=redemptionOutcomeV1043(e),final=allFinalV1043(),active=o.active;
+  const text=active?L(`${userName(e.actorId)} cleared the condition. GW${o.referenceWeek} is replaced from ${o.reference} to ${o.replacement} (+${o.gain}).`,`${userName(e.actorId)} حقق الشرط. ج${o.referenceWeek} بتتبدل من ${o.reference} إلى ${o.replacement} (+${o.gain}).`):L(`${userName(e.actorId)} needs to finish above ${o.reference} points. If successful, GW${o.referenceWeek} will be replaced by this Gameweek's score.`,`${userName(e.actorId)} محتاج يخلص أعلى من ${o.reference} نقطة. لو نجح، ج${o.referenceWeek} هتتبدل بنقاط الجولة دي.`);
+  return`<article class="wc-event-v1043 redemption"><div class="wc-event-head-v1043"><div class="wc-event-kicker-v1043">REDEMPTION</div><span>${L(`Activated from ${e.rankAtActivation}th`,`اتفعّل من المركز ${e.rankAtActivation}`)}</span></div><div class="wc-event-body-v1043"><div class="wc-redemption-line-v1043"><div class="wc-redemption-score-v1043"><small>${L(`LOWEST GW · GW${o.referenceWeek}`,`أقل جولة · ج${o.referenceWeek}`)}</small><b>${o.reference}</b></div><div class="wc-arrow-v1043">→</div><div class="wc-redemption-score-v1043"><small>${L('REPLACEMENT','البديل')}</small><b>${o.replacement}</b></div></div><div class="wc-modal-note-v1043">${L(`Current Gameweek: ${o.current} pts · must finish above ${o.reference}.`,`الجولة الحالية: ${o.current} نقطة · لازم تخلص أعلى من ${o.reference}.`)}</div></div>${statusBarV1043(final?L('FINAL REDEMPTION','REDEMPTION النهائي'):L('COMEBACK TRACKER','متابعة العودة'),text,active?`+${o.gain}`:'—')}</article>`;
+};
+window.redemptionEventHTMLV1043=redemptionEventHTMLV1043;
+
+// Returning from iOS/background/bfcache must restore the newest live fixture before leaving the user on a pre-match card.
+async function resumeLatestLiveV1090(){
+  try{if(typeof window.fetchLiveSnapshotV1088==='function')await window.fetchLiveSnapshotV1088()}catch{}
+  try{
+    const live=(state.fixtures||[]).find(f=>f.phase==='live');
+    if(live&&typeof homeStoryFixturesV21==='function'){
+      const fs=homeStoryFixturesV21(),i=fs.findIndex(f=>f.id===live.id);if(i>=0){state.homeStoryIndexV21=state.homeStoryIndexV21||{};state.homeStoryIndexV21[String(state.selectedHomeWeek??'overall')]=i}
+    }
+    if(typeof render==='function')render();
+  }catch{}
+}
+window.resumeLatestLiveV1090=resumeLatestLiveV1090;
+const hydrateBaseV1090=window.hydrateProductionV1073;
+window.hydrateProductionV1073=async function(profile,user,supa){
+  const ok=await hydrateBaseV1090(profile,user,supa);
+  try{
+    for(const f of state.fixtures||[]){
+      const row=window.prodCtxV1073?.fxById?.[f.id];
+      if(f.phase==='live'&&!f.liveScore){f.liveScore={home:Number(row?.home_goals??f.result?.home??0),away:Number(row?.away_goals??f.result?.away??0)};f.liveFirstTeam=row?.first_scoring_team_id?teamCodeV1083(row.first_scoring_team_id):f.liveFirstTeam;f.liveFirstScorer=row?.first_scorer_id?String(row.first_scorer_id):f.liveFirstScorer}
+    }
+    await resumeLatestLiveV1090();
+  }catch{}
+  return ok;
+};
+document.addEventListener('visibilitychange',()=>{if(!document.hidden)resumeLatestLiveV1090()});
+window.addEventListener('pageshow',resumeLatestLiveV1090);
+window.addEventListener('focus',resumeLatestLiveV1090);
+})();
+</script>
 </body>
 </html>
