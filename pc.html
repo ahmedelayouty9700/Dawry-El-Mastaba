@@ -6932,7 +6932,7 @@ html[data-theme="realmadrid"] .ticker-group .ticker-match + .ticker-match{
   <script>
 'use strict';
 
-const STORAGE_KEY='almastaba-production-v10-75';
+const STORAGE_KEY='almastaba-production-v10-83';
 const $=(s,r=document)=>r.querySelector(s); const $$=(s,r=document)=>[...r.querySelectorAll(s)];
 const L=(en,ar)=>state.lang==='ar'?ar:en;
 const I18N={
@@ -7172,7 +7172,7 @@ function currentUser(){return state.users.find(u=>u.id===state.currentUser)}
 function activeUsers(){return state.users.filter(u=>u.active!==false)}
 function userTZ(u=currentUser()){return u.timeZone&&u.timeZone!=='auto'?u.timeZone:(Intl.DateTimeFormat().resolvedOptions().timeZone||'UTC')}
 function formatTime(iso,opts={}){try{return new Intl.DateTimeFormat(state.lang==='ar'?'ar-EG':'en-US',{weekday:'short',month:'short',day:'numeric',hour:'numeric',minute:'2-digit',timeZone:userTZ(),...opts}).format(new Date(iso))}catch{return new Date(iso).toLocaleString()}}
-function firstKickoff(){return new Date(Math.min(...state.fixtures.map(f=>new Date(f.kickoff).getTime())))} function deadline(){return firstKickoff()}
+function firstKickoff(){return new Date(Math.min(...state.fixtures.map(f=>new Date(f.kickoff).getTime())))} function deadline(){const db=window.prodCtxV1073?.gw?.deadline_at;if(db)return new Date(db);return new Date(firstKickoff().getTime()-60000)}
 function isRoundLocked(){return state.roundLocked||state.forceDeadline||Date.now()>=deadline().getTime()}
 function userSubmittedLocked(){const m=state.roundMeta[state.currentUser]||{};return !isRoundLocked()&&!!m.submittedAt&&!m.editing}
 function ensureDeadlineLock(){if(!state.roundLocked&&Date.now()>=deadline().getTime())lockRound('automatic')}
@@ -7502,7 +7502,7 @@ window.setRankMode=m=>{state.selectedRankMode=m;save();render()};window.setRankW
 
 function renderRules(){const rows=[
  [L('Correct Winner / Outcome','الفائز / النتيجة الصحيحة'),'5'],[L('Correct Draw, Wrong Score','تعادل صحيح لكن النتيجة مش بالظبط'),'8'],[L('Correct Goal Difference','فارق الأهداف الصحيح'),'3'],[L('Correct Home Team Goals','أهداف صاحب الأرض الصحيحة'),'1'],[L('Correct Away Team Goals','أهداف الضيف الصحيحة'),'1'],[L('Exact Score Bonus','بونص النتيجة بالظبط'),'5'],[L('First Team to Score','أول فريق يسجل'),'2'],[L('First Goalscorer','أول لاعب يسجل'),'3']
- ];$('#view-rules').innerHTML=`<h1 class="page-title">${L('Prediction Rules','قواعد التوقعات')}</h1><p class="page-sub">${L('The full المصطبة scoring system and Gameweek rules.','نظام نقاط المصطبة كامل وقواعد كل جولة.')}</p><div class="rules-grid"><div class="rule-card"><h3>${L('Match Scoring','نقاط الماتش')}</h3><table class="scoring-table"><thead><tr><th>${L('Rule','القاعدة')}</th><th>${L('Points','النقاط')}</th></tr></thead><tbody>${rows.map(r=>`<tr><td>${r[0]}</td><td><span class="points-pill">+${r[1]}</span></td></tr>`).join('')}</tbody></table><p style="margin-top:12px">${L('A perfect match prediction is worth 20 base points. A correct non-exact draw receives 8 outcome points instead of the normal 5, and still receives the 3-point goal-difference bonus because every draw has a goal difference of zero.','التوقع الكامل للماتش يساوي 20 نقطة أساسية. لو توقعت تعادل صح بس السكور غلط، بتاخد 8 نقاط للنتيجة بدل 5، وكمان 3 نقاط لفارق الأهداف لأن كل تعادل فارق أهدافه صفر.')}</p></div><div class="rule-card"><h3>${L('Double Points','دبل بوينتس')}</h3><p>${L('You may activate Double Points on one match per Gameweek. It doubles the full match score, including any Risky Prediction bonus. A perfect 20-point match can become 40, and a +10 Risky bonus on that doubled match is doubled too. Once selected, Double Points is disabled on every other match unless you move it before submitting.','تقدر تفعّل الدبل بوينتس على ماتش واحد بس في كل جولة. بيضاعف إجمالي نقاط الماتش، بما فيها بونص المجازفة. يعني 20 ممكن تبقى 40، ولو كسبت +10 مجازفة في نفس الماتش بالدبل فهي كمان بتتضاعف. أول ما تختاره، الدبل بيتقفل في باقي الماتشات إلا لو غيرته قبل الإرسال.')}</p></div><div class="rule-card"><h3>${L('Risky Prediction Bonus','بونص التوقع المجازف')}</h3><p>${L('If at least five of seven users choose one outcome, the minority outcome becomes risky. An outcome chosen by only one user is also risky. If that minority outcome is correct, the user earns +10. If Double Points is active on that match, the +10 Risky bonus is included before doubling.','لو 5 من 7 أو أكتر اختاروا نفس النتيجة، الاختيار الأقلية يبقى مجازفة. ولو شخص واحد بس اختار نتيجة مختلفة فهي كمان مجازفة. لو الاختيار المختلف طلع صح، ياخد +10. ولو الدبل متفعل على نفس الماتش، بونص المجازفة +10 بيتضاف قبل المضاعفة وبيتضاعف مع باقي نقاط الماتش.')}</p></div><div class="rule-card"><h3>${L('Perfect Gameweek','الجولة الكاملة')}</h3><p>${L('Get every match outcome in the Gameweek correct and receive a +15 bonus. Exact scores are not required for this bonus.','لو جبت نتيجة كل الماتشات في الجولة صح، تاخد +15. مش لازم السكور يكون بالظبط للبونص ده.')}</p></div><div class="rule-card"><h3>${L('Goalscorer Rules','قواعد أول هداف')}</h3><p>${L('For 0–0, No Team to Score and No Goalscorer are selected automatically and can earn their bonuses. Own goals do not count as First Goalscorer. If you predict only one team to score, the scorer list is restricted to that team.','لو توقعت 0–0، لا يوجد فريق يسجل ولا يوجد هداف بيتحددوا تلقائيًا ويقدروا يكسبوا البونص. الأهداف العكسية لا تُحسب كأول هداف. ولو توقعت فريق واحد بس يسجل، قائمة الهدافين بتبقى من الفريق ده بس.')}</p></div><div class="rule-card"><h3>${L('Deadline & Privacy','الموعد والخصوصية')}</h3><p>${L('The entire Gameweek locks when the first selected match kicks off. A saved Draft becomes the official prediction if the deadline passes. Other users’ predictions stay hidden until each match kicks off. All kickoff times are shown in the user’s selected timezone.','الجولة كلها بتتقفل مع بداية أول ماتش مختار. لو عندك Draft محفوظ وعدّى الموعد، بيتحول لتوقعك الرسمي. توقعات باقي الناس بتفضل مخفية لحد بداية كل ماتش. كل المواعيد بتظهر حسب المنطقة الزمنية للمستخدم.')}</p></div></div>`}
+ ];$('#view-rules').innerHTML=`<h1 class="page-title">${L('Prediction Rules','قواعد التوقعات')}</h1><p class="page-sub">${L('The full المصطبة scoring system and Gameweek rules.','نظام نقاط المصطبة كامل وقواعد كل جولة.')}</p><div class="rules-grid"><div class="rule-card"><h3>${L('Match Scoring','نقاط الماتش')}</h3><table class="scoring-table"><thead><tr><th>${L('Rule','القاعدة')}</th><th>${L('Points','النقاط')}</th></tr></thead><tbody>${rows.map(r=>`<tr><td>${r[0]}</td><td><span class="points-pill">+${r[1]}</span></td></tr>`).join('')}</tbody></table><p style="margin-top:12px">${L('A perfect match prediction is worth 20 base points. A correct non-exact draw receives 8 outcome points instead of the normal 5, and still receives the 3-point goal-difference bonus because every draw has a goal difference of zero.','التوقع الكامل للماتش يساوي 20 نقطة أساسية. لو توقعت تعادل صح بس السكور غلط، بتاخد 8 نقاط للنتيجة بدل 5، وكمان 3 نقاط لفارق الأهداف لأن كل تعادل فارق أهدافه صفر.')}</p></div><div class="rule-card"><h3>${L('Double Points','دبل بوينتس')}</h3><p>${L('You may activate Double Points on one match per Gameweek. It doubles the full match score, including any Risky Prediction bonus. A perfect 20-point match can become 40, and a +10 Risky bonus on that doubled match is doubled too. Once selected, Double Points is disabled on every other match unless you move it before submitting.','تقدر تفعّل الدبل بوينتس على ماتش واحد بس في كل جولة. بيضاعف إجمالي نقاط الماتش، بما فيها بونص المجازفة. يعني 20 ممكن تبقى 40، ولو كسبت +10 مجازفة في نفس الماتش بالدبل فهي كمان بتتضاعف. أول ما تختاره، الدبل بيتقفل في باقي الماتشات إلا لو غيرته قبل الإرسال.')}</p></div><div class="rule-card"><h3>${L('Risky Prediction Bonus','بونص التوقع المجازف')}</h3><p>${L('If at least five of seven users choose one outcome, the minority outcome becomes risky. An outcome chosen by only one user is also risky. If that minority outcome is correct, the user earns +10. If Double Points is active on that match, the +10 Risky bonus is included before doubling.','لو 5 من 7 أو أكتر اختاروا نفس النتيجة، الاختيار الأقلية يبقى مجازفة. ولو شخص واحد بس اختار نتيجة مختلفة فهي كمان مجازفة. لو الاختيار المختلف طلع صح، ياخد +10. ولو الدبل متفعل على نفس الماتش، بونص المجازفة +10 بيتضاف قبل المضاعفة وبيتضاعف مع باقي نقاط الماتش.')}</p></div><div class="rule-card"><h3>${L('Perfect Gameweek','الجولة الكاملة')}</h3><p>${L('Get every match outcome in the Gameweek correct and receive a +15 bonus. Exact scores are not required for this bonus.','لو جبت نتيجة كل الماتشات في الجولة صح، تاخد +15. مش لازم السكور يكون بالظبط للبونص ده.')}</p></div><div class="rule-card"><h3>${L('Goalscorer Rules','قواعد أول هداف')}</h3><p>${L('For 0–0, No Team to Score and No Goalscorer are selected automatically and can earn their bonuses. Own goals do not count as First Goalscorer. If you predict only one team to score, the scorer list is restricted to that team.','لو توقعت 0–0، لا يوجد فريق يسجل ولا يوجد هداف بيتحددوا تلقائيًا ويقدروا يكسبوا البونص. الأهداف العكسية لا تُحسب كأول هداف. ولو توقعت فريق واحد بس يسجل، قائمة الهدافين بتبقى من الفريق ده بس.')}</p></div><div class="rule-card"><h3>${L('Deadline & Privacy','الموعد والخصوصية')}</h3><p>${L('The entire Gameweek locks one minute before the first selected match kicks off. A saved Draft becomes the official prediction if the deadline passes. Other users’ predictions stay hidden until each match kicks off. All kickoff times are shown in the user’s selected timezone.','الجولة كلها بتتقفل قبل بداية أول ماتش مختار بدقيقة. لو عندك Draft محفوظ وعدّى الموعد، بيتحول لتوقعك الرسمي. توقعات باقي الناس بتفضل مخفية لحد بداية كل ماتش. كل المواعيد بتظهر حسب المنطقة الزمنية للمستخدم.')}</p></div></div>`}
 
 
 function profileThemeKeyV1051(u=currentUser()){return VISUAL_THEMES[u?.theme]?u.theme:(VISUAL_THEMES[u?.club]?u.club:'mastaba')}
@@ -9725,7 +9725,7 @@ firstKickoff=function(){
   const times=(Array.isArray(state.fixtures)?state.fixtures:[]).map(f=>new Date(f?.kickoff).getTime()).filter(Number.isFinite);
   return times.length?new Date(Math.min(...times)):new Date(Date.now()+86400000);
 };
-deadline=function(){return new Date(firstKickoff().getTime()-3600000)};
+deadline=function(){return new Date(firstKickoff().getTime()-60000)};
 deadlineStatus=function(){
   if(isRoundLocked())return L('Gameweek Closed','الجولة اتقفلت');
   const d=deadline();
@@ -10342,6 +10342,11 @@ render();
 .ats-counter-v25{font-size:.84rem;font-weight:1000;color:var(--ats-outer-text)}
 .ats-comp-v25{display:flex;align-items:center;gap:8px;color:var(--ats-outer-text);font-size:.78rem;font-weight:1000;white-space:nowrap}
 .ats-comp-mark-v25{width:30px;height:30px;border-radius:8px;display:grid;place-items:center;border:1px solid color-mix(in srgb,var(--ats-outer-text) 22%,transparent);background:color-mix(in srgb,var(--ats-inner) 58%,transparent);font-size:.58rem;font-weight:1000}
+.ats-comp-logo-v1083{width:34px;height:34px;flex:0 0 34px;border-radius:9px;display:grid;place-items:center;padding:4px;background:rgba(255,255,255,.96);border:1px solid color-mix(in srgb,var(--ats-outer-text) 18%,transparent);box-shadow:0 2px 8px rgba(0,0,0,.10);overflow:hidden}
+.ats-comp-logo-v1083 img{display:block;max-width:100%;max-height:100%;width:auto;height:auto;object-fit:contain}
+.ats-comp-logo-fallback-v1083{display:none;width:100%;height:100%;place-items:center;color:#12171f;font-size:.54rem;font-weight:1000;line-height:1;text-align:center}
+@media(max-width:620px){.ats-comp-logo-v1083{width:30px;height:30px;flex-basis:30px;padding:3px;border-radius:8px}}
+
 .ats-grid-v25{display:grid;grid-template-columns:minmax(0,1.12fr) minmax(190px,.78fr) minmax(0,1.12fr);gap:11px;padding:12px}
 .ats-box-v25{min-width:0;min-height:176px;padding:17px;border:1px solid color-mix(in srgb,var(--ats-inner-text) 19%,transparent);border-radius:15px;background:var(--ats-inner);color:var(--ats-inner-text);box-sizing:border-box}
 .ats-box-v25.center,.ats-box-v25.prediction{display:flex;align-items:center;justify-content:center;text-align:center}
@@ -10571,6 +10576,32 @@ function countdownHMSV25(iso){
   const h=Math.floor(seconds/3600),m=Math.floor((seconds%3600)/60),s=seconds%60;
   return `${String(h).padStart(2,'0')}:${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}`;
 }
+function competitionLogoUrlV1083(f){
+  const direct=String(f?.competitionLogo||f?.leagueLogo||'').trim();
+  if(direct)return direct;
+  let leagueId=Number(f?.apiLeagueId||f?.api_league_id||0);
+  if(!leagueId){
+    const country=String(f?.competitionCountry||'').trim().toLowerCase();
+    const comp=String(f?.competition||'').trim().toLowerCase();
+    const known={
+      'england|premier league':39,'england|fa cup':45,'england|league cup':48,
+      'spain|la liga':140,'spain|laliga':140,'spain|copa del rey':143,
+      'egypt|premier league':233,'egypt|egyptian premier league':233,
+      'italy|serie a':135,'italy|coppa italia':137,
+      'germany|bundesliga':78,'france|ligue 1':61,
+      '|champions league':2,'|uefa champions league':2,'|europa league':3,'|uefa europa league':3,
+      '|afcon':6,'|africa cup of nations':6,'|caf champions league':12
+    };
+    leagueId=known[`${country}|${comp}`]||known[`|${comp}`]||0;
+  }
+  return leagueId?`https://media.api-sports.io/football/leagues/${leagueId}.png`:'';
+}
+function atsCompetitionMarkV1083(f){
+  const fallback=atsCompShortV25(f?.competition||'');
+  const logo=competitionLogoUrlV1083(f);
+  if(!logo)return `<span class="ats-comp-mark-v25">${escapeHTML(fallback)}</span>`;
+  return `<span class="ats-comp-logo-v1083"><img src="${escapeHTML(logo)}" alt="" loading="eager" decoding="async" onerror="this.style.display='none';this.nextElementSibling.style.display='grid'"><span class="ats-comp-logo-fallback-v1083">${escapeHTML(fallback)}</span></span>`;
+}
 function atsCompShortV25(name){const m={'Premier League':'PL','LaLiga':'LL','Serie A':'SA','Champions League':'UCL','Saudi Pro League':'SPL','Egyptian Premier League':'EPL'};return m[name]||String(name||'CUP').split(/\s+/).map(x=>x[0]).join('').slice(0,4).toUpperCase()}
 function atsTeamV25(code,score,showScore){const t=TEAM[code];return `<div class="ats-team-v25"><span class="ats-logo-v25"><img src="${t.logo}" alt="${displayTeamNameV22(code)}"></span><strong>${displayTeamNameV22(code)}</strong>${showScore?`<b>${score}</b>`:'<b></b>'}</div>`}
 function startATSCountdownV25(){clearInterval(window.__atsV25Timer);const tick=()=>document.querySelectorAll('.ats-count-v25[data-kickoff]').forEach(el=>el.textContent=countdownHMSV25(el.dataset.kickoff));tick();window.__atsV25Timer=setInterval(tick,1000)}
@@ -10599,7 +10630,7 @@ function insertHomeStoryV25(){
     middle=`<div class="ats-metric-v25"><span>${L('Kickoff Countdown','العد التنازلي للبداية')}</span><strong class="ats-points-v25 ats-count-v25" data-kickoff="${f.kickoff}">${countdownHMSV25(f.kickoff)}</strong><small class="ats-sub-v25">${L('Hours : Minutes : Seconds','ساعات : دقائق : ثواني')}</small></div>`;
     right=`<div class="ats-metric-v25"><span>${L('Your Prediction','توقعك')}</span><strong class="ats-points-v25" style="font-size:1.7rem">${p?.touched?`${TEAM[f.home].short} ${p.home}–${p.away} ${TEAM[f.away].short}`:'—'}</strong><small class="ats-sub-v25">${p?.touched?L('Your current pick for this match.','توقعك الحالي للماتش ده.'):L('Complete it before the deadline.','كمّله قبل الموعد.')}</small></div>`;
   }
-  const html=`<div class="ats-section-v25"><div class="section-title">${L('As Things Stand','الوضع الحالي')}</div><div class="ats-card-v25"><div class="ats-head-v25"><div class="ats-head-left-v25"><span class="ats-phase-v25 ${phaseClass}">${phase}</span><strong class="ats-counter-v25">${L(`Match ${idx+1} of ${fixtures.length}`,`ماتش ${idx+1} من ${fixtures.length}`)}</strong></div><div class="ats-head-right-v25"><span class="ats-comp-mark-v25">${atsCompShortV25(f.competition)}</span><strong class="ats-comp-v25">${localizedCompetitionV21(f.competition)}</strong></div></div><div class="ats-grid-v25"><div class="ats-box-v25 left"><div class="ats-fixture-v25"><div class="ats-date-v25"><strong>${kick.time}</strong><span>${kick.date}</span></div><div class="ats-teams-v25">${atsTeamV25(f.home,hs,isLive||isFinal)}${atsTeamV25(f.away,as,isLive||isFinal)}</div></div></div><div class="ats-box-v25 center">${middle}</div><div class="ats-box-v25 ${isLive?'right':'prediction'}">${right}</div></div><div class="ats-footer-v25"><div class="ats-pager-v25"><button onclick="changeHomeStoryV25(-1)" ${idx===0?'disabled':''}>‹</button><div class="ats-dots-v25">${fixtures.map((_,i)=>`<span class="ats-dot-v25 ${i===idx?'active':''}"></span>`).join('')}</div><button onclick="changeHomeStoryV25(1)" ${idx===fixtures.length-1?'disabled':''}>›</button></div>${!(!isLive&&!isFinal)?`<button class="ats-insights-v25" onclick="openMatchdayInsights('${f.id}',${(state.history?.fixtures||[]).some(x=>x.id===f.id)})">${L('View Matchday Insights','شوف تحليلات الماتش')} →</button>`:''}</div></div></div>`;
+  const html=`<div class="ats-section-v25"><div class="section-title">${L('As Things Stand','الوضع الحالي')}</div><div class="ats-card-v25"><div class="ats-head-v25"><div class="ats-head-left-v25"><span class="ats-phase-v25 ${phaseClass}">${phase}</span><strong class="ats-counter-v25">${L(`Match ${idx+1} of ${fixtures.length}`,`ماتش ${idx+1} من ${fixtures.length}`)}</strong></div><div class="ats-head-right-v25">${atsCompetitionMarkV1083(f)}<strong class="ats-comp-v25">${localizedCompetitionV21(f.competition)}</strong></div></div><div class="ats-grid-v25"><div class="ats-box-v25 left"><div class="ats-fixture-v25"><div class="ats-date-v25"><strong>${kick.time}</strong><span>${kick.date}</span></div><div class="ats-teams-v25">${atsTeamV25(f.home,hs,isLive||isFinal)}${atsTeamV25(f.away,as,isLive||isFinal)}</div></div></div><div class="ats-box-v25 center">${middle}</div><div class="ats-box-v25 ${isLive?'right':'prediction'}">${right}</div></div><div class="ats-footer-v25"><div class="ats-pager-v25"><button onclick="changeHomeStoryV25(-1)" ${idx===0?'disabled':''}>‹</button><div class="ats-dots-v25">${fixtures.map((_,i)=>`<span class="ats-dot-v25 ${i===idx?'active':''}"></span>`).join('')}</div><button onclick="changeHomeStoryV25(1)" ${idx===fixtures.length-1?'disabled':''}>›</button></div>${!(!isLive&&!isFinal)?`<button class="ats-insights-v25" onclick="openMatchdayInsights('${f.id}',${(state.history?.fixtures||[]).some(x=>x.id===f.id)})">${L('View Matchday Insights','شوف تحليلات الماتش')} →</button>`:''}</div></div></div>`;
   ticker.insertAdjacentHTML('afterend',html);startATSCountdownV25();
 }
 window.changeHomeStoryV25=function(delta){const fs=homeStoryFixturesV21(),key=String(state.selectedHomeWeek??'overall'),cur=Number(state.homeStoryIndexV21[key]||0);state.homeStoryIndexV21[key]=Math.max(0,Math.min(fs.length-1,cur+Number(delta||0)));save();insertHomeStoryV25()}
@@ -11068,7 +11099,7 @@ html[data-theme="arsenal"] body #app #view-admin .fixture-choice-livescore input
       middle=`<div class="ats-metric-v25"><span>${L('Kickoff Countdown','العد التنازلي للبداية')}</span><strong class="ats-points-v25 ats-count-v25" data-kickoff="${f.kickoff}">${countdownHMSV25(f.kickoff)}</strong><small class="ats-sub-v25">${L('Hours : Minutes : Seconds','ساعات : دقائق : ثواني')}</small></div>`;
       right=`<div class="ats-metric-v25"><span>${L('Your Prediction','توقعك')}</span>${predictionMarkupV26(f,p)}<small class="ats-sub-v25">${p?.touched?L('Your current pick for this match.','توقعك الحالي للماتش ده.'):L('Complete it before the deadline.','كمّله قبل الموعد.')}</small></div>`;
     }
-    const html=`<div class="ats-section-v25"><div class="section-title">${L('As Things Stand','الوضع الحالي')}</div><div class="ats-card-v25"><div class="ats-head-v25"><div class="ats-head-left-v25"><span class="ats-phase-v25 ${phaseClass}">${phase}</span><strong class="ats-counter-v25">${L(`Match ${idx+1} of ${fixtures.length}`,`ماتش ${idx+1} من ${fixtures.length}`)}</strong></div><div class="ats-head-right-v25"><span class="ats-comp-mark-v25">${atsCompShortV25(f.competition)}</span><strong class="ats-comp-v25">${localizedCompetitionV21(f.competition)}</strong></div></div><div class="ats-grid-v25"><div class="ats-box-v25 left"><div class="ats-fixture-v25"><div class="ats-date-v25"><strong>${kick.time}</strong><span>${kick.date}</span></div><div class="ats-teams-v25">${atsTeamV25(f.home,hs,isLive||isFinal)}${atsTeamV25(f.away,as,isLive||isFinal)}</div></div></div><div class="ats-box-v25 center">${middle}</div><div class="ats-box-v25 ${isLive?'right':'prediction'}">${right}</div></div><div class="ats-footer-v25"><div class="ats-pager-v25"><button onclick="changeHomeStoryV25(-1)" ${idx===0?'disabled':''}>‹</button><div class="ats-dots-v25">${fixtures.map((_,i)=>`<span class="ats-dot-v25 ${i===idx?'active':''}"></span>`).join('')}</div><button onclick="changeHomeStoryV25(1)" ${idx===fixtures.length-1?'disabled':''}>›</button></div>${isLive||isFinal?`<button class="ats-insights-v25" onclick="openMatchdayInsights('${f.id}',${(state.history?.fixtures||[]).some(x=>x.id===f.id)})">${L('View Matchday Insights','شوف تحليلات الماتش')} →</button>`:''}</div></div></div>`;
+    const html=`<div class="ats-section-v25"><div class="section-title">${L('As Things Stand','الوضع الحالي')}</div><div class="ats-card-v25"><div class="ats-head-v25"><div class="ats-head-left-v25"><span class="ats-phase-v25 ${phaseClass}">${phase}</span><strong class="ats-counter-v25">${L(`Match ${idx+1} of ${fixtures.length}`,`ماتش ${idx+1} من ${fixtures.length}`)}</strong></div><div class="ats-head-right-v25">${atsCompetitionMarkV1083(f)}<strong class="ats-comp-v25">${localizedCompetitionV21(f.competition)}</strong></div></div><div class="ats-grid-v25"><div class="ats-box-v25 left"><div class="ats-fixture-v25"><div class="ats-date-v25"><strong>${kick.time}</strong><span>${kick.date}</span></div><div class="ats-teams-v25">${atsTeamV25(f.home,hs,isLive||isFinal)}${atsTeamV25(f.away,as,isLive||isFinal)}</div></div></div><div class="ats-box-v25 center">${middle}</div><div class="ats-box-v25 ${isLive?'right':'prediction'}">${right}</div></div><div class="ats-footer-v25"><div class="ats-pager-v25"><button onclick="changeHomeStoryV25(-1)" ${idx===0?'disabled':''}>‹</button><div class="ats-dots-v25">${fixtures.map((_,i)=>`<span class="ats-dot-v25 ${i===idx?'active':''}"></span>`).join('')}</div><button onclick="changeHomeStoryV25(1)" ${idx===fixtures.length-1?'disabled':''}>›</button></div>${isLive||isFinal?`<button class="ats-insights-v25" onclick="openMatchdayInsights('${f.id}',${(state.history?.fixtures||[]).some(x=>x.id===f.id)})">${L('View Matchday Insights','شوف تحليلات الماتش')} →</button>`:''}</div></div></div>`;
     ticker.insertAdjacentHTML('afterend',html);startATSCountdownV25();ensureTimingHeaderV26();
   };
   insertHomeStoryV23=insertHomeStoryV25;insertHomeStoryV22=insertHomeStoryV25;insertHomeStoryV21=insertHomeStoryV25;
@@ -13164,43 +13195,72 @@ renderRankings=function(){
 window.MASTABA_PRODUCTION_V1073=true;
 const FOOTBALL_EDGE_V1073='https://bnwjtrtlwnlbldfhaggg.supabase.co/functions/v1/mastaba-football';
 let prodCtxV1073=null;
-const teamCodeV1073=id=>Number(id)===42?'ARS':Number(id)===1346?'COV':`T${id}`;
+const TEAM_ABBR_V1083=window.MASTABA_TEAM_ABBR_V1083=Object.assign({1577:"AHL",1572:"ETT",42:"ARS",529:"BAR",35:"BOU",1346:"COV",797:"ELC",1037:"ENP",540:"ESP",64:"HUL",40:"LIV",50:"MCI",33:"MUN",34:"NEW",541:"RMA",1040:"ZAM"},window.MASTABA_TEAM_ABBR_V1083||{});
+function fallbackTeamCodeV1083(name,id){
+ const raw=String(name||'').normalize('NFD').replace(/[\u0300-\u036f]/g,'').replace(/[^A-Za-z0-9 ]+/g,' ').trim();
+ const stop=new Set(['FC','SC','CF','AFC','CLUB','FOOTBALL','CALCIO']);
+ const words=raw.split(/\s+/).filter(Boolean).filter(w=>!stop.has(w.toUpperCase()));
+ if(!words.length)return 'TM';
+ if(words.length===1)return words[0].slice(0,3).toUpperCase();
+ if(words.length===2)return (words[0].slice(0,1)+words[1].slice(0,2)).toUpperCase();
+ return words.slice(0,3).map(w=>w[0]).join('').toUpperCase();
+}
+const teamCodeV1073=(id,name='')=>TEAM_ABBR_V1083[Number(id)]||fallbackTeamCodeV1083(name,id);
 const posV1073=p=>({Goalkeeper:'GK',Defender:'CB',Midfielder:'MID',Attacker:'FW'}[p]||'MID');
 const zeroStatsV1073=()=>({ALL:{apps:0,goals:0,assists:0,xg:0,xa:0,bench:0},'Premier League':{apps:0,goals:0,assists:0,xg:0,xa:0,bench:0}});
 function clubFromThemeV1073(theme){return (typeof CLUBS!=='undefined'&&CLUBS[theme])?theme:'mastaba'}
 async function getSquadV1073(teamId){
- try{const r=await fetch(`${FOOTBALL_EDGE_V1073}?endpoint=players/squads&team=${encodeURIComponent(teamId)}`,{cache:'no-store'});if(!r.ok)return[];const j=await r.json();return j?.data?.response?.[0]?.players||[]}catch{return[]}
+ // Legacy helper retained for admin diagnostics only. User scorer selection is central-Supabase only in V10.83.
+ try{const {data:ss}=await window.mastabaSandboxV1064?.auth?.getSession?.();const tok=ss?.session?.access_token||'';const r=await fetch(`${FOOTBALL_EDGE_V1073}?endpoint=players/squads&team=${encodeURIComponent(teamId)}`,{cache:'no-store',headers:tok?{Authorization:`Bearer ${tok}`}:{}});if(!r.ok)return[];const j=await r.json();return j?.data?.response?.[0]?.players||[]}catch{return[]}
 }
 function fixturePhaseV1073(status,kickoff){const s=String(status||'NS').toUpperCase();if(['FT','AET','PEN'].includes(s))return'final';if(!['NS','TBD','PST','CANC','ABD','AWD','WO'].includes(s)||Date.now()>=new Date(kickoff).getTime())return'live';return'upcoming'}
-function rowToPickV1073(row,fixture){const homeCode=teamCodeV1073(fixture.home_team_id),awayCode=teamCodeV1073(fixture.away_team_id);let firstTeam='none';if(Number(row?.first_team_id)===Number(fixture.home_team_id))firstTeam=homeCode;else if(Number(row?.first_team_id)===Number(fixture.away_team_id))firstTeam=awayCode;return{home:row?.home_score??'',away:row?.away_score??'',firstTeam,firstScorer:row?.first_scorer_id?String(row.first_scorer_id):'none',double:!!row?.double_points,touched:row?.home_score!=null&&row?.away_score!=null}}
+function rowToPickV1073(row,fixture){const homeCode=teamCodeV1073(fixture.home_team_id,fixture.home_team_name),awayCode=teamCodeV1073(fixture.away_team_id,fixture.away_team_name);let firstTeam='none';if(Number(row?.first_team_id)===Number(fixture.home_team_id))firstTeam=homeCode;else if(Number(row?.first_team_id)===Number(fixture.away_team_id))firstTeam=awayCode;return{home:row?.home_score??'',away:row?.away_score??'',firstTeam,firstScorer:row?.first_scorer_id?String(row.first_scorer_id):'none',double:!!row?.double_points,touched:row?.home_score!=null&&row?.away_score!=null}}
 async function hydrateProductionV1073(profile,user,supa){
- const [profilesR,leaguesR,membersR,gwR,roleR]=await Promise.all([
-  supa.from('mastaba_profiles').select('id,display_name,primary_team_key,theme_key,language,created_at').order('created_at',{ascending:true}),
+ // Scale-safe hydration: only load memberships/profiles for leagues the current user actually belongs to.
+ const [leaguesR,gwR,roleR,ownMembershipR]=await Promise.all([
   supa.from('mastaba_leagues').select('id,slug,name_en,name_ar,league_type,status,auto_join,can_leave,owner_id,scoring_from_gameweek,started_at'),
-  supa.from('mastaba_league_members').select('league_id,user_id,member_role,scoring_from_gameweek'),
-  supa.from('mastaba_gameweeks').select('id,gameweek_number,name_en,name_ar,status,opens_at').in('status',['open','locked','scoring']).order('gameweek_number',{ascending:false}).limit(1).maybeSingle(),
-  supa.from('mastaba_roles').select('role').eq('user_id',user.id).maybeSingle()
+  supa.from('mastaba_gameweeks').select('id,gameweek_number,name_en,name_ar,status,opens_at,deadline_at,finalized_at,updated_at').in('status',['open','locked','scoring','final']).order('gameweek_number',{ascending:false}).limit(1).maybeSingle(),
+  supa.from('mastaba_roles').select('role').eq('user_id',user.id).maybeSingle(),
+  supa.from('mastaba_league_members').select('league_id,user_id,member_role,scoring_from_gameweek').eq('user_id',user.id)
  ]);
- for(const r of [profilesR,leaguesR,membersR,gwR])if(r.error)throw r.error;
+ for(const r of [leaguesR,gwR,ownMembershipR])if(r.error)throw r.error;
  const gw=gwR.data;if(!gw)throw new Error('No active Production Gameweek is available.');
+ const leagueRows=leaguesR.data||[], leagueById=Object.fromEntries(leagueRows.map(l=>[l.id,l]));
+ const ownMemberships=ownMembershipR.data||[];
+ const nonPublicIds=[...new Set(ownMemberships.map(m=>m.league_id).filter(id=>leagueById[id]?.slug!=='mastaba-public'))];
+ let memberships=[...ownMemberships];
+ if(nonPublicIds.length){
+  const relR=await supa.from('mastaba_league_members').select('league_id,user_id,member_role,scoring_from_gameweek').in('league_id',nonPublicIds);
+  if(relR.error)throw relR.error;
+  const seen=new Set(memberships.map(m=>`${m.league_id}:${m.user_id}`));
+  for(const m of relR.data||[]){const k=`${m.league_id}:${m.user_id}`;if(!seen.has(k)){seen.add(k);memberships.push(m)}}
+ }
+ const profileIds=[...new Set([user.id,...memberships.map(m=>m.user_id).filter(Boolean)])];
+ const profilesR=await supa.from('mastaba_profiles').select('id,display_name,primary_team_key,theme_key,language,created_at').in('id',profileIds).order('created_at',{ascending:true});if(profilesR.error)throw profilesR.error;
  const fixturesR=await supa.from('mastaba_fixtures').select('*').eq('gameweek_id',gw.id).order('kickoff_at',{ascending:true});if(fixturesR.error)throw fixturesR.error;
- const predsR=await supa.from('mastaba_predictions').select('*').eq('gameweek_id',gw.id);if(predsR.error)throw predsR.error;
+ const fixtureRows=fixturesR.data||[];
+ const selectedTeamIds=[...new Set(fixtureRows.flatMap(f=>[Number(f.home_team_id),Number(f.away_team_id)]).filter(Boolean))];
+ const [predsR,abbrR]=await Promise.all([
+  supa.from('mastaba_predictions').select('*').eq('gameweek_id',gw.id),
+  selectedTeamIds.length?supa.from('mastaba_team_abbreviations').select('team_id,abbreviation').in('team_id',selectedTeamIds):Promise.resolve({data:[],error:null})
+ ]);
+ if(predsR.error)throw predsR.error;
+ if(!abbrR.error)for(const r of abbrR.data||[])if(r?.abbreviation)TEAM_ABBR_V1083[Number(r.team_id)]=String(r.abbreviation).toUpperCase();
  const profiles=profilesR.data||[];const slotByAuth={};profiles.forEach((p,i)=>slotByAuth[p.id]=`p${i+1}`);
  if(!slotByAuth[user.id]){slotByAuth[user.id]=`p${profiles.length+1}`;profiles.push(profile)}
  const isAdmin=roleR.data?.role==='admin';
  state.users=profiles.map(p=>({id:slotByAuth[p.id],authUserId:p.id,name:p.display_name||'Mastaba Player',nickname:p.display_name||'Mastaba Player',gender:'male',avatar:null,admin:p.id===user.id&&isAdmin,timeZone:'auto',club:clubFromThemeV1073(p.theme_key),theme:p.theme_key||'mastaba',active:true}));
  state.currentUser=slotByAuth[user.id];
  state.authProfileV1064={id:user.id,email:user.email||'',displayName:profile.display_name||'',team:profile.primary_team_key||'',theme:profile.theme_key||'mastaba'};
- const memberships=membersR.data||[];
- state.leagues=(leaguesR.data||[]).map(l=>({id:l.slug,nameEn:l.name_en,nameAr:l.name_ar,visibility:l.league_type==='private'?'private':'public',members:memberships.filter(m=>m.league_id===l.id&&slotByAuth[m.user_id]).map(m=>slotByAuth[m.user_id]),adminId:l.owner_id?slotByAuth[l.owner_id]:null,lockedMembership:!l.can_leave,fixtureSource:l.slug==='mastaba-public'?'mastaba':undefined,started:l.status==='active',startWeek:l.scoring_from_gameweek||null,baselineByUser:{}})).filter(l=>l.members.includes(state.currentUser));
- if(!state.leagues.length)state.leagues=[{id:'mastaba-public',nameEn:'Mastaba Public League',nameAr:'دوري المصطبة العام',visibility:'public',members:[state.currentUser],lockedMembership:true,started:true,startWeek:1,baselineByUser:{}}];
+ state.leagues=leagueRows.map(l=>({id:l.slug,nameEn:l.name_en,nameAr:l.name_ar,visibility:l.league_type==='private'?'private':'public',members:memberships.filter(m=>m.league_id===l.id&&slotByAuth[m.user_id]).map(m=>slotByAuth[m.user_id]),adminId:l.owner_id?slotByAuth[l.owner_id]:null,lockedMembership:!l.can_leave,fixtureSource:l.slug==='mastaba-public'?'mastaba':undefined,started:l.status==='active',startWeek:l.scoring_from_gameweek||null,baselineByUser:{}})).filter(l=>l.members.includes(state.currentUser));
+ if(!state.leagues.length){const pl=leagueRows.find(l=>l.slug==='mastaba-public');state.leagues=[{id:'mastaba-public',nameEn:pl?.name_en||'Mastaba Public League',nameAr:pl?.name_ar||'دوري المصطبة العام',visibility:'public',members:[state.currentUser],lockedMembership:true,started:pl?.status==='active',startWeek:pl?.scoring_from_gameweek||null,baselineByUser:{}}]}
  const publicL=state.leagues.find(l=>l.id==='mastaba-public');state.homeLeagueId=(state.leagues.find(l=>l.id==='mastaba')||publicL||state.leagues[0]).id;state.selectedLeagueId=state.homeLeagueId;
- const fx=fixturesR.data||[];
- for(const f of fx){const hc=teamCodeV1073(f.home_team_id),ac=teamCodeV1073(f.away_team_id);TEAM[hc]={name:f.home_team_name,short:hc,logo:f.home_team_logo||''};TEAM[ac]={name:f.away_team_name,short:ac,logo:f.away_team_logo||''}}
+ const fx=fixtureRows;
+ for(const f of fx){const hc=teamCodeV1073(f.home_team_id,f.home_team_name),ac=teamCodeV1073(f.away_team_id,f.away_team_name);TEAM[hc]={name:f.home_team_name,short:hc,logo:f.home_team_logo||''};TEAM[ac]={name:f.away_team_name,short:ac,logo:f.away_team_logo||''}}
  const uniqueTeamIds=[...new Set(fx.flatMap(f=>[f.home_team_id,f.away_team_id]))];
- uniqueTeamIds.forEach(tid=>{const code=teamCodeV1073(tid);players[code]=players[code]||[]});
+ uniqueTeamIds.forEach(tid=>{const f=fx.find(x=>Number(x.home_team_id)===Number(tid)||Number(x.away_team_id)===Number(tid));const name=Number(f?.home_team_id)===Number(tid)?f?.home_team_name:f?.away_team_name;const code=teamCodeV1073(tid,name);players[code]=players[code]||[]});
  state.week=Number(gw.gameweek_number);state.selectedPredictWeek=state.week;state.selectedRankWeek=state.week;state.selectedHomeWeek='overall';state.nextPublished=false;state.nextFixtures=[];state.history=null;state.previousWeekPoints={};state.previousWeekStats={};state.rankOrderHistory=[];state.leaderHistory=[];state.lastPlaceHistory=[];state.roundLocked=false;state.forceDeadline=false;
- state.fixtures=fx.map(f=>{const phase=fixturePhaseV1073(f.fixture_status,f.kickoff_at);const result=(f.home_goals!=null&&f.away_goals!=null)?{home:Number(f.home_goals),away:Number(f.away_goals),firstTeam:f.first_scoring_team_id?teamCodeV1073(f.first_scoring_team_id):'none',firstScorer:f.first_scorer_id?String(f.first_scorer_id):'none'}:null;return{id:f.id,apiFixtureId:Number(f.api_fixture_id),competition:f.competition_name,home:teamCodeV1073(f.home_team_id),away:teamCodeV1073(f.away_team_id),homeTeamId:Number(f.home_team_id),awayTeamId:Number(f.away_team_id),stadium:f.venue_name||'',kickoff:f.kickoff_at,phase,result}});
+ state.fixtures=fx.map(f=>{const phase=fixturePhaseV1073(f.fixture_status,f.kickoff_at);const result=(f.home_goals!=null&&f.away_goals!=null)?{home:Number(f.home_goals),away:Number(f.away_goals),firstTeam:f.first_scoring_team_id?teamCodeV1073(f.first_scoring_team_id):'none',firstScorer:f.first_scorer_id?String(f.first_scorer_id):'none'}:null;return{id:f.id,apiFixtureId:Number(f.api_fixture_id),competition:f.competition_name,competitionCountry:f.competition_country||'',apiLeagueId:Number(f.api_league_id)||null,competitionLogo:String(f?.api_payload?.league?.logo||''),home:teamCodeV1073(f.home_team_id,f.home_team_name),away:teamCodeV1073(f.away_team_id,f.away_team_name),homeTeamId:Number(f.home_team_id),awayTeamId:Number(f.away_team_id),stadium:f.venue_name||'',kickoff:f.kickoff_at,phase,result}});
  state.fixturePool=state.fixtures.map(x=>({...x}));state.predictions={};state.savedDrafts={};state.officialPredictions={};state.roundMeta={};
  state.users.forEach(u=>{state.predictions[u.id]={};state.savedDrafts[u.id]={};state.officialPredictions[u.id]={};state.roundMeta[u.id]={draftSavedAt:null,submittedAt:null,editing:true}});
  const dbFixtureById=Object.fromEntries(fx.map(f=>[f.id,f]));
@@ -13415,11 +13475,11 @@ if(titleElV1077&&window.MutationObserver){
 
 /* ---------- Small helpers ---------- */
 const safeNumV1077=v=>Number.isFinite(Number(v))?Number(v):0;
-const teamCodeV1077=id=>{
+const teamCodeV1077=(id,name='')=>{
   const n=Number(id);
   const current=(state?.fixtures||[]).find(f=>Number(f.homeTeamId)===n||Number(f.awayTeamId)===n);
   if(current)return Number(current.homeTeamId)===n?current.home:current.away;
-  if(n===42)return'ARS';if(n===1346)return'COV';return`T${n}`;
+  return window.MASTABA_TEAM_ABBR_V1083?.[n]||fallbackTeamCodeV1083(name,n);
 };
 const posV1077=p=>({Goalkeeper:'GK',Defender:'CB',Midfielder:'MID',Attacker:'FW'}[String(p||'')]||String(p||'MID').toUpperCase());
 function phaseV1077(short,kickoff){
@@ -13431,7 +13491,9 @@ function phaseV1077(short,kickoff){
 async function edgeV1077(endpoint,params={}){
   const url=new URL(V1077_EDGE);url.searchParams.set('endpoint',endpoint);
   Object.entries(params).forEach(([k,v])=>{if(v!==undefined&&v!==null&&v!=='')url.searchParams.set(k,String(v))});
-  const r=await fetch(url.toString(),{cache:'no-store'});
+  let headersV1083={};
+  try{const {data:ss}=await window.mastabaSandboxV1064?.auth?.getSession?.();const tok=ss?.session?.access_token;if(tok)headersV1083.Authorization=`Bearer ${tok}`}catch{}
+  const r=await fetch(url.toString(),{cache:'no-store',headers:headersV1083});
   if(!r.ok)throw new Error(`Football data request failed (${r.status})`);
   const j=await r.json();
   if(j?.error)throw new Error(j.message||j.error);
@@ -13446,7 +13508,7 @@ function addStatV1077(a,s){
   return a;
 }
 function registerTeamV1077(id,name,logo){
-  const code=teamCodeV1077(id);
+  const code=teamCodeV1077(id,name);
   TEAM[code]={name:name||code,short:code,logo:logo||TEAM[code]?.logo||''};
   return code;
 }
@@ -13551,9 +13613,10 @@ window.hydrateProductionV1073=async function(profile,user,supa){
   if(!ctx)return ok;
   adminSlotV1077=state.currentUser;
   try{
+    const relevantProfileIdsV1083=(state.users||[]).map(u=>u.authUserId).filter(Boolean);
     const [{data:activeRows},{data:nextRow}]=await Promise.all([
-      supa.from('mastaba_profiles').select('id,active'),
-      supa.from('mastaba_gameweeks').select('id,gameweek_number,name_en,name_ar,status,opens_at').eq('gameweek_number',Number(state.week)+1).maybeSingle()
+      relevantProfileIdsV1083.length?supa.from('mastaba_profiles').select('id,active').in('id',relevantProfileIdsV1083):Promise.resolve({data:[]}),
+      supa.from('mastaba_gameweeks').select('id,gameweek_number,name_en,name_ar,status,opens_at,deadline_at,finalized_at').eq('gameweek_number',Number(state.week)+1).maybeSingle()
     ]);
     const activeById=Object.fromEntries((activeRows||[]).map(x=>[x.id,x.active!==false]));
     state.users.forEach(u=>u.active=activeById[u.authUserId]!==false);
@@ -14213,5 +14276,309 @@ window.scoreStepper=scoreStepper=function(mid,side,val,disabled){const display=(
 })();
 </script>
 
+
+<style id="mastaba-v1082-style">
+/* ===== V10.82 — scalable shared player cache + Bulletin date ===== */
+.ticker-kickoff-v1082{display:inline-flex;flex-direction:column;align-items:center;justify-content:center;line-height:1.05;margin-left:5px;min-width:58px}
+.ticker-kickoff-v1082 .ticker-date-v1082{font-size:.56rem!important;font-weight:850;opacity:.78;letter-spacing:.01em;margin:0 0 3px!important;color:inherit!important}
+.ticker-kickoff-v1082 .ticker-time-v1082{font-size:.65rem!important;font-weight:900;margin:0!important;color:inherit!important;opacity:.96}
+@media(max-width:720px){
+  .ticker-kickoff-v1082{min-width:52px;margin-left:3px}
+  .ticker-kickoff-v1082 .ticker-date-v1082{font-size:.52rem!important;margin-bottom:2px!important}
+  .ticker-kickoff-v1082 .ticker-time-v1082{font-size:.6rem!important}
+}
+html[dir="rtl"] .ticker-kickoff-v1082{margin-left:0;margin-right:5px}
+</style>
+<script id="mastaba-v1082-script">
+(function(){
+'use strict';
+const EDGE_V1082='https://bnwjtrtlwnlbldfhaggg.supabase.co/functions/v1/mastaba-football';
+const loadedV1082=new Set();
+const loadingV1082=new Map();
+const statsZeroV1082=()=>({apps:0,bench:0,goals:0,assists:0,xg:null,xa:null});
+const safeNV1082=v=>Number.isFinite(Number(v))?Number(v):0;
+const posV1082=p=>({Goalkeeper:'GK',Defender:'CB',Midfielder:'MID',Attacker:'FW'}[String(p||'')]||String(p||'MID').toUpperCase());
+function providerErrorsV1082(d){const e=d?.errors;if(!e)return[];if(Array.isArray(e))return e.filter(Boolean).map(String);if(typeof e==='object')return Object.values(e).filter(Boolean).map(String);return String(e).trim()?[String(e)]:[]}
+function sleepV1082(ms){return new Promise(r=>setTimeout(r,ms))}
+async function edgeV1082(endpoint,params={}){
+  const u=new URL(EDGE_V1082);u.searchParams.set('endpoint',endpoint);Object.entries(params).forEach(([k,v])=>{if(v!==undefined&&v!==null&&v!=='')u.searchParams.set(k,String(v))});
+  let last;
+  for(let attempt=0;attempt<4;attempt++){
+    const r=await fetch(u.toString());let j={};try{j=await r.json()}catch{}
+    if(r.ok&&!j?.error){const d=j?.data||{};const errs=providerErrorsV1082(d);if(!errs.length)return d;last=new Error(errs.join('; '));}
+    else{last=new Error(j?.message||j?.error||`Football data request failed (${r.status})`);if(j?.error!=='CACHE_WARMING')throw last;}
+    await sleepV1082(850+(attempt*550));
+  }
+  throw last||new Error('Football data is temporarily unavailable.');
+}
+function mergeSquadV1082(code,squad){
+  const old=new Map((players[code]||[]).map(p=>[String(p.id),p]));
+  for(const x of squad||[]){const id=String(x?.id||'');if(!id)continue;const p=old.get(id)||{id,name:x.name||'Player',pos:posV1082(x.position),number:x.number??null,status:'available',stats:{}};p.name=x.name||p.name;p.pos=posV1082(x.position||p.pos);if(x.number!=null)p.number=x.number;p.status=p.status||'available';p.stats=p.stats||{};p.stats.ALL=p.stats.ALL||statsZeroV1082();old.set(id,p)}
+  players[code]=[...old.values()];
+}
+function addStatV1082(a,s){a.apps+=safeNV1082(s?.games?.appearences);a.bench+=safeNV1082(s?.substitutes?.bench);a.goals+=safeNV1082(s?.goals?.total);a.assists+=safeNV1082(s?.goals?.assists);return a}
+function mergeStatsEntryV1082(code,entry,fixture){
+  const id=String(entry?.player?.id||'');if(!id)return;let p=(players[code]||[]).find(x=>String(x.id)===id);
+  if(!p){p={id,name:entry?.player?.name||'Player',pos:posV1082(entry?.statistics?.[0]?.games?.position),number:null,status:'available',stats:{}};(players[code]??=[]).push(p)}
+  p.name=entry?.player?.name||p.name;if(entry?.statistics?.[0]?.games?.position)p.pos=posV1082(entry.statistics[0].games.position);p.stats=p.stats||{};
+  const all=statsZeroV1082(),byComp={};(entry?.statistics||[]).forEach(st=>{addStatV1082(all,st);const c=st?.league?.name;if(c){byComp[c]=byComp[c]||statsZeroV1082();addStatV1082(byComp[c],st)}});p.stats={...p.stats,ALL:all,...byComp};if(fixture?.competition)p.stats[fixture.competition]=p.stats[fixture.competition]||statsZeroV1082();
+}
+function teamIdV1082(f,code){if(code===f.home)return Number(f.homeTeamId);if(code===f.away)return Number(f.awayTeamId);return Number(String(code||'').replace(/^T/,''))||null}
+function seasonV1082(f){const db=window.prodCtxV1073?.fxById?.[f?.id];return Number(db?.api_payload?.league?.season||f?.apiPayload?.league?.season||new Date(f?.kickoff||Date.now()).getUTCFullYear())}
+async function ensureTeamPlayersV1082(f,code){
+  if(loadedV1082.has(code)&&(players[code]||[]).length)return true;if(loadingV1082.has(code))return loadingV1082.get(code);
+  const task=(async()=>{const tid=teamIdV1082(f,code);if(!tid)throw new Error(L('Team ID is unavailable.','رقم الفريق غير متاح.'));let have=(players[code]||[]).length>0;
+    try{const d=await edgeV1082('players/squads',{team:tid});const sq=d?.response?.[0]?.players||[];if(sq.length){mergeSquadV1082(code,sq);have=true}}catch(e){console.warn('Shared squad cache unavailable',tid,e)}
+    try{let page=1,total=1;do{const d=await edgeV1082('players',{team:tid,season:seasonV1082(f),page});for(const entry of (d?.response||[]))mergeStatsEntryV1082(code,entry,f);total=Math.max(1,Number(d?.paging?.total||1));page++}while(page<=total&&page<=4)}catch(e){console.warn('Shared stats cache temporarily unavailable',tid,e)}
+    if(!(players[code]||[]).length&&!have)throw new Error(L('Player data is being prepared. Please try again in a moment.','بيانات اللعيبة بيتم تجهيزها. حاول تاني بعد لحظة.'));
+    try{if(f?.apiFixtureId){const d=await edgeV1082('injuries',{fixture:f.apiFixtureId});for(const item of (d?.response||[])){const p=(players[code]||[]).find(x=>String(x.id)===String(item?.player?.id||''));if(!p)continue;const t=`${item?.player?.type||''} ${item?.player?.reason||''}`.toLowerCase();p.status=/suspend|red card|ban/.test(t)?'suspended':/doubt|question/.test(t)?'doubtful':'out'}}}catch(e){console.warn('Shared availability cache temporarily unavailable',e)}
+    loadedV1082.add(code);return true;
+  })();loadingV1082.set(code,task);try{return await task}finally{loadingV1082.delete(code)}
+}
+window.ensureTeamPlayersV1082=ensureTeamPlayersV1082;
+window.openScorers=async function(mid){
+  if(isRoundLocked()||userSubmittedLocked())return;const f=fixtureById(mid),p=getWorking(state.currentUser,mid)||{};p.touched=true;
+  if(p.home===''||p.away==='')return toast(L('Enter the score first.','اكتب النتيجة الأول.'),'warn');
+  if(Number(p.home)===0&&Number(p.away)===0){p.firstTeam='none';p.firstScorer='none';state.predictions[state.currentUser][mid]=p;markDirty(mid);save();refreshPredictionCard(mid);return}
+  if(Number(p.home)>0&&Number(p.away)===0)p.firstTeam=f.home;if(Number(p.away)>0&&Number(p.home)===0)p.firstTeam=f.away;
+  if(!p.firstTeam||p.firstTeam==='none')return toast(L('Choose the first team to score first.','اختار أول فريق هيسجل الأول.'),'warn');
+  state.predictions[state.currentUser][mid]=p;
+  const root=$('#modalRoot');root.innerHTML=`<div class="player-drawer" data-player-backdrop-v1082><div class="drawer-card"><div class="drawer-handle"></div><div class="panel-head"><div><h3>${L('First Goalscorer','أول لاعب يسجل')} — ${TEAM[p.firstTeam]?.name||p.firstTeam}</h3></div><button class="icon-button" onclick="closeModal()">×</button></div><div class="player-loading-v1081"><div><div class="player-loading-spinner-v1081"></div><strong>${L('Loading squad…','جاري تحميل قائمة اللعيبة…')}</strong><span>${L('Shared player cache — one provider request serves everyone.','بيانات مشتركة — طلب واحد من المصدر بيخدم الكل.')}</span></div></div></div></div>`;
+  try{await ensureTeamPlayersV1082(f,p.firstTeam);if(document.querySelector('[data-player-backdrop-v1082]'))openPlayerDrawer(mid,p.firstTeam,f.competition)}catch(e){console.error(e);root.innerHTML=`<div class="player-drawer" data-player-backdrop-v1082><div class="drawer-card"><div class="drawer-handle"></div><div class="panel-head"><div><h3>${L('First Goalscorer','أول لاعب يسجل')}</h3></div><button class="icon-button" onclick="closeModal()">×</button></div><div class="player-load-error-v1081"><strong>${String(e?.message||L('Player data could not be loaded.','تعذر تحميل بيانات اللعيبة.'))}</strong><br><button class="btn btn-primary" onclick="closeModal();openScorers('${mid}')">${L('Retry','حاول تاني')}</button></div></div></div>`}
+};
+function bulletinDateV1082(iso){
+  const d=new Date(iso);const parts=new Intl.DateTimeFormat('en-GB',{day:'numeric',month:'numeric',year:'2-digit',timeZone:userTZ()}).formatToParts(d);const get=t=>parts.find(p=>p.type===t)?.value||'';return`${Number(get('day'))}/${Number(get('month'))}/${get('year')}`;
+}
+function bulletinTimeV1082(iso){return new Intl.DateTimeFormat(state.lang==='ar'?'ar-EG':'en-US',{hour:'numeric',minute:'2-digit',timeZone:userTZ()}).format(new Date(iso))}
+window.tickerGroups=tickerGroups=function(fixtures,label){
+  const groups={};(fixtures||[]).forEach(f=>{const comp=window.canonicalCompetitionV1080?window.canonicalCompetitionV1080(f):f.competition;(groups[comp]??=[]).push(f)});
+  return Object.entries(groups).map(([comp,fs])=>`<div class="ticker-group"><span class="ticker-league"><small>${label}</small>${comp}</span>${fs.map(f=>`<span class="ticker-match ${f.phase}">${tickerTeamBadge(f.home)} <b class="ticker-score">${f.phase==='final'?`${f.result.home}–${f.result.away}`:f.phase==='live'?`${(f.liveScore||f.result||{home:0,away:0}).home}–${(f.liveScore||f.result||{home:0,away:0}).away}`:'vs'}</b> ${tickerTeamBadge(f.away)}${f.phase==='live'?'<em>LIVE</em>':f.phase==='final'?'<em>FT</em>':`<span class="ticker-kickoff-v1082"><small class="ticker-date-v1082">${bulletinDateV1082(f.kickoff)}</small><small class="ticker-time-v1082">${bulletinTimeV1082(f.kickoff)}</small></span>`}</span>`).join('')}</div>`).join('');
+};
+})();
+</script>
+
+
+<style id="mastaba-v1083-style">
+/* ===== V10.83 — central player pool + Gameweek T−1 deadline ===== */
+.central-player-note-v1083{font-size:.68rem;font-weight:800;opacity:.72;margin-top:4px}
+.player-list-empty-v1083{padding:24px 16px;text-align:center;color:#667085;font-weight:800}
+</style>
+<script id="mastaba-v1083-script">
+(function(){
+'use strict';
+const centralAvailabilityV1083={};
+let centralPoolReadyV1083=false,lastAvailabilityReadV1083=0;
+function zeroV1083(){return{apps:0,bench:0,goals:0,assists:0,xg:null,xa:null}}
+function teamCodeV1083(tid){const n=Number(tid);const f=(state.fixtures||[]).find(x=>Number(x.homeTeamId)===n||Number(x.awayTeamId)===n);if(f)return Number(f.homeTeamId)===n?f.home:f.away;return window.MASTABA_TEAM_ABBR_V1083?.[n]||'TM'}
+function posV1083(p){const x=String(p||'MID').toUpperCase();if(x==='DEF')return'CB';if(x==='ATTACKER'||x==='FWD'||x==='FORWARD')return'FW';if(x==='MIDFIELDER')return'MID';if(x==='GOALKEEPER')return'GK';return x}
+function deadlineV1083(){const db=window.prodCtxV1073?.gw?.deadline_at;if(db)return new Date(db);const times=(state.fixtures||[]).map(f=>new Date(f.kickoff).getTime()).filter(Number.isFinite);return new Date(Math.min(...times)-60000)}
+window.deadline=deadlineV1083;try{deadline=deadlineV1083}catch{}
+function applyAvailabilityV1083(mid,team){const m=centralAvailabilityV1083[mid]||{};(players[team]||[]).forEach(p=>{const a=m[String(p.id)];p.status=a?.status||'available';p.availabilityReason=a?.reason||null})}
+async function loadCentralAvailabilityV1083(supa){
+  lastAvailabilityReadV1083=Date.now();
+  const fids=(state.fixtures||[]).map(f=>f.id).filter(Boolean);if(!fids.length)return;
+  const {data,error}=await supa.from('mastaba_fixture_player_availability').select('fixture_id,player_id,status,reason,refreshed_at').in('fixture_id',fids);
+  if(error){console.warn('Central availability read failed',error);return}
+  fids.forEach(id=>centralAvailabilityV1083[id]={});
+  for(const r of data||[])(centralAvailabilityV1083[r.fixture_id]??={})[String(r.player_id)]={status:r.status||'available',reason:r.reason||null,refreshed_at:r.refreshed_at};
+}
+async function loadCentralPlayerPoolV1083(supa){
+  const tids=[...new Set((state.fixtures||[]).flatMap(f=>[Number(f.homeTeamId),Number(f.awayTeamId)]).filter(Boolean))];if(!tids.length)return;
+  const cacheKey=`mastaba_central_players_v1083_${window.prodCtxV1073?.gw?.id||state.week}`;
+  let data=null;
+  try{const c=JSON.parse(localStorage.getItem(cacheKey)||'null');if(c&&Date.now()-Number(c.ts||0)<6*3600000&&Array.isArray(c.rows))data=c.rows}catch{}
+  if(!data){const r=await supa.from('mastaba_team_player_pool').select('team_id,player_id,player_name,position,squad_number,stats,stats_refreshed_at').in('team_id',tids).eq('active',true).order('player_name',{ascending:true});if(r.error){console.warn('Central player pool read failed',r.error);return}data=r.data||[];try{localStorage.setItem(cacheKey,JSON.stringify({ts:Date.now(),rows:data}))}catch{}}
+  const by={};for(const r of data||[]){const code=teamCodeV1083(r.team_id);(by[code]??=[]).push({id:String(r.player_id),name:r.player_name||'Player',pos:posV1083(r.position),number:r.squad_number??null,status:'available',stats:r.stats&&Object.keys(r.stats).length?r.stats:{ALL:zeroV1083()}})}
+  Object.entries(by).forEach(([code,list])=>players[code]=list);
+  centralPoolReadyV1083=true;
+}
+async function prefetchCentralV1083(supa){await Promise.all([loadCentralPlayerPoolV1083(supa),loadCentralAvailabilityV1083(supa)])}
+const hydrateV1083Base=window.hydrateProductionV1073;
+window.hydrateProductionV1073=async function(profile,user,supa){const ok=await hydrateV1083Base(profile,user,supa);await prefetchCentralV1083(supa);window.mastabaGameweekDeadlineV1083=deadlineV1083().toISOString();return ok};
+window.ensureTeamPlayersV1082=async function(f,code){return (players[code]||[]).length>0};
+window.ensureTeamPlayersV1081=window.ensureTeamPlayersV1082;
+window.openScorers=function(mid){
+  if(isRoundLocked()||userSubmittedLocked())return;
+  const f=fixtureById(mid),p=getWorking(state.currentUser,mid)||{};p.touched=true;
+  if(p.home===''||p.away==='')return toast(L('Enter the score first.','اكتب النتيجة الأول.'),'warn');
+  if(Number(p.home)===0&&Number(p.away)===0){p.firstTeam='none';p.firstScorer='none';state.predictions[state.currentUser][mid]=p;markDirty(mid);save();refreshPredictionCard(mid);return}
+  if(Number(p.home)>0&&Number(p.away)===0)p.firstTeam=f.home;if(Number(p.away)>0&&Number(p.home)===0)p.firstTeam=f.away;
+  if(!p.firstTeam||p.firstTeam==='none')return toast(L('Choose the first team to score first.','اختار أول فريق هيسجل الأول.'),'warn');
+  state.predictions[state.currentUser][mid]=p;applyAvailabilityV1083(mid,p.firstTeam);
+  if(!(players[p.firstTeam]||[]).length){const root=$('#modalRoot');root.innerHTML=`<div class="player-drawer" data-player-backdrop-v1083><div class="drawer-card"><div class="drawer-handle"></div><div class="panel-head"><div><h3>${L('First Goalscorer','أول لاعب يسجل')}</h3></div><button class="icon-button" onclick="closeModal()">×</button></div><div class="player-list-empty-v1083">${L('The central player list is still being prepared by المصطبة. No API request is being made from your device.','قائمة اللعيبة المركزية لسه بتتجهز من المصطبة. مفيش أي طلب للـ API بيتعمل من جهازك.')}</div></div></div>`;return}
+  openPlayerDrawer(mid,p.firstTeam,f.competition);
+};
+// Keep availability fresh in the background without any API-Football call from the user.
+setInterval(()=>{const s=window.prodCtxV1073?.supa;if(s&&Date.now()<deadlineV1083().getTime())loadCentralAvailabilityV1083(s)},60*60*1000);
+document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='visible'&&Date.now()-lastAvailabilityReadV1083>30*60*1000){const s=window.prodCtxV1073?.supa;if(s&&Date.now()<deadlineV1083().getTime())loadCentralAvailabilityV1083(s)}});
+// Deadline copy is sourced from the server-side Gameweek deadline.
+const oldDeadlineStatusV1083=window.deadlineStatus||deadlineStatus;
+window.deadlineStatus=deadlineStatus=function(){return isRoundLocked()?L('Gameweek Closed','الجولة اتقفلت'):`${L('Closes','يقفل')}: ${formatTime(deadlineV1083().toISOString())}`};
+})();
+</script>
+
+<style id="mastaba-v1083-finalize-style">
+/* V10.83 production finalization */
+.private-join-production-v1083{font-size:.68rem;color:var(--theme-muted);margin-top:9px}
+</style>
+<script id="mastaba-v1083-finalize-script">
+(function(){
+'use strict';
+const PRIVATE_JOIN_EDGE_V1083='https://bnwjtrtlwnlbldfhaggg.supabase.co/functions/v1/mastaba-private-join';
+let privateLeagueDbIdV1083=null;
+let liveDbTimerV1083=null;
+
+function authSlotV1083(authId){return (state.users||[]).find(u=>u.authUserId===authId)?.id||null}
+function blankWcV1083(){return{used:{steal:{first:false,second:false},surge:{first:false,second:false},redemption:{first:false,second:false}},pending:{steal:null,surge:null,redemption:null},history:[]}}
+function ensureWcUserV1083(uid){state.mastabaWildcardsV1043=state.mastabaWildcardsV1043||{};state.mastabaWildcardsV1043[uid]=state.mastabaWildcardsV1043[uid]||blankWcV1083();state.mastabaWildcardChoiceV1045=state.mastabaWildcardChoiceV1045||{};state.mastabaWildcardChoiceV1045[uid]=state.mastabaWildcardChoiceV1045[uid]||{};state.mastabaWildcardEventsV1043=state.mastabaWildcardEventsV1043||{steals:[],redemptions:[],surges:[],conflicts:[]};state.mastabaStealReservationsV1049=state.mastabaStealReservationsV1049||[];return state.mastabaWildcardsV1043[uid]}
+async function privateLeagueIdV1083(supa){if(privateLeagueDbIdV1083)return privateLeagueDbIdV1083;const {data,error}=await supa.from('mastaba_leagues').select('id').eq('slug','mastaba').maybeSingle();if(error)throw error;privateLeagueDbIdV1083=data?.id||null;return privateLeagueDbIdV1083}
+
+async function loadHistoricalPointsV1083(supa){
+  const lid=await privateLeagueIdV1083(supa);if(!lid)return;
+  const [ptsR,gwsR]=await Promise.all([
+    supa.from('mastaba_league_gameweek_points').select('user_id,gameweek_id,total_points,finalized').eq('league_id',lid),
+    supa.from('mastaba_gameweeks').select('id,gameweek_number,status')
+  ]);
+  if(ptsR.error||gwsR.error)return;
+  const gwNum=Object.fromEntries((gwsR.data||[]).map(g=>[g.id,Number(g.gameweek_number)]));
+  const previous={};(state.users||[]).forEach(u=>previous[u.id]=0);state.mastabaWeekScoresV1043=state.mastabaWeekScoresV1043||{};
+  for(const r of ptsR.data||[]){const slot=authSlotV1083(r.user_id),w=gwNum[r.gameweek_id];if(!slot||!w)continue;(state.mastabaWeekScoresV1043[w]??={})[slot]=Number(r.total_points||0);if(w<Number(state.week)&&r.finalized)previous[slot]=(previous[slot]||0)+Number(r.total_points||0)}
+  state.previousWeekPoints=previous;
+}
+
+async function loadPowerChipsV1083(supa){
+  const lid=await privateLeagueIdV1083(supa);if(!lid||!window.prodCtxV1073?.gw?.id)return;
+  const {data,error}=await supa.from('mastaba_power_chip_uses').select('*').eq('league_id',lid);if(error)return;
+  for(const u of state.users||[])ensureWcUserV1083(u.id);
+  state.mastabaWildcardEventsV1043.steals=[];state.mastabaWildcardEventsV1043.surges=[];state.mastabaWildcardEventsV1043.redemptions=[];state.mastabaStealReservationsV1049=[];
+  for(const r of data||[]){
+    const slot=authSlotV1083(r.user_id);if(!slot||r.status==='cancelled')continue;const rec=ensureWcUserV1083(slot);const gw=(state.week===Number(window.prodCtxV1073?.gw?.gameweek_number))?Number(state.week):Number(state.week);const current=r.gameweek_id===window.prodCtxV1073.gw.id;
+    const half=Number(state.week)<=19?'first':'second';
+    if(r.status==='selected'&&current){state.mastabaWildcardChoiceV1045[slot][String(state.week)]=r.chip_type;rec.pending[r.chip_type]={week:Number(state.week),half,armedAt:r.selected_at,...(r.payload||{})};if(r.chip_type==='steal'){const target=authSlotV1083(r.payload?.target_user_id);if(target){rec.pending.steal.targetId=target;state.mastabaStealReservationsV1049.push({id:r.id,week:Number(state.week),attackerId:slot,targetId:target,half,status:'reserved',createdAt:r.selected_at})}}}
+    if(r.status==='locked'||r.status==='resolved'){
+      if(r.chip_type==='surge')state.mastabaWildcardEventsV1043.surges.push({id:r.id,type:'surge',actorId:slot,week:Number(state.week),half,status:'locked',lockedAt:r.locked_at});
+      if(r.chip_type==='redemption')state.mastabaWildcardEventsV1043.redemptions.push({id:r.id,type:'redemption',actorId:slot,week:Number(state.week),half,status:'locked',lockedAt:r.locked_at,referenceWeek:Number(r.payload?.reference_week||0),referenceScore:Number(r.payload?.reference_score||0),rankAtActivation:Number(r.payload?.rank_at_activation||0)});
+      if(r.chip_type==='steal'){const target=authSlotV1083(r.payload?.target_user_id);if(target)state.mastabaWildcardEventsV1043.steals.push({id:r.id,type:'steal',attackers:[slot],targetId:target,week:Number(state.week),half,status:'locked',lockedAt:r.locked_at,targetWasFirst:!!r.payload?.target_was_first})}
+    }
+  }
+}
+
+async function activeOwnChipV1083(supa,lid){const {data,error}=await supa.from('mastaba_power_chip_uses').select('*').eq('league_id',lid).eq('user_id',window.prodCtxV1073.user.id).eq('gameweek_id',window.prodCtxV1073.gw.id).neq('status','cancelled').maybeSingle();if(error)throw error;return data||null}
+async function persistChipV1083(type,payload={}){
+  const ctx=window.prodCtxV1073;if(!ctx)throw new Error('Production is not ready.');const lid=await privateLeagueIdV1083(ctx.supa);if(!lid)throw new Error('Private league is unavailable.');
+  let existing=await activeOwnChipV1083(ctx.supa,lid);
+  if(existing&&existing.chip_type!==type){if(existing.chip_type==='steal')throw new Error('A confirmed Steal cannot be changed.');const {error}=await ctx.supa.from('mastaba_power_chip_uses').update({status:'cancelled'}).eq('id',existing.id);if(error)throw error;existing=null}
+  if(existing){const {error}=await ctx.supa.from('mastaba_power_chip_uses').update({payload,status:'selected'}).eq('id',existing.id);if(error)throw error;return existing.id}
+  const {data,error}=await ctx.supa.from('mastaba_power_chip_uses').insert({league_id:lid,user_id:ctx.user.id,gameweek_id:ctx.gw.id,chip_type:type,status:'selected',payload}).select('id').single();if(error)throw error;return data.id
+}
+async function cancelChipDbV1083(){const ctx=window.prodCtxV1073;if(!ctx)return;const lid=await privateLeagueIdV1083(ctx.supa);if(!lid)return;const existing=await activeOwnChipV1083(ctx.supa,lid);if(existing&&existing.chip_type!=='steal'){const {error}=await ctx.supa.from('mastaba_power_chip_uses').update({status:'cancelled'}).eq('id',existing.id);if(error)throw error}}
+
+const localSurgeV1083=window.armSurgeV1051;
+if(localSurgeV1083)window.armSurgeV1051=async function(){try{const ctx=window.prodCtxV1073;if(ctx){const {error:dErr}=await ctx.supa.from('mastaba_predictions').update({double_points:false}).eq('user_id',ctx.user.id).eq('gameweek_id',ctx.gw.id);if(dErr)throw dErr;await persistChipV1083('surge',{})}return localSurgeV1083()}catch(e){console.error(e);toast(e?.message||L('Could not save Power Chip.','تعذر حفظ الكارت.'),'warn')}};
+const localRedemptionV1083=window.armRedemptionV1043;
+if(localRedemptionV1083)window.armRedemptionV1043=async function(){try{let ref=null;const weeks=Object.entries(state.mastabaWeekScoresV1043||{}).map(([w,m])=>({week:Number(w),score:Number(m?.[state.currentUser])})).filter(x=>x.week<Number(state.week)&&Number.isFinite(x.score)).sort((a,b)=>a.score-b.score||a.week-b.week);ref=weeks[0]||null;if(!ref)throw new Error(L('Redemption needs a completed earlier Gameweek.','Redemption محتاج جولة سابقة مكتملة.'));const rows=leagueStandings('mastaba','overall'),rank=Math.max(1,rows.findIndex(x=>x.id===state.currentUser)+1);await persistChipV1083('redemption',{reference_week:ref.week,reference_score:ref.score,rank_at_activation:rank});return localRedemptionV1083()}catch(e){console.error(e);toast(e?.message||L('Could not save Power Chip.','تعذر حفظ الكارت.'),'warn')}};
+const localStealV1083=window.activateStealV1049;
+if(localStealV1083)window.activateStealV1049=async function(targetId){try{const target=(state.users||[]).find(u=>u.id===targetId);if(!target?.authUserId)throw new Error(L('This player has not joined Production yet.','اللاعب ده لسه منضمش للنسخة الحية.'));const rows=leagueStandings('mastaba','overall'),targetRank=Math.max(1,rows.findIndex(x=>x.id===targetId)+1);await persistChipV1083('steal',{target_user_id:target.authUserId,target_was_first:targetRank===1});return localStealV1083(targetId)}catch(e){console.error(e);toast(e?.message||L('Could not confirm Steal.','تعذر تأكيد Steal.'),'warn')}};
+const localUnselectV1083=window.unselectPowerChipV1048;
+if(localUnselectV1083)window.unselectPowerChipV1048=async function(){try{await cancelChipDbV1083();return localUnselectV1083()}catch(e){console.error(e);toast(e?.message||L('Could not remove Power Chip.','تعذر إلغاء الكارت.'),'warn')}};
+const localCancelV1083=window.cancelWildcardV1043;
+if(localCancelV1083)window.cancelWildcardV1043=async function(type){try{await cancelChipDbV1083();return localCancelV1083(type)}catch(e){console.error(e);toast(e?.message||L('Could not remove Power Chip.','تعذر إلغاء الكارت.'),'warn')}};
+
+function dbPickV1083(row,f){let firstTeam='none';if(Number(row.first_team_id)===Number(f.homeTeamId))firstTeam=f.home;else if(Number(row.first_team_id)===Number(f.awayTeamId))firstTeam=f.away;return{home:row.home_score??'',away:row.away_score??'',firstTeam,firstScorer:row.first_scorer_id?String(row.first_scorer_id):'none',double:!!row.double_points,touched:row.home_score!=null&&row.away_score!=null}}
+function phaseV1083(r){const s=String(r.fixture_status||'NS').toUpperCase();if(r.result_final||['FT','AET','PEN'].includes(s))return'final';if(!['NS','TBD','PST','CANC','ABD','AWD','WO'].includes(s)||Date.now()>=new Date(r.kickoff_at).getTime())return'live';return'upcoming'}
+async function refreshPrivateLiveV1083(){
+  const ctx=window.prodCtxV1073;if(!ctx||!(state.leagues||[]).some(l=>l.id==='mastaba'))return;if(Date.now()<deadlineV1083().getTime())return;
+  try{
+    const [fxR,pR]=await Promise.all([
+      ctx.supa.from('mastaba_fixtures').select('id,kickoff_at,fixture_status,elapsed,home_goals,away_goals,first_scoring_team_id,first_scorer_id,result_final,last_synced_at').eq('gameweek_id',ctx.gw.id),
+      ctx.supa.from('mastaba_predictions').select('*').eq('gameweek_id',ctx.gw.id)
+    ]);if(fxR.error)throw fxR.error;if(pR.error)throw pR.error;
+    let changed=false;
+    for(const r of fxR.data||[]){const f=fixtureById(r.id);if(!f)continue;const ph=phaseV1083(r);const h=r.home_goals==null?0:Number(r.home_goals),a=r.away_goals==null?0:Number(r.away_goals);const sig=`${f.phase}|${f.result?.home}|${f.result?.away}|${f.liveScore?.home}|${f.liveScore?.away}|${f.result?.firstScorer}`;f.phase=ph;if(ph==='final')f.result={home:h,away:a,firstTeam:r.first_scoring_team_id?teamCodeV1083(r.first_scoring_team_id):'none',firstScorer:r.first_scorer_id?String(r.first_scorer_id):'none'};else if(ph==='live')f.liveScore={home:h,away:a};const nowSig=`${f.phase}|${f.result?.home}|${f.result?.away}|${f.liveScore?.home}|${f.liveScore?.away}|${f.result?.firstScorer}`;if(sig!==nowSig)changed=true}
+    const byId=Object.fromEntries((state.users||[]).filter(u=>u.authUserId).map(u=>[u.authUserId,u.id]));
+    for(const row of pR.data||[]){const slot=byId[row.user_id],f=fixtureById(row.fixture_id);if(!slot||!f)continue;const pick=dbPickV1083(row,f);state.predictions[slot]=state.predictions[slot]||{};state.savedDrafts[slot]=state.savedDrafts[slot]||{};state.officialPredictions[slot]=state.officialPredictions[slot]||{};state.predictions[slot][f.id]=pick;state.savedDrafts[slot][f.id]={...pick};if(row.submitted)state.officialPredictions[slot][f.id]={...pick}}
+    if(changed){state.lastUpdate=new Date().toISOString();save();render()}
+    if((state.fixtures||[]).length&&(state.fixtures||[]).every(f=>f.phase==='final')&&liveDbTimerV1083){clearInterval(liveDbTimerV1083);liveDbTimerV1083=null;await loadHistoricalPointsV1083(ctx.supa)}
+  }catch(e){console.warn('Private live refresh failed',e)}
+}
+function startPrivateLiveV1083(){if(liveDbTimerV1083)clearInterval(liveDbTimerV1083);if(!(state.leagues||[]).some(l=>l.id==='mastaba'))return;liveDbTimerV1083=setInterval(refreshPrivateLiveV1083,60000);setTimeout(refreshPrivateLiveV1083,2500)}
+
+const hydrateFinalizeBaseV1083=window.hydrateProductionV1073;
+window.hydrateProductionV1073=async function(profile,user,supa){const ok=await hydrateFinalizeBaseV1083(profile,user,supa);await Promise.all([loadHistoricalPointsV1083(supa),loadPowerChipsV1083(supa)]);startPrivateLiveV1083();save();return ok};
+
+window.requestPrivateLeague=async function(){
+  const code=(document.querySelector('#privateLeagueCode')?.value||'').trim();if(!code)return toast(L('Enter an invite code first.','اكتب كود الدعوة الأول.'),'warn');
+  try{const ctx=window.prodCtxV1073;if(!ctx)throw new Error(L('Sign in first.','سجل دخولك الأول.'));const {data:ss}=await ctx.supa.auth.getSession();const token=ss?.session?.access_token;if(!token)throw new Error(L('Sign in first.','سجل دخولك الأول.'));const r=await fetch(PRIVATE_JOIN_EDGE_V1083,{method:'POST',headers:{'Content-Type':'application/json',Authorization:`Bearer ${token}`},body:JSON.stringify({code})});const j=await r.json();if(!r.ok||j?.error)throw new Error(j?.message||L('Invite code not found.','كود الدعوة مش موجود.'));toast(L('Joined Mastaba League. Reloading…','تم الانضمام لدوري المصطبة. جاري التحديث…'),'good');setTimeout(()=>location.reload(),650)}catch(e){console.error(e);toast(e?.message||L('Could not join the private league.','تعذر الانضمام للدوري الخاص.'),'warn')}
+};
+const renderLeaguesFinalizeBaseV1083=window.renderLeagues||renderLeagues;
+window.renderLeagues=renderLeagues=function(){const out=renderLeaguesFinalizeBaseV1083();const panel=document.querySelector('.private-league-panel');if(panel){const note=panel.querySelector('.muted');if(note){note.className='private-join-production-v1083';note.textContent=L('Use the private Mastaba invite code provided by the league admin.','استخدم كود دعوة دوري المصطبة الخاص من الأدمن.')}}return out};
+})();
+</script>
+
+
+<style id="mastaba-v1083-theme-restore">
+/* V10.83: restore the approved pre-V10.69 NON-WATERMARK theme authority.
+   Club/logo watermark rules intentionally remain removed. */
+/* ATS / Wildcard / repeated major surfaces use one palette. */
+html:is([data-theme="midnight"], [data-theme="emerald"], [data-theme="desert"], [data-theme="violet"], [data-theme="alahly"], [data-theme="zamalek"], [data-theme="bayern"], [data-theme="psg"], [data-theme="inter"], [data-theme="juventus"], [data-theme="roma"], [data-theme="mancity"], [data-theme="chelsea"], [data-theme="alhilal"], [data-theme="alnassr"], [data-theme="alittihad"], [data-theme="alahlisaudi"]) body #app .ats-card-v25{--ats-outer:var(--club-outer)!important;--ats-outer-text:var(--club-outer-text)!important;--ats-inner:var(--club-inner)!important;--ats-inner-text:var(--club-inner-text)!important;border-color:color-mix(in srgb,var(--club-outline) 48%,transparent)!important}
+html:is([data-theme="midnight"], [data-theme="emerald"], [data-theme="desert"], [data-theme="violet"], [data-theme="alahly"], [data-theme="zamalek"], [data-theme="bayern"], [data-theme="psg"], [data-theme="inter"], [data-theme="juventus"], [data-theme="roma"], [data-theme="mancity"], [data-theme="chelsea"], [data-theme="alhilal"], [data-theme="alnassr"], [data-theme="alittihad"], [data-theme="alahlisaudi"]) body #app .wc-arena-v1043{--wc-show-outer:var(--club-outer)!important;--wc-show-outer-text:var(--club-outer-text)!important;--wc-show-inner:var(--club-inner)!important;--wc-show-inner-text:var(--club-inner-text)!important}
+
+/* Here's What's Happening: theme-native shell + four SOLID, distinct theme actions. */
+html:is([data-theme="midnight"], [data-theme="emerald"], [data-theme="desert"], [data-theme="violet"], [data-theme="alahly"], [data-theme="zamalek"], [data-theme="bayern"], [data-theme="psg"], [data-theme="inter"], [data-theme="juventus"], [data-theme="roma"], [data-theme="mancity"], [data-theme="chelsea"], [data-theme="alhilal"], [data-theme="alnassr"], [data-theme="alittihad"], [data-theme="alahlisaudi"]) body #app .home-command.home-submit-status{background:linear-gradient(118deg,var(--club-outer) 0 72%,color-mix(in srgb,var(--club-outer) 83%,#000 17%) 72% 84%,var(--theme-head-c) 84% 100%)!important;color:var(--club-outer-text)!important;border:1px solid color-mix(in srgb,var(--club-outline) 55%,transparent)!important}
+html:is([data-theme="midnight"], [data-theme="emerald"], [data-theme="desert"], [data-theme="violet"], [data-theme="alahly"], [data-theme="zamalek"], [data-theme="bayern"], [data-theme="psg"], [data-theme="inter"], [data-theme="juventus"], [data-theme="roma"], [data-theme="mancity"], [data-theme="chelsea"], [data-theme="alhilal"], [data-theme="alnassr"], [data-theme="alittihad"], [data-theme="alahlisaudi"]) body #app .home-command.home-submit-status :is(.home-command-eyebrow,h1,.home-command-status strong,.home-command-status span){color:var(--club-outer-text)!important}
+html:is([data-theme="midnight"], [data-theme="emerald"], [data-theme="desert"], [data-theme="violet"], [data-theme="alahly"], [data-theme="zamalek"], [data-theme="bayern"], [data-theme="psg"], [data-theme="inter"], [data-theme="juventus"], [data-theme="roma"], [data-theme="mancity"], [data-theme="chelsea"], [data-theme="alhilal"], [data-theme="alnassr"], [data-theme="alittihad"], [data-theme="alahlisaudi"]) body #app .home-command-actions .btn{box-shadow:none!important;opacity:1!important}
+html:is([data-theme="midnight"], [data-theme="emerald"], [data-theme="desert"], [data-theme="violet"], [data-theme="alahly"], [data-theme="zamalek"], [data-theme="bayern"], [data-theme="psg"], [data-theme="inter"], [data-theme="juventus"], [data-theme="roma"], [data-theme="mancity"], [data-theme="chelsea"], [data-theme="alhilal"], [data-theme="alnassr"], [data-theme="alittihad"], [data-theme="alahlisaudi"]) body #app .home-command-actions .btn:nth-child(1){background:var(--home-btn1)!important;color:var(--home-btn1-text)!important;border:1px solid color-mix(in srgb,var(--club-outline) 52%,transparent)!important}
+html:is([data-theme="midnight"], [data-theme="emerald"], [data-theme="desert"], [data-theme="violet"], [data-theme="alahly"], [data-theme="zamalek"], [data-theme="bayern"], [data-theme="psg"], [data-theme="inter"], [data-theme="juventus"], [data-theme="roma"], [data-theme="mancity"], [data-theme="chelsea"], [data-theme="alhilal"], [data-theme="alnassr"], [data-theme="alittihad"], [data-theme="alahlisaudi"]) body #app .home-command-actions .btn:nth-child(2){background:var(--home-btn2)!important;color:var(--home-btn2-text)!important;border:1px solid color-mix(in srgb,var(--club-outline) 52%,transparent)!important}
+html:is([data-theme="midnight"], [data-theme="emerald"], [data-theme="desert"], [data-theme="violet"], [data-theme="alahly"], [data-theme="zamalek"], [data-theme="bayern"], [data-theme="psg"], [data-theme="inter"], [data-theme="juventus"], [data-theme="roma"], [data-theme="mancity"], [data-theme="chelsea"], [data-theme="alhilal"], [data-theme="alnassr"], [data-theme="alittihad"], [data-theme="alahlisaudi"]) body #app .home-command-actions .btn:nth-child(3){background:var(--home-btn3)!important;color:var(--home-btn3-text)!important;border:1px solid color-mix(in srgb,var(--club-outline) 52%,transparent)!important}
+html:is([data-theme="midnight"], [data-theme="emerald"], [data-theme="desert"], [data-theme="violet"], [data-theme="alahly"], [data-theme="zamalek"], [data-theme="bayern"], [data-theme="psg"], [data-theme="inter"], [data-theme="juventus"], [data-theme="roma"], [data-theme="mancity"], [data-theme="chelsea"], [data-theme="alhilal"], [data-theme="alnassr"], [data-theme="alittihad"], [data-theme="alahlisaudi"]) body #app .home-command-actions .btn:nth-child(4){background:var(--home-btn4)!important;color:var(--home-btn4-text)!important;border:1px solid color-mix(in srgb,var(--club-outline) 52%,transparent)!important}
+
+/* This Week: every summary card uses one consistent theme surface and text color. */
+html:is([data-theme="midnight"], [data-theme="emerald"], [data-theme="desert"], [data-theme="violet"], [data-theme="alahly"], [data-theme="zamalek"], [data-theme="bayern"], [data-theme="psg"], [data-theme="inter"], [data-theme="juventus"], [data-theme="roma"], [data-theme="mancity"], [data-theme="chelsea"], [data-theme="alhilal"], [data-theme="alnassr"], [data-theme="alittihad"], [data-theme="alahlisaudi"]) body #app #view-home .countdown-panel .count-card{background:var(--week-top)!important;color:var(--week-top-text)!important;border:1px solid color-mix(in srgb,var(--club-outline) 52%,transparent)!important}
+html:is([data-theme="midnight"], [data-theme="emerald"], [data-theme="desert"], [data-theme="violet"], [data-theme="alahly"], [data-theme="zamalek"], [data-theme="bayern"], [data-theme="psg"], [data-theme="inter"], [data-theme="juventus"], [data-theme="roma"], [data-theme="mancity"], [data-theme="chelsea"], [data-theme="alhilal"], [data-theme="alnassr"], [data-theme="alittihad"], [data-theme="alahlisaudi"]) body #app #view-home .countdown-panel .count-card :is(.stat-label,strong,.muted){color:var(--week-top-text)!important}
+html:is([data-theme="midnight"], [data-theme="emerald"], [data-theme="desert"], [data-theme="violet"], [data-theme="alahly"], [data-theme="zamalek"], [data-theme="bayern"], [data-theme="psg"], [data-theme="inter"], [data-theme="juventus"], [data-theme="roma"], [data-theme="mancity"], [data-theme="chelsea"], [data-theme="alhilal"], [data-theme="alnassr"], [data-theme="alittihad"], [data-theme="alahlisaudi"]) body #app #view-home :is(.home-gameweek-card,.home-points-card,.league-rank-card){background:var(--week-bottom)!important;color:var(--week-bottom-text)!important;border:1px solid color-mix(in srgb,var(--club-outline) 48%,transparent)!important}
+html:is([data-theme="midnight"], [data-theme="emerald"], [data-theme="desert"], [data-theme="violet"], [data-theme="alahly"], [data-theme="zamalek"], [data-theme="bayern"], [data-theme="psg"], [data-theme="inter"], [data-theme="juventus"], [data-theme="roma"], [data-theme="mancity"], [data-theme="chelsea"], [data-theme="alhilal"], [data-theme="alnassr"], [data-theme="alittihad"], [data-theme="alahlisaudi"]) body #app #view-home :is(.home-gameweek-card,.home-points-card,.league-rank-card) :is(.stat-label,.stat-value,.rank-heading-line,.rank-inline-name,.home-week-select){color:var(--week-bottom-text)!important}
+html:is([data-theme="midnight"], [data-theme="emerald"], [data-theme="desert"], [data-theme="violet"], [data-theme="alahly"], [data-theme="zamalek"], [data-theme="bayern"], [data-theme="psg"], [data-theme="inter"], [data-theme="juventus"], [data-theme="roma"], [data-theme="mancity"], [data-theme="chelsea"], [data-theme="alhilal"], [data-theme="alnassr"], [data-theme="alittihad"], [data-theme="alahlisaudi"]) body #app #view-home .home-week-select{background:transparent!important;border:0!important}
+
+/* Bulletin: one surface + an explicitly contrasting GW block; no inherited white-on-white/yellow-on-yellow. */
+html:is([data-theme="midnight"], [data-theme="emerald"], [data-theme="desert"], [data-theme="violet"], [data-theme="alahly"], [data-theme="zamalek"], [data-theme="bayern"], [data-theme="psg"], [data-theme="inter"], [data-theme="juventus"], [data-theme="roma"], [data-theme="mancity"], [data-theme="chelsea"], [data-theme="alhilal"], [data-theme="alnassr"], [data-theme="alittihad"], [data-theme="alahlisaudi"]) body #app .bulletin-ticker{background:var(--bulletin-bg)!important;color:var(--bulletin-text)!important;border:1px solid color-mix(in srgb,var(--club-outline) 50%,transparent)!important}
+html:is([data-theme="midnight"], [data-theme="emerald"], [data-theme="desert"], [data-theme="violet"], [data-theme="alahly"], [data-theme="zamalek"], [data-theme="bayern"], [data-theme="psg"], [data-theme="inter"], [data-theme="juventus"], [data-theme="roma"], [data-theme="mancity"], [data-theme="chelsea"], [data-theme="alhilal"], [data-theme="alnassr"], [data-theme="alittihad"], [data-theme="alahlisaudi"]) body #app .bulletin-ticker :is(.ticker-group,.ticker-match,.ticker-match b,.ticker-match small){color:var(--bulletin-text)!important}
+html:is([data-theme="midnight"], [data-theme="emerald"], [data-theme="desert"], [data-theme="violet"], [data-theme="alahly"], [data-theme="zamalek"], [data-theme="bayern"], [data-theme="psg"], [data-theme="inter"], [data-theme="juventus"], [data-theme="roma"], [data-theme="mancity"], [data-theme="chelsea"], [data-theme="alhilal"], [data-theme="alnassr"], [data-theme="alittihad"], [data-theme="alahlisaudi"]) body #app .bulletin-ticker .ticker-league{background:var(--bulletin-gw)!important;color:var(--bulletin-gw-text)!important;border-color:color-mix(in srgb,var(--club-outline) 38%,transparent)!important}
+html:is([data-theme="midnight"], [data-theme="emerald"], [data-theme="desert"], [data-theme="violet"], [data-theme="alahly"], [data-theme="zamalek"], [data-theme="bayern"], [data-theme="psg"], [data-theme="inter"], [data-theme="juventus"], [data-theme="roma"], [data-theme="mancity"], [data-theme="chelsea"], [data-theme="alhilal"], [data-theme="alnassr"], [data-theme="alittihad"], [data-theme="alahlisaudi"]) body #app .bulletin-ticker .ticker-league *{color:var(--bulletin-gw-text)!important}
+
+/* Positive result/points earned strips retain club identity instead of reverting to plain white. */
+html:is([data-theme="midnight"], [data-theme="emerald"], [data-theme="desert"], [data-theme="violet"], [data-theme="alahly"], [data-theme="zamalek"], [data-theme="bayern"], [data-theme="psg"], [data-theme="inter"], [data-theme="juventus"], [data-theme="roma"], [data-theme="mancity"], [data-theme="chelsea"], [data-theme="alhilal"], [data-theme="alnassr"], [data-theme="alittihad"], [data-theme="alahlisaudi"]) body #app #view-predict :is(.match-footer.points,.match-footer.great,.match-footer.double-good){background:linear-gradient(100deg,var(--result-a),var(--result-b))!important;color:var(--result-text)!important;border-top:1px solid color-mix(in srgb,var(--club-outline) 38%,transparent)!important}
+html:is([data-theme="midnight"], [data-theme="emerald"], [data-theme="desert"], [data-theme="violet"], [data-theme="alahly"], [data-theme="zamalek"], [data-theme="bayern"], [data-theme="psg"], [data-theme="inter"], [data-theme="juventus"], [data-theme="roma"], [data-theme="mancity"], [data-theme="chelsea"], [data-theme="alhilal"], [data-theme="alnassr"], [data-theme="alittihad"], [data-theme="alahlisaudi"]) body #app #view-predict :is(.match-footer.points,.match-footer.great,.match-footer.double-good) :is(.footer-status>strong,.footer-status>small){color:var(--result-text)!important}
+html:is([data-theme="midnight"], [data-theme="emerald"], [data-theme="desert"], [data-theme="violet"], [data-theme="alahly"], [data-theme="zamalek"], [data-theme="bayern"], [data-theme="psg"], [data-theme="inter"], [data-theme="juventus"], [data-theme="roma"], [data-theme="mancity"], [data-theme="chelsea"], [data-theme="alhilal"], [data-theme="alnassr"], [data-theme="alittihad"], [data-theme="alahlisaudi"]) body #app #view-predict :is(.match-footer.points,.match-footer.great,.match-footer.double-good) .footer-icon{color:#43C77A!important;border-color:#70F0A0!important;background:#FFFFFF!important}
+
+/* Admin controls: one coherent admin palette. Selected dates always use actionText, never inherited text. */
+html:is([data-theme="midnight"], [data-theme="emerald"], [data-theme="desert"], [data-theme="violet"], [data-theme="alahly"], [data-theme="zamalek"], [data-theme="bayern"], [data-theme="psg"], [data-theme="inter"], [data-theme="juventus"], [data-theme="roma"], [data-theme="mancity"], [data-theme="chelsea"], [data-theme="alhilal"], [data-theme="alnassr"], [data-theme="alittihad"], [data-theme="alahlisaudi"]) body #app #view-admin :is(.admin-match,.admin-focus-panel,.admin-round-panel,.admin-user-card,.fixture-choice,.selected-fixtures-summary){background:var(--theme-surface)!important;color:var(--theme-text)!important;border-color:var(--theme-border)!important}
+html:is([data-theme="midnight"], [data-theme="emerald"], [data-theme="desert"], [data-theme="violet"], [data-theme="alahly"], [data-theme="zamalek"], [data-theme="bayern"], [data-theme="psg"], [data-theme="inter"], [data-theme="juventus"], [data-theme="roma"], [data-theme="mancity"], [data-theme="chelsea"], [data-theme="alhilal"], [data-theme="alnassr"], [data-theme="alittihad"], [data-theme="alahlisaudi"]) body #app #view-admin :is(.admin-match,.admin-focus-panel,.admin-round-panel,.admin-user-card,.fixture-choice,.selected-fixtures-summary) :is(h2,h3,h4,strong,b,label,.fixture-team-line b,.fixture-stadium,.fixture-kickoff,.fixture-check-label){color:var(--theme-text)!important}
+html:is([data-theme="midnight"], [data-theme="emerald"], [data-theme="desert"], [data-theme="violet"], [data-theme="alahly"], [data-theme="zamalek"], [data-theme="bayern"], [data-theme="psg"], [data-theme="inter"], [data-theme="juventus"], [data-theme="roma"], [data-theme="mancity"], [data-theme="chelsea"], [data-theme="alhilal"], [data-theme="alnassr"], [data-theme="alittihad"], [data-theme="alahlisaudi"]) body #app #view-admin :is(.muted,.admin-match small,.fixture-choice-main small){color:var(--theme-muted)!important}
+html:is([data-theme="midnight"], [data-theme="emerald"], [data-theme="desert"], [data-theme="violet"], [data-theme="alahly"], [data-theme="zamalek"], [data-theme="bayern"], [data-theme="psg"], [data-theme="inter"], [data-theme="juventus"], [data-theme="roma"], [data-theme="mancity"], [data-theme="chelsea"], [data-theme="alhilal"], [data-theme="alnassr"], [data-theme="alittihad"], [data-theme="alahlisaudi"]) body #app #view-admin :is(input,select,.select-control,.text-input,.admin-controls input,.admin-controls select){background:var(--theme-input)!important;color:var(--theme-text)!important;border-color:var(--theme-border)!important}
+html:is([data-theme="midnight"], [data-theme="emerald"], [data-theme="desert"], [data-theme="violet"], [data-theme="alahly"], [data-theme="zamalek"], [data-theme="bayern"], [data-theme="psg"], [data-theme="inter"], [data-theme="juventus"], [data-theme="roma"], [data-theme="mancity"], [data-theme="chelsea"], [data-theme="alhilal"], [data-theme="alnassr"], [data-theme="alittihad"], [data-theme="alahlisaudi"]) body #app #view-admin :is(input,select) option{background:var(--theme-surface)!important;color:var(--theme-text)!important}
+html:is([data-theme="midnight"], [data-theme="emerald"], [data-theme="desert"], [data-theme="violet"], [data-theme="alahly"], [data-theme="zamalek"], [data-theme="bayern"], [data-theme="psg"], [data-theme="inter"], [data-theme="juventus"], [data-theme="roma"], [data-theme="mancity"], [data-theme="chelsea"], [data-theme="alhilal"], [data-theme="alnassr"], [data-theme="alittihad"], [data-theme="alahlisaudi"]) body #app #view-admin .fixture-day{background:var(--theme-surface-2)!important;color:var(--theme-text)!important;border-color:var(--theme-border)!important}
+html:is([data-theme="midnight"], [data-theme="emerald"], [data-theme="desert"], [data-theme="violet"], [data-theme="alahly"], [data-theme="zamalek"], [data-theme="bayern"], [data-theme="psg"], [data-theme="inter"], [data-theme="juventus"], [data-theme="roma"], [data-theme="mancity"], [data-theme="chelsea"], [data-theme="alhilal"], [data-theme="alnassr"], [data-theme="alittihad"], [data-theme="alahlisaudi"]) body #app #view-admin .fixture-day small{color:var(--theme-muted)!important}
+html:is([data-theme="midnight"], [data-theme="emerald"], [data-theme="desert"], [data-theme="violet"], [data-theme="alahly"], [data-theme="zamalek"], [data-theme="bayern"], [data-theme="psg"], [data-theme="inter"], [data-theme="juventus"], [data-theme="roma"], [data-theme="mancity"], [data-theme="chelsea"], [data-theme="alhilal"], [data-theme="alnassr"], [data-theme="alittihad"], [data-theme="alahlisaudi"]) body #app #view-admin .fixture-day.active{background:var(--theme-action)!important;color:var(--theme-action-text)!important;border-color:var(--theme-action)!important}
+html:is([data-theme="midnight"], [data-theme="emerald"], [data-theme="desert"], [data-theme="violet"], [data-theme="alahly"], [data-theme="zamalek"], [data-theme="bayern"], [data-theme="psg"], [data-theme="inter"], [data-theme="juventus"], [data-theme="roma"], [data-theme="mancity"], [data-theme="chelsea"], [data-theme="alhilal"], [data-theme="alnassr"], [data-theme="alittihad"], [data-theme="alahlisaudi"]) body #app #view-admin .fixture-day.active :is(small,b){color:var(--theme-action-text)!important}
+html:is([data-theme="midnight"], [data-theme="emerald"], [data-theme="desert"], [data-theme="violet"], [data-theme="alahly"], [data-theme="zamalek"], [data-theme="bayern"], [data-theme="psg"], [data-theme="inter"], [data-theme="juventus"], [data-theme="roma"], [data-theme="mancity"], [data-theme="chelsea"], [data-theme="alhilal"], [data-theme="alnassr"], [data-theme="alittihad"], [data-theme="alahlisaudi"]) body #app #view-admin .fixture-choice.selected{background:color-mix(in srgb,var(--theme-action) 14%,var(--theme-surface))!important;border-color:color-mix(in srgb,var(--theme-action) 62%,var(--theme-border))!important}
+html:is([data-theme="midnight"], [data-theme="emerald"], [data-theme="desert"], [data-theme="violet"], [data-theme="alahly"], [data-theme="zamalek"], [data-theme="bayern"], [data-theme="psg"], [data-theme="inter"], [data-theme="juventus"], [data-theme="roma"], [data-theme="mancity"], [data-theme="chelsea"], [data-theme="alhilal"], [data-theme="alnassr"], [data-theme="alittihad"], [data-theme="alahlisaudi"]) body #app #view-admin .btn-primary{background:var(--theme-action)!important;color:var(--theme-action-text)!important}
+html:is([data-theme="midnight"], [data-theme="emerald"], [data-theme="desert"], [data-theme="violet"], [data-theme="alahly"], [data-theme="zamalek"], [data-theme="bayern"], [data-theme="psg"], [data-theme="inter"], [data-theme="juventus"], [data-theme="roma"], [data-theme="mancity"], [data-theme="chelsea"], [data-theme="alhilal"], [data-theme="alnassr"], [data-theme="alittihad"], [data-theme="alahlisaudi"]) body #app #view-admin .btn-secondary{background:var(--theme-secondary-button)!important;color:var(--theme-secondary-text)!important}
+
+/* New themes mimic the ORIGINAL nav interaction: no selection box or recoloring gimmick; selected item simply brightens. */
+html:is([data-theme="midnight"], [data-theme="emerald"], [data-theme="desert"], [data-theme="violet"], [data-theme="alahly"], [data-theme="zamalek"], [data-theme="bayern"], [data-theme="psg"], [data-theme="inter"], [data-theme="juventus"], [data-theme="roma"], [data-theme="mancity"], [data-theme="chelsea"], [data-theme="alhilal"], [data-theme="alnassr"], [data-theme="alittihad"], [data-theme="alahlisaudi"]) body #app .bottom-nav .nav-item{background:transparent!important;color:var(--theme-text)!important;opacity:.58!important;filter:none!important}
+html:is([data-theme="midnight"], [data-theme="emerald"], [data-theme="desert"], [data-theme="violet"], [data-theme="alahly"], [data-theme="zamalek"], [data-theme="bayern"], [data-theme="psg"], [data-theme="inter"], [data-theme="juventus"], [data-theme="roma"], [data-theme="mancity"], [data-theme="chelsea"], [data-theme="alhilal"], [data-theme="alnassr"], [data-theme="alittihad"], [data-theme="alahlisaudi"]) body #app .bottom-nav .nav-item.active{background:transparent!important;color:var(--theme-text)!important;opacity:1!important;box-shadow:none!important;filter:brightness(1.14)!important}
+html:is([data-theme="midnight"], [data-theme="emerald"], [data-theme="desert"], [data-theme="violet"], [data-theme="alahly"], [data-theme="zamalek"], [data-theme="bayern"], [data-theme="psg"], [data-theme="inter"], [data-theme="juventus"], [data-theme="roma"], [data-theme="mancity"], [data-theme="chelsea"], [data-theme="alhilal"], [data-theme="alnassr"], [data-theme="alittihad"], [data-theme="alahlisaudi"]) body #app .bottom-nav .nav-item.active :is(.nav-svg,small){color:inherit!important}
+html:is([data-theme="midnight"], [data-theme="emerald"], [data-theme="desert"], [data-theme="violet"], [data-theme="alahly"], [data-theme="zamalek"], [data-theme="bayern"], [data-theme="psg"], [data-theme="inter"], [data-theme="juventus"], [data-theme="roma"], [data-theme="mancity"], [data-theme="chelsea"], [data-theme="alhilal"], [data-theme="alnassr"], [data-theme="alittihad"], [data-theme="alahlisaudi"]) body #app .bottom-nav{--nav-glider-color:var(--club-outline)!important}
+
+/* Rank Showdown = exact League Selector width on every theme. Home remains full-width. */
+#view-rankings .rank-controls,#view-rankings .wc-arena-v1043{width:min(980px,100%)!important;max-width:980px!important;margin-left:auto!important;margin-right:auto!important;box-sizing:border-box!important}
+#view-rankings .wc-arena-grid-v1043,#view-rankings .wc-event-v1043{width:100%!important;max-width:100%!important;box-sizing:border-box!important}
+#view-home .wc-arena-v1043{width:100%!important;max-width:none!important;margin-left:0!important;margin-right:0!important}
+
+/* Keep the approved clean text-only Highlights/Prince headers in original themes. */
+html:is([data-theme="mastaba"],[data-theme="barcelona"],[data-theme="realmadrid"],[data-theme="acmilan"],[data-theme="arsenal"],[data-theme="liverpool"],[data-theme="manunited"]) body #app :is(.highlights-title,.week-prince-title){width:100%!important;max-width:none!important;margin:24px 0 12px!important;padding:0 0 8px!important;display:block!important;background:transparent!important;border:0!important;border-radius:0!important;box-shadow:none!important;border-bottom:1px solid color-mix(in srgb,var(--theme-accent) 24%,rgba(255,255,255,.10))!important;color:var(--theme-text)!important;text-align:start!important}
+html:is([data-theme="mastaba"],[data-theme="barcelona"],[data-theme="realmadrid"],[data-theme="acmilan"],[data-theme="arsenal"],[data-theme="liverpool"],[data-theme="manunited"]) body #app :is(.highlights-title,.week-prince-title):before,html:is([data-theme="mastaba"],[data-theme="barcelona"],[data-theme="realmadrid"],[data-theme="acmilan"],[data-theme="arsenal"],[data-theme="liverpool"],[data-theme="manunited"]) body #app :is(.highlights-title,.week-prince-title):after{display:none!important;content:none!important}
+
+</style>
 </body>
 </html>
