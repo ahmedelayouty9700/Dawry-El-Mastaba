@@ -6746,6 +6746,79 @@ html[data-theme="acmilan"] .league-insights-v22 .form-table th{background:#2a161
     @keyframes mastabaAuthSpinV1072{to{transform:rotate(360deg)!important}}
   </style>
 
+
+<style id="mastaba-v1080-style">
+/* ===== V10.80 — competition identity, separators, fast Admin search, compact jersey backs ===== */
+
+/* Bulletin: subtle divider between fixtures that share the same competition group. */
+.ticker-group .ticker-match + .ticker-match{
+  border-inline-start:1px solid rgba(255,255,255,.16)!important;
+}
+html[data-theme="arsenal"] .ticker-group .ticker-match + .ticker-match,
+html[data-theme="realmadrid"] .ticker-group .ticker-match + .ticker-match{
+  border-inline-start-color:rgba(27,50,114,.18)!important;
+}
+
+/* Admin: subtle line between fixtures in the same league section. */
+.fixture-league-group .fixture-choice + .fixture-choice{
+  border-top:1px solid color-mix(in srgb,var(--theme-text) 13%,transparent)!important;
+}
+.fixture-choice[data-v1080-hidden="1"],
+.fixture-league-group[data-v1080-hidden="1"]{display:none!important}
+
+/* Keep fixture search stable while typing; browser handles rows in-place. */
+.fixture-search-box{scroll-margin-top:18px}
+.fixture-search-mode-v1080{margin:8px 0 2px;color:var(--theme-muted);font-size:.7rem;font-weight:800}
+
+/* V10.80 jersey — compact, proportional shirt-back badge rather than stretched rectangle. */
+.player-photo,.scorer-headshot{
+  overflow:visible!important;background:transparent!important;border:0!important;border-radius:0!important;color:inherit!important;
+}
+.mastaba-jersey-v1080{
+  --jersey-main:#25364f;--jersey-trim:#f4f6f8;--jersey-text:#fff;--jersey-name-bg:rgba(0,0,0,.22);
+  position:relative;display:grid;grid-template-rows:auto 1fr;place-items:center;
+  width:100%;height:100%;box-sizing:border-box;padding:19% 14% 15%;
+  color:var(--jersey-text);font-weight:1000;text-align:center;line-height:1;
+  filter:drop-shadow(0 2px 2px rgba(0,0,0,.20));isolation:isolate;
+}
+.mastaba-jersey-v1080::before{
+  content:"";position:absolute;z-index:-2;
+  left:8%;right:8%;top:4%;bottom:8%;
+  background:var(--jersey-main);
+  clip-path:polygon(29% 5%,40% 0,60% 0,71% 5%,96% 20%,84% 39%,73% 33%,73% 94%,27% 94%,27% 33%,16% 39%,4% 20%);
+}
+.mastaba-jersey-v1080::after{
+  content:"";position:absolute;z-index:-1;left:39%;right:39%;top:4%;height:9%;
+  background:var(--jersey-trim);border-radius:0 0 100% 100%;
+}
+.mastaba-jersey-name-v1080{
+  align-self:end;display:block;max-width:100%;min-width:0;
+  padding:2px 3px;border-radius:3px;background:var(--jersey-name-bg);
+  overflow:hidden;text-overflow:ellipsis;white-space:nowrap;
+  text-transform:uppercase;letter-spacing:-.025em;
+  font-size:var(--jersey-name-size,7px);font-weight:1000;
+  text-shadow:0 1px 1px rgba(0,0,0,.48);
+}
+.mastaba-jersey-number-v1080{
+  align-self:start;margin-top:3px;font-size:var(--jersey-number-size,20px);font-weight:1000;
+  letter-spacing:-.04em;line-height:.8;text-shadow:0 1px 1px rgba(0,0,0,.52);font-variant-numeric:tabular-nums;
+}
+/* Make the table jersey a compact square badge with readable surname. */
+.player-name-cell .player-photo{
+  width:46px!important;height:46px!important;flex:0 0 46px!important;background:transparent!important;
+}
+.player-name-cell .mastaba-jersey-v1080{--jersey-number-size:17px}
+/* Selected scorer gets a larger, properly proportioned shirt. */
+.scorer-headshot{width:62px!important;height:62px!important}
+.scorer-headshot .mastaba-jersey-v1080{--jersey-number-size:23px}
+@media(max-width:560px){
+  .player-name-cell .player-photo{width:42px!important;height:42px!important;flex-basis:42px!important}
+  .player-name-cell .mastaba-jersey-v1080{--jersey-number-size:15px}
+  .scorer-headshot{width:54px!important;height:54px!important}
+  .scorer-headshot .mastaba-jersey-v1080{--jersey-number-size:20px}
+}
+
+</style>
 </head>
 <body class="auth-pending-v1064">
 
@@ -14046,6 +14119,212 @@ window.playerRow=function(p,comp,mid){
   const stat=v=>v==null?`<span class="player-stat-na-v1077">—</span>`:v;
   return`<button class="player-row ${disabled?'disabled':''}" ${disabled?'disabled':''} onclick="pickScorer('${mid}','${p.id}')"><span class="player-name-cell"><span class="player-photo">${jerseyV1078(p)}</span><span class="player-name-copy"><strong>${escapeV1078(p.name)}</strong><small>${comp==='ALL'?L('All Competitions','كل البطولات'):escapeV1078(comp)}</small></span></span><span class="player-cell player-pos-cell">${playerPositionGroup(p.pos)}</span><span class="player-cell player-stat-cell">${stat(st.apps)}</span><span class="player-cell player-stat-cell">${stat(st.bench)}</span><span class="player-cell player-stat-cell">${stat(st.goals)}</span><span class="player-cell player-stat-cell">${stat(st.assists)}</span><span class="player-cell player-stat-cell">${stat(st.xg)}</span><span class="player-cell player-stat-cell">${stat(st.xa)}</span><span class="player-cell">${flag}</span></button>`;
 };
+})();
+
+</script>
+
+<!-- mastaba-v1080 -->
+<script id="mastaba-v1080-script">
+(function(){
+'use strict';
+
+/* ---------------- Competition identity ---------------- */
+function fixtureCountryV1080(f){
+  if(f?.competitionCountry)return String(f.competitionCountry);
+  if(f?.apiPayload?.league?.country)return String(f.apiPayload.league.country);
+  const db=window.prodCtxV1073?.fxById?.[f?.id];
+  return String(db?.competition_country||db?.api_payload?.league?.country||'');
+}
+function fixtureLeagueIdV1080(f){
+  if(Number(f?.apiLeagueId))return Number(f.apiLeagueId);
+  if(Number(f?.apiPayload?.league?.id))return Number(f.apiPayload.league.id);
+  const db=window.prodCtxV1073?.fxById?.[f?.id];
+  return Number(db?.api_league_id||db?.api_payload?.league?.id||0)||null;
+}
+function canonicalCompetitionV1080(f){
+  const n=String(f?.competition||'').trim();
+  const c=fixtureCountryV1080(f).trim();
+  // Country is authoritative for duplicate competition names such as "Premier League".
+  if(c==='England'&&n==='Premier League')return'English Premier League';
+  if(c==='Egypt'&&(n==='Premier League'||n==='Egyptian Premier League'))return'Egyptian Premier League';
+  if(c==='England'&&['League Cup','EFL Cup','Carabao Cup'].includes(n))return'English League Cup';
+  if(c==='England'&&n==='FA Cup')return'FA Cup';
+  if(c==='England'&&n==='Community Shield')return'Community Shield';
+  if(c==='Spain'&&(n==='La Liga'||n==='LaLiga'))return'La Liga';
+  if(c==='Spain'&&n==='Copa del Rey')return'Copa del Rey';
+  if(c==='Spain'&&['Super Cup','Supercopa'].includes(n))return'Spanish Super Cup';
+  if(c==='Egypt'&&['Cup','Egypt Cup'].includes(n))return'Egypt Cup';
+  if(c==='Egypt'&&n==='Super Cup')return'Egyptian Super Cup';
+  if(c==='Italy'&&n==='Serie A')return'Serie A';
+  if(c==='Italy'&&n==='Coppa Italia')return'Coppa Italia';
+  if(c==='Italy'&&['Super Cup','Supercoppa'].includes(n))return'Italian Super Cup';
+  if(c==='Germany'&&n==='Bundesliga')return'Bundesliga';
+  if(c==='France'&&n==='Ligue 1')return'Ligue 1';
+  if((c==='World'||c==='Europe')&&['UEFA Champions League','Champions League'].includes(n))return'Champions League';
+  if((c==='World'||c==='Europe')&&['UEFA Europa League','Europa League'].includes(n))return'Europa League';
+  if((c==='World'||c==='Africa')&&['Africa Cup of Nations','AFCON'].includes(n))return'AFCON';
+  if((c==='World'||c==='Africa')&&n==='CAF Champions League')return'CAF Champions League';
+  // If country metadata is unavailable, preserve an already explicit label before falling back.
+  if(/^English Premier League$/i.test(n))return'English Premier League';
+  if(/^Egyptian Premier League$/i.test(n))return'Egyptian Premier League';
+  return n||'Competition';
+}
+window.canonicalCompetitionV1080=canonicalCompetitionV1080;
+
+/* Repair production-hydrated fixture metadata so every surface can distinguish duplicate names. */
+function repairFixtureIdentityV1080(){
+  const ctx=window.prodCtxV1073;
+  for(const f of [...(state.fixtures||[]),...(state.nextFixtures||[]),...(state.fixturePool||[])]){
+    const db=ctx?.fxById?.[f.id];
+    if(!f.competitionCountry)f.competitionCountry=db?.competition_country||db?.api_payload?.league?.country||f.apiPayload?.league?.country||'';
+    if(!f.apiLeagueId)f.apiLeagueId=Number(db?.api_league_id||db?.api_payload?.league?.id||f.apiPayload?.league?.id||0)||null;
+  }
+}
+
+/* Bulletin groups by canonical competition identity, not the raw provider name. */
+window.tickerGroups=tickerGroups=function(fixtures,label){
+  const groups={};
+  (fixtures||[]).forEach(f=>{const comp=canonicalCompetitionV1080(f);(groups[comp]??=[]).push(f)});
+  return Object.entries(groups).map(([comp,fs])=>`<div class="ticker-group"><span class="ticker-league"><small>${label}</small>${comp}</span>${fs.map(f=>`<span class="ticker-match ${f.phase}">${tickerTeamBadge(f.home)} <b class="ticker-score">${f.phase==='final'?`${f.result.home}–${f.result.away}`:f.phase==='live'?`${(f.liveScore||f.result||{home:0,away:0}).home}–${(f.liveScore||f.result||{home:0,away:0}).away}`:'vs'}</b> ${tickerTeamBadge(f.away)}${f.phase==='live'?'<em>LIVE</em>':f.phase==='final'?'<em>FT</em>':`<small>${new Intl.DateTimeFormat(state.lang==='ar'?'ar-EG':'en-US',{hour:'numeric',minute:'2-digit',timeZone:userTZ()}).format(new Date(f.kickoff))}</small>`}</span>`).join('')}</div>`).join('');
+};
+
+/* ---------------- Fast alias-aware Admin fixture search ---------------- */
+function foldV1080(v){return String(v??'').normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase().replace(/&/g,' and ').replace(/[^a-z0-9]+/g,' ').trim()}
+const tokenAliasV1080={utd:'united',fc:'',afc:'',cf:'',st:'saint'};
+const phraseAliasesV1080={
+  'man city':'manchester city','mancity':'manchester city','mcfc':'manchester city',
+  'man utd':'manchester united','man united':'manchester united','manu':'manchester united','mufc':'manchester united',
+  'barca':'barcelona','fcb':'barcelona','atleti':'atletico madrid','atletico':'atletico madrid',
+  'real':'real madrid','rma':'real madrid','psg':'paris saint germain',
+  'spurs':'tottenham hotspur','tottenham':'tottenham hotspur','wolves':'wolverhampton wanderers',
+  'juve':'juventus','bvb':'borussia dortmund','dortmund':'borussia dortmund','bayern':'bayern munich',
+  'inter milan':'inter','internazionale':'inter','acm':'ac milan',
+  'ahly':'al ahly','alahly':'al ahly','ahly cairo':'al ahly','pyramids':'pyramids fc',
+  'zamalek sc':'zamalek','masr':'zED fc masr'.toLowerCase()
+};
+function expandPhraseV1080(q){const x=foldV1080(q);return phraseAliasesV1080[x]||x}
+function meaningfulTokensV1080(s){
+  return foldV1080(s).split(/\s+/).map(t=>tokenAliasV1080[t]===undefined?t:tokenAliasV1080[t]).filter(t=>t&&!['football','club','de','the'].includes(t));
+}
+function acronymV1080(s){return meaningfulTokensV1080(s).map(t=>t[0]).join('')}
+function aliasesForTeamV1080(name,short){
+  const base=foldV1080(name),terms=new Set([base,foldV1080(short),acronymV1080(name)]);
+  Object.entries(phraseAliasesV1080).forEach(([alias,target])=>{if(base.includes(foldV1080(target))||foldV1080(target).includes(base))terms.add(alias)});
+  return [...terms].filter(Boolean);
+}
+function fixtureSearchTextV1080(f){
+  const hn=TEAM[f.home]?.name||f.home||'',an=TEAM[f.away]?.name||f.away||'';
+  return [hn,...aliasesForTeamV1080(hn,TEAM[f.home]?.short||f.home),an,...aliasesForTeamV1080(an,TEAM[f.away]?.short||f.away),canonicalCompetitionV1080(f),f.competition||'',fixtureCountryV1080(f),f.stadium||''].join(' ');
+}
+function fuzzyTokenMatchV1080(qToken,hToken){
+  if(qToken===hToken)return true;
+  if(qToken.length>=3&&(hToken.startsWith(qToken)||qToken.startsWith(hToken)))return true;
+  return false;
+}
+function smartMatchV1080(query,hay){
+  const expanded=expandPhraseV1080(query),full=foldV1080(hay);
+  if(!expanded)return true;
+  if(full.includes(expanded))return true;
+  const qt=meaningfulTokensV1080(expanded),ht=meaningfulTokensV1080(full);
+  return qt.every(q=>ht.some(h=>fuzzyTokenMatchV1080(q,h)));
+}
+window.smartFixtureSearchV1080=smartMatchV1080;
+
+/* Render the entire 10-day pool once. Search only toggles visibility afterwards. */
+adminFixtureSelector=function(target){
+  repairFixtureIdentityV1080();
+  const selected=target==='current'?state.fixtures:(state.nextFixtures||[]),ui=ensureAdminBrowser(target),pool=(state.fixturePool||sandboxFixturePool()).filter(f=>typeof supportedStateFixtureV1079!=='function'||supportedStateFixtureV1079(f));
+  const dates=[...new Set(pool.map(f=>adminFixtureDateKey(f.kickoff)))].sort();
+  const leagues=[...new Set(pool.map(f=>canonicalCompetitionV1080(f)))].sort(fixtureCompetitionSort);
+  const grouped={};pool.forEach(f=>{const label=canonicalCompetitionV1080(f);(grouped[label]??=[]).push(f)});
+  return`<div class="fixture-browser" data-admin-target-v1080="${target}">
+    <div class="fixture-browser-search"><input class="fixture-search-box" value="${escapeHTML(ui.q||'')}" placeholder="${L('Search team, alias, league or stadium…','ابحث باسم فريق أو اختصار أو بطولة أو ملعب…')}" autocomplete="off" spellcheck="false" oninput="setAdminFixtureQueryV1080('${target}',this.value)"><select class="fixture-league-filter" onchange="setAdminFixtureLeague('${target}',this.value)"><option value="all">${L('All Leagues','كل البطولات')}</option>${leagues.map(x=>`<option value="${x}" ${ui.league===x?'selected':''}>${x}</option>`).join('')}</select></div>
+    <div class="fixture-day-strip">${dates.map(d=>`<button class="fixture-day ${ui.date===d&&!(ui.q||'').trim()?'active':''}" onclick="setAdminFixtureDay('${target}','${d}')"><small>${adminFixtureDateLabel(d).split(' ')[0]}</small><b>${adminFixtureDateLabel(d).replace(/^\S+\s*/,'')}</b></button>`).join('')}</div>
+    <div class="fixture-search-mode-v1080" data-search-status-v1080></div>
+    <div class="fixture-selector grouped">${Object.entries(grouped).sort((a,b)=>fixtureCompetitionSort(a[0],b[0])).map(([league,fs])=>`<div class="fixture-league-group" data-league-group-v1080="${escapeHTML(league)}"><div class="fixture-league-title"><strong>${league}</strong><span data-group-count-v1080>${fs.length} ${L('fixtures','ماتش')}</span></div>${fs.sort((a,b)=>new Date(a.kickoff)-new Date(b.kickoff)).map(f=>{const checked=selected.some(x=>String(x.id)===String(f.id));const disabled=target==='current'&&isRoundLocked();return`<label class="fixture-choice fixture-choice-livescore ${checked?'selected':''} ${disabled?'disabled':''}" data-fixture-row-v1080 data-fixture-date-v1080="${adminFixtureDateKey(f.kickoff)}" data-fixture-league-v1080="${escapeHTML(league)}" data-fixture-search-v1080="${escapeHTML(fixtureSearchTextV1080(f))}"><span class="fixture-kickoff">${formatFixtureClock(f.kickoff)}</span><span class="fixture-team-stack"><span class="fixture-team-line"><span class="fixture-team-logo"><img src="${TEAM[f.home].logo}" alt=""></span><b>${TEAM[f.home].name}</b></span><span class="fixture-team-line"><span class="fixture-team-logo"><img src="${TEAM[f.away].logo}" alt=""></span><b>${TEAM[f.away].name}</b></span><small class="fixture-stadium">${f.stadium}</small></span><span class="fixture-checkbox-wrap"><input type="checkbox" ${checked?'checked':''} ${disabled?'disabled':''} onchange="toggleAdminFixture('${f.id}','${target}',this.checked)"><span class="fixture-check-label">${checked?L('Selected','مختار'):L('Add','إضافة')}</span></span></label>`}).join('')}</div>`).join('')}</div>
+  </div>`;
+};
+
+let filterFrameV1080=0;
+window.applyAdminFixtureFilterV1080=function(target){
+  const host=document.querySelector(`[data-admin-target-v1080="${target}"]`);if(!host)return;
+  const ui=adminBrowserState[target],q=String(ui.q||'').trim(),league=ui.league||'all';
+  let visibleTotal=0;
+  host.querySelectorAll('[data-league-group-v1080]').forEach(group=>{
+    let count=0;
+    group.querySelectorAll('[data-fixture-row-v1080]').forEach(row=>{
+      const dateOk=q?true:row.dataset.fixtureDateV1080===ui.date;
+      const leagueOk=league==='all'||row.dataset.fixtureLeagueV1080===league;
+      const qOk=!q||smartMatchV1080(q,row.dataset.fixtureSearchV1080||'');
+      const show=dateOk&&leagueOk&&qOk;row.dataset.v1080Hidden=show?'0':'1';if(show){count++;visibleTotal++}
+    });
+    group.dataset.v1080Hidden=count?'0':'1';
+    const c=group.querySelector('[data-group-count-v1080]');if(c)c.textContent=`${count} ${L('fixtures','ماتش')}`;
+  });
+  host.querySelectorAll('.fixture-day').forEach(b=>b.classList.toggle('active',!q&&String(b.getAttribute('onclick')||'').includes(`'${ui.date}'`)));
+  const status=host.querySelector('[data-search-status-v1080]');
+  if(status)status.textContent=q?`${L('Searching across all available dates','البحث في كل الأيام المتاحة')} · “${q}” · ${visibleTotal} ${L('matches','ماتش')}`:'';
+};
+window.setAdminFixtureQueryV1080=function(target,value){
+  adminBrowserState[target].q=value;
+  cancelAnimationFrame(filterFrameV1080);
+  filterFrameV1080=requestAnimationFrame(()=>applyAdminFixtureFilterV1080(target));
+};
+/* Preserve old inline handler compatibility without re-rendering. */
+window.setAdminFixtureQuery=window.setAdminFixtureQueryV1080;
+
+/* ---------------- Compact jersey-back redesign ---------------- */
+function escapeV1080(v){return typeof escapeHTML==='function'?escapeHTML(String(v??'')):String(v??'').replace(/[&<>\"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','\"':'&quot;'}[c]))}
+function playerTeamV1080(p){
+  const id=String(p?.id??'');
+  for(const [code,list] of Object.entries(window.players||players||{}))if((list||[]).some(x=>String(x?.id??'')===id))return code;
+  return'';
+}
+function surnameV1080(name){const bits=String(name||'PLAYER').trim().split(/\s+/).filter(Boolean);return bits.length?bits[bits.length-1]:'PLAYER'}
+function paletteV1080(code){
+  const teamName=String((window.TEAM||TEAM||{})?.[code]?.name||code||'').toLowerCase();
+  const rules=[
+    [/arsenal/,['#cf1f15','#ffffff','#ffffff']],[/coventry/,['#69b9e6','#ffffff','#13263b']],
+    [/barcelona/,['#1c14bf','#d9b82e','#ffffff']],[/real madrid/,['#f7f7f7','#edc130','#274793']],
+    [/ac milan|milan/,['#bf1b2d','#12171f','#ffffff']],[/liverpool/,['#af181d','#f3f4f2','#ffffff']],
+    [/manchester united|man united/,['#9f160b','#fcff40','#ffffff']],[/chelsea/,['#163b8f','#ffffff','#ffffff']],
+    [/manchester city|man city/,['#74b9e6','#ffffff','#162b49']],[/tottenham|spurs/,['#f6f7f9','#18224b','#18224b']],
+    [/newcastle/,['#17191c','#ffffff','#ffffff']],[/juventus/,['#f5f5f5','#151515','#151515']],
+    [/inter/,['#1754a7','#111111','#ffffff']],[/napoli/,['#35a7dc','#ffffff','#ffffff']],
+    [/bayern/,['#cf1738','#ffffff','#ffffff']],[/dortmund/,['#f4d400','#111111','#111111']],
+    [/paris|psg/,['#172d59','#d9233f','#ffffff']],[/al ahly|ahly/,['#c61d23','#ffffff','#ffffff']],
+    [/zamalek/,['#f5f5f5','#d61f2c','#202020']],[/pyramids/,['#143d7a','#d9b02d','#ffffff']]
+  ];for(const [re,p] of rules)if(re.test(teamName))return p;return['#25364f','#f4f6f8','#ffffff'];
+}
+function jerseyV1080(p){
+  if(!p)return'—';const code=playerTeamV1080(p),[main,trim,text]=paletteV1080(code);const num=Number(p.number)>0?String(Number(p.number)):'';const back=surnameV1080(p.name);const len=back.length;
+  const nameSize=len>=12?5.3:len>=9?6:len>=7?6.6:7.2;
+  const nameBg=(text.toLowerCase()==='#202020'||text.toLowerCase()==='#13263b'||text.toLowerCase()==='#162b49'||text.toLowerCase()==='#151515')?'rgba(255,255,255,.62)':'rgba(0,0,0,.22)';
+  return`<span class="mastaba-jersey-v1080" style="--jersey-main:${main};--jersey-trim:${trim};--jersey-text:${text};--jersey-name-bg:${nameBg};--jersey-name-size:${nameSize}px" title="${escapeV1080(p.name||'Player')}${num?' #'+num:''}" aria-label="${escapeV1080(p.name||'Player')}${num?' number '+num:''}"><span class="mastaba-jersey-name-v1080">${escapeV1080(back)}</span>${num?`<span class="mastaba-jersey-number-v1080">${num}</span>`:''}</span>`;
+}
+window.mastabaJerseyV1080=jerseyV1080;
+window.playerHead=function(pid){const p=playerById(pid);if(!p)return`<span class="scorer-headshot">—</span>`;return`<span class="scorer-headshot">${jerseyV1080(p)}</span>`};
+const fallbackStatsV1080=()=>({apps:0,bench:0,goals:0,assists:0,xg:null,xa:null});
+window.playerRow=function(p,comp,mid){
+  const st=p.stats?.[comp]||p.stats?.ALL||fallbackStatsV1080(),disabled=['out','suspended'].includes(p.status);
+  const flag=p.status==='doubtful'?`<span class="availability-icon doubtful" title="${L('Doubtful','مشكوك فيه')}">!</span>`:disabled?`<span class="availability-icon ${p.status}" title="${statusLabel(p.status)}">!</span>`:'';
+  const stat=v=>v==null?`<span class="player-stat-na-v1077">—</span>`:v;
+  return`<button class="player-row ${disabled?'disabled':''}" ${disabled?'disabled':''} onclick="pickScorer('${mid}','${p.id}')"><span class="player-name-cell"><span class="player-photo">${jerseyV1080(p)}</span><span class="player-name-copy"><strong>${escapeV1080(p.name)}</strong><small>${comp==='ALL'?L('All Competitions','كل البطولات'):escapeV1080(comp)}</small></span></span><span class="player-cell player-pos-cell">${playerPositionGroup(p.pos)}</span><span class="player-cell player-stat-cell">${stat(st.apps)}</span><span class="player-cell player-stat-cell">${stat(st.bench)}</span><span class="player-cell player-stat-cell">${stat(st.goals)}</span><span class="player-cell player-stat-cell">${stat(st.assists)}</span><span class="player-cell player-stat-cell">${stat(st.xg)}</span><span class="player-cell player-stat-cell">${stat(st.xa)}</span><span class="player-cell">${flag}</span></button>`;
+};
+
+/* Post-render: repair labels and apply initial Admin visibility without stealing focus. */
+const renderV1080Base=window.render||render;
+window.render=function(){
+  repairFixtureIdentityV1080();
+  const out=renderV1080Base();
+  requestAnimationFrame(()=>{
+    repairFixtureIdentityV1080();
+    if(state.view==='admin'&&currentUser()?.admin)applyAdminFixtureFilterV1080(adminSetupTarget==='current'?'current':'next');
+  });
+  return out;
+};
+
+repairFixtureIdentityV1080();
 })();
 
 </script>
