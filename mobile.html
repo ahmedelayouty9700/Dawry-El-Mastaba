@@ -4,7 +4,17 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
   <meta name="theme-color" content="#12171f" />
-  <title>دوري المصطبة — Mobile Reviewer V10.72</title>
+  <title>المصطبة</title>
+<script id="mastaba-device-route-v1077">(function(){
+  var ua=navigator.userAgent||"";
+  var uaDataMobile=!!(navigator.userAgentData&&navigator.userAgentData.mobile===true);
+  var phoneUA=/iPhone|iPod|Android.*Mobile|Windows Phone|webOS|BlackBerry|Opera Mini|IEMobile/i.test(ua);
+  var iPadOS=/Macintosh/i.test(ua)&&navigator.maxTouchPoints>1;
+  var useMobile=uaDataMobile||phoneUA||iPadOS;
+  var here=(location.pathname.split('/').pop()||'index.html').toLowerCase();
+  if(here==='mobile.html'&&!useMobile){location.replace('pc.html'+location.search+location.hash);return;}
+  if(here==='pc.html'&&useMobile){location.replace('mobile.html'+location.search+location.hash);return;}
+})();</script>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
@@ -13401,6 +13411,486 @@ bootAuthV1064();
 })();
 </script>
 
+
+
+<style id="mastaba-v1077-production-style">
+/* V10.77 production polish */
+.sandbox-chip,.sandbox-preview-strip{display:none!important}
+
+/* OAuth icons share one optical box on PC + mobile. */
+.auth-oauth-btn-v1064{align-items:center!important}
+.auth-oauth-btn-v1064 svg{
+  display:block!important;
+  width:24px!important;height:24px!important;
+  flex:0 0 24px!important;
+  transform-origin:50% 50%;
+}
+#authAppleLoginV1064 svg,#authAppleSignupV1064 svg{transform:scale(1.12)}
+#authGoogleLoginV1064 svg,#authGoogleSignupV1064 svg{transform:scale(.96)}
+@media(max-width:720px){
+  .auth-oauth-btn-v1064 svg{width:24px!important;height:24px!important;flex-basis:24px!important}
+}
+
+/* Account dropdown */
+.mastaba-account-menu-v1077{
+  position:fixed;z-index:100000;min-width:210px;padding:7px;
+  border-radius:14px;border:1px solid var(--theme-border,#304769);
+  background:var(--theme-surface,#111d31);color:var(--theme-text,#fff);
+  box-shadow:0 18px 48px rgba(0,0,0,.28);
+}
+.mastaba-account-menu-v1077 .account-head-v1077{padding:9px 10px 8px;border-bottom:1px solid var(--theme-border,#304769);margin-bottom:5px}
+.mastaba-account-menu-v1077 .account-head-v1077 strong{display:block;font-size:.88rem}
+.mastaba-account-menu-v1077 .account-head-v1077 small{display:block;margin-top:2px;color:var(--theme-muted,#9aa8ba);font-size:.68rem;word-break:break-word}
+.mastaba-account-menu-v1077 button{
+  width:100%;min-height:42px;border:0;border-radius:10px;padding:9px 10px;
+  display:flex;align-items:center;justify-content:flex-start;gap:9px;
+  background:transparent;color:inherit;font:inherit;font-weight:900;text-align:start;cursor:pointer
+}
+.mastaba-account-menu-v1077 button:hover{background:color-mix(in srgb,var(--theme-action,#b5162d) 12%,transparent)}
+.mastaba-account-menu-v1077 button.account-signout-v1077{color:#ff8f9f}
+
+/* Player photos and missing provider stats */
+.player-photo img,.scorer-headshot img{width:100%;height:100%;object-fit:cover;display:block}
+.player-stat-na-v1077{color:#8b95a3!important;font-weight:800!important}
+
+/* Production admin / view-as helpers */
+.admin-production-note-v1077{
+  margin:10px 0 0;padding:10px 12px;border-radius:12px;
+  border:1px solid var(--theme-border);background:var(--theme-surface-2);
+  color:var(--theme-muted);font-size:.72rem;line-height:1.45
+}
+.admin-open-next-v1077{margin-top:9px}
+.mastaba-viewas-v1077{
+  margin:0 0 12px;padding:10px 12px;border-radius:14px;
+  border:1px solid color-mix(in srgb,var(--theme-accent) 42%,var(--theme-border));
+  background:color-mix(in srgb,var(--theme-action) 10%,var(--theme-surface));
+  display:flex;align-items:center;justify-content:space-between;gap:10px;font-size:.78rem
+}
+.mastaba-viewas-v1077 strong{color:var(--theme-text)}
+.mastaba-viewas-v1077 button{min-height:36px;padding:7px 10px}
+@media(max-width:760px){
+  .mastaba-account-menu-v1077{min-width:190px}
+  .mastaba-viewas-v1077{align-items:flex-start;flex-direction:column}
+}
+</style>
+
+
+<script id="mastaba-v1077-production-script">
+(function(){
+'use strict';
+const V1077_EDGE='https://bnwjtrtlwnlbldfhaggg.supabase.co/functions/v1/mastaba-football';
+const V1077_SUPPORTED=/Premier League|FA Cup|EFL Cup|League Cup|Carabao|LaLiga|La Liga|Copa del Rey|Supercopa|Serie A|Coppa Italia|Supercoppa|Champions League|Saudi Pro League|King'?s Cup|Egyptian Premier League|Egypt Cup/i;
+let adminPoolLoadingV1077=false,adminPoolLoadedV1077=false;
+let nextGwV1077=null,adminSlotV1077=null,viewAsTargetV1077=null;
+
+/* ---------- Production identity / browser title ---------- */
+function lockProductionTitleV1077(){
+  if(document.title!=='المصطبة')document.title='المصطبة';
+  document.querySelectorAll('.sandbox-chip,.sandbox-preview-strip').forEach(el=>el.remove());
+}
+lockProductionTitleV1077();
+const titleElV1077=document.querySelector('title');
+if(titleElV1077&&window.MutationObserver){
+  new MutationObserver(lockProductionTitleV1077).observe(titleElV1077,{childList:true,subtree:true,characterData:true});
+}
+
+/* ---------- Small helpers ---------- */
+const safeNumV1077=v=>Number.isFinite(Number(v))?Number(v):0;
+const teamCodeV1077=id=>{
+  const n=Number(id);
+  const current=(state?.fixtures||[]).find(f=>Number(f.homeTeamId)===n||Number(f.awayTeamId)===n);
+  if(current)return Number(current.homeTeamId)===n?current.home:current.away;
+  if(n===42)return'ARS';if(n===1346)return'COV';return`T${n}`;
+};
+const posV1077=p=>({Goalkeeper:'GK',Defender:'CB',Midfielder:'MID',Attacker:'FW'}[String(p||'')]||String(p||'MID').toUpperCase());
+function phaseV1077(short,kickoff){
+  const s=String(short||'NS').toUpperCase();
+  if(['FT','AET','PEN'].includes(s))return'final';
+  if(!['NS','TBD','PST','CANC','ABD','AWD','WO'].includes(s)||Date.now()>=new Date(kickoff).getTime())return'live';
+  return'upcoming';
+}
+async function edgeV1077(endpoint,params={}){
+  const url=new URL(V1077_EDGE);url.searchParams.set('endpoint',endpoint);
+  Object.entries(params).forEach(([k,v])=>{if(v!==undefined&&v!==null&&v!=='')url.searchParams.set(k,String(v))});
+  const r=await fetch(url.toString(),{cache:'no-store'});
+  if(!r.ok)throw new Error(`Football data request failed (${r.status})`);
+  const j=await r.json();
+  if(j?.error)throw new Error(j.message||j.error);
+  return j?.data||{};
+}
+function statsZeroV1077(){return{apps:0,bench:0,goals:0,assists:0,xg:null,xa:null}}
+function addStatV1077(a,s){
+  a.apps+=safeNumV1077(s?.games?.appearences);
+  a.bench+=safeNumV1077(s?.substitutes?.bench);
+  a.goals+=safeNumV1077(s?.goals?.total);
+  a.assists+=safeNumV1077(s?.goals?.assists);
+  return a;
+}
+function registerTeamV1077(id,name,logo){
+  const code=teamCodeV1077(id);
+  TEAM[code]={name:name||code,short:code,logo:logo||TEAM[code]?.logo||''};
+  return code;
+}
+function providerFixtureV1077(x){
+  if(!x?.fixture?.id||!x?.teams?.home?.id||!x?.teams?.away?.id)return null;
+  const home=registerTeamV1077(x.teams.home.id,x.teams.home.name,x.teams.home.logo);
+  const away=registerTeamV1077(x.teams.away.id,x.teams.away.name,x.teams.away.logo);
+  const existing=[...(state.fixtures||[]),...(state.nextFixtures||[])].find(f=>Number(f.apiFixtureId)===Number(x.fixture.id));
+  return{
+    id:existing?.id||`api-${x.fixture.id}`,
+    apiFixtureId:Number(x.fixture.id),apiLeagueId:Number(x.league?.id)||null,season:Number(x.league?.season)||new Date(x.fixture.date).getUTCFullYear(),
+    competition:x.league?.name||'Competition',competitionCountry:x.league?.country||'',
+    home,away,homeTeamId:Number(x.teams.home.id),awayTeamId:Number(x.teams.away.id),
+    stadium:x.fixture?.venue?.name||'',kickoff:x.fixture.date,
+    phase:phaseV1077(x.fixture?.status?.short,x.fixture.date),
+    result:existing?.result||null,apiPayload:x
+  };
+}
+function dbRowForFixtureV1077(f,gameweekId){
+  return{
+    api_fixture_id:Number(f.apiFixtureId),gameweek_id:gameweekId,
+    api_league_id:f.apiLeagueId==null?null:Number(f.apiLeagueId),
+    competition_name:f.competition||'Competition',competition_country:f.competitionCountry||null,
+    home_team_id:Number(f.homeTeamId),home_team_name:TEAM[f.home]?.name||f.home,home_team_logo:TEAM[f.home]?.logo||null,
+    away_team_id:Number(f.awayTeamId),away_team_name:TEAM[f.away]?.name||f.away,away_team_logo:TEAM[f.away]?.logo||null,
+    kickoff_at:new Date(f.kickoff).toISOString(),venue_name:f.stadium||null,
+    fixture_status:f.phase==='final'?'FT':f.phase==='live'?'1H':'NS',
+    api_payload:f.apiPayload||{},updated_at:new Date().toISOString()
+  };
+}
+
+/* ---------- Real player stats/photos/availability ---------- */
+async function fetchTeamStatsV1077(teamId,season){
+  let page=1,total=1,rows=[];
+  do{
+    const d=await edgeV1077('players',{team:teamId,season,page});
+    rows.push(...(Array.isArray(d?.response)?d.response:[]));
+    total=Math.max(1,Number(d?.paging?.total||1));page++;
+  }while(page<=total&&page<=5);
+  return rows;
+}
+async function enrichPlayersV1077(){
+  const ctx=window.prodCtxV1073;if(!ctx)return;
+  const activeFx=state.fixtures||[];
+  const teamIds=[...new Set(activeFx.flatMap(f=>[Number(f.homeTeamId),Number(f.awayTeamId)]).filter(Boolean))];
+  const seasonByTeam={};
+  teamIds.forEach(tid=>{
+    const f=activeFx.find(f=>Number(f.homeTeamId)===tid||Number(f.awayTeamId)===tid);
+    const dbf=f&&ctx.fxById?.[f.id];
+    seasonByTeam[tid]=Number(dbf?.api_payload?.league?.season||dbf?.api_payload?.league?.year||new Date(f?.kickoff||Date.now()).getUTCFullYear());
+  });
+  await Promise.all(teamIds.map(async tid=>{
+    const code=teamCodeV1077(tid);
+    (players[code]||[]).forEach(p=>{
+      p.photo=p.photo||null;p.stats=p.stats||{};
+      Object.keys(p.stats).forEach(k=>{p.stats[k].xg=null;p.stats[k].xa=null});
+      p.stats.ALL={...(p.stats.ALL||statsZeroV1077()),xg:null,xa:null};
+      activeFx.filter(f=>Number(f.homeTeamId)===tid||Number(f.awayTeamId)===tid).forEach(f=>p.stats[f.competition]=p.stats[f.competition]||statsZeroV1077());
+    });
+    try{
+      const entries=await fetchTeamStatsV1077(tid,seasonByTeam[tid]);
+      const byId=new Map((players[code]||[]).map(p=>[String(p.id),p]));
+      for(const entry of entries){
+        const id=String(entry?.player?.id||'');if(!id)continue;
+        let p=byId.get(id);
+        if(!p){
+          p={id,name:entry.player?.name||'Player',pos:posV1077(entry.statistics?.[0]?.games?.position),number:null,status:'available',photo:entry.player?.photo||null,stats:{}};
+          (players[code]??=[]).push(p);byId.set(id,p);
+        }
+        p.photo=entry.player?.photo||p.photo||null;
+        if(entry.statistics?.[0]?.games?.position)p.pos=posV1077(entry.statistics[0].games.position);
+        const all=statsZeroV1077(),byComp={};
+        (entry.statistics||[]).forEach(st=>{
+          addStatV1077(all,st);
+          const comp=st?.league?.name;if(comp){byComp[comp]=byComp[comp]||statsZeroV1077();addStatV1077(byComp[comp],st)}
+        });
+        p.stats={...p.stats,ALL:all,...byComp};
+        activeFx.filter(f=>Number(f.homeTeamId)===tid||Number(f.awayTeamId)===tid).forEach(f=>p.stats[f.competition]=p.stats[f.competition]||statsZeroV1077());
+      }
+    }catch(e){console.warn('Player stats unavailable',tid,e)}
+  }));
+  await Promise.all(activeFx.map(async f=>{
+    if(!f.apiFixtureId)return;
+    try{
+      const d=await edgeV1077('injuries',{fixture:f.apiFixtureId});
+      (d?.response||[]).forEach(item=>{
+        const p=playerById(String(item?.player?.id||''));if(!p)return;
+        const text=`${item?.player?.type||''} ${item?.player?.reason||''}`.toLowerCase();
+        if(/suspend|red card|ban/.test(text))p.status='suspended';
+        else if(/doubt|question/.test(text))p.status='doubtful';
+        else p.status='out';
+      });
+    }catch(e){console.warn('Injury data unavailable',f.apiFixtureId,e)}
+  }));
+}
+
+/* ---------- Extend production hydration ---------- */
+const hydrateBaseV1077=window.hydrateProductionV1073;
+window.hydrateProductionV1073=async function(profile,user,supa){
+  const ok=await hydrateBaseV1077(profile,user,supa);
+  const ctx=window.prodCtxV1073;
+  if(!ctx)return ok;
+  adminSlotV1077=state.currentUser;
+  try{
+    const [{data:activeRows},{data:nextRow}]=await Promise.all([
+      supa.from('mastaba_profiles').select('id,active'),
+      supa.from('mastaba_gameweeks').select('id,gameweek_number,name_en,name_ar,status,opens_at').eq('gameweek_number',Number(state.week)+1).maybeSingle()
+    ]);
+    const activeById=Object.fromEntries((activeRows||[]).map(x=>[x.id,x.active!==false]));
+    state.users.forEach(u=>u.active=activeById[u.authUserId]!==false);
+    if(nextRow){
+      nextGwV1077=nextRow;
+      const {data:nfx,error:nfxErr}=await supa.from('mastaba_fixtures').select('*').eq('gameweek_id',nextRow.id).order('kickoff_at',{ascending:true});
+      if(nfxErr)throw nfxErr;
+      state.nextFixtures=(nfx||[]).map(f=>{
+        const home=registerTeamV1077(f.home_team_id,f.home_team_name,f.home_team_logo);
+        const away=registerTeamV1077(f.away_team_id,f.away_team_name,f.away_team_logo);
+        return{id:f.id,apiFixtureId:Number(f.api_fixture_id),apiLeagueId:f.api_league_id?Number(f.api_league_id):null,competition:f.competition_name,competitionCountry:f.competition_country||'',home,away,homeTeamId:Number(f.home_team_id),awayTeamId:Number(f.away_team_id),stadium:f.venue_name||'',kickoff:f.kickoff_at,phase:phaseV1077(f.fixture_status,f.kickoff_at),result:null,apiPayload:f.api_payload||{}};
+      });
+      state.nextPublished=state.nextFixtures.length>0;
+    }
+    state.fixturePool=[...(state.fixtures||[]),...(state.nextFixtures||[])];
+  }catch(e){console.warn('Production admin hydration warning',e)}
+  await enrichPlayersV1077();
+  lockProductionTitleV1077();
+  return ok;
+};
+
+/* ---------- Scorer drawer: goals first, then FW > MID > DEF > GK ---------- */
+function playerPhotoHTMLV1077(p){
+  if(p?.photo)return`<img src="${escapeHTML(p.photo)}" alt="${escapeHTML(p.name||'Player')}" loading="lazy">`;
+  return escapeHTML((p?.name||'?').split(/\s+/).map(x=>x[0]).slice(0,2).join(''));
+}
+window.playerHead=function(pid){
+  const p=playerById(pid);if(!p)return`<span class="scorer-headshot">—</span>`;
+  return`<span class="scorer-headshot">${playerPhotoHTMLV1077(p)}</span>`;
+};
+window.playerRow=function(p,comp,mid){
+  const st=p.stats?.[comp]||p.stats?.ALL||statsZeroV1077(),disabled=['out','suspended'].includes(p.status);
+  const flag=p.status==='doubtful'?`<span class="availability-icon doubtful" title="${L('Doubtful','مشكوك فيه')}">!</span>`:disabled?`<span class="availability-icon ${p.status}" title="${statusLabel(p.status)}">!</span>`:'';
+  const stat=v=>v==null?`<span class="player-stat-na-v1077">—</span>`:v;
+  return`<button class="player-row ${disabled?'disabled':''}" ${disabled?'disabled':''} onclick="pickScorer('${mid}','${p.id}')"><span class="player-name-cell"><span class="player-photo">${playerPhotoHTMLV1077(p)}</span><span class="player-name-copy"><strong>${escapeHTML(p.name)}</strong><small>${comp==='ALL'?L('All Competitions','كل البطولات'):escapeHTML(comp)}</small></span></span><span class="player-cell player-pos-cell">${playerPositionGroup(p.pos)}</span><span class="player-cell player-stat-cell">${stat(st.apps)}</span><span class="player-cell player-stat-cell">${stat(st.bench)}</span><span class="player-cell player-stat-cell">${stat(st.goals)}</span><span class="player-cell player-stat-cell">${stat(st.assists)}</span><span class="player-cell player-stat-cell">${stat(st.xg)}</span><span class="player-cell player-stat-cell">${stat(st.xa)}</span><span class="player-cell">${flag}</span></button>`;
+};
+window.openPlayerDrawer=function(mid,team,competition){
+  const root=$('#modalRoot');
+  root.innerHTML=`<div class="player-drawer"><div class="drawer-card"><div class="drawer-handle"></div><div class="panel-head"><div><h3>${L('First Goalscorer','أول لاعب يسجل')} — ${TEAM[team].name}</h3><div class="stat-context">${L('Players are ordered by goals. Ties are broken by position: forwards, midfielders, defenders, then goalkeepers.','الترتيب حسب الأهداف، وعند التعادل: مهاجمين ثم وسط ثم مدافعين ثم حراس.')}</div></div><button class="icon-button" onclick="closeModal()">×</button></div><div class="player-comp-tabs"><button class="player-comp-tab active" data-pcomp="${competition}">${competition}</button><button class="player-comp-tab" data-pcomp="ALL">${L('All Competitions','كل البطولات')}</button></div><div class="player-filterbar"><input class="player-search" id="playerSearch" placeholder="${L('Search player…','ابحث عن لاعب…')}"><select id="playerPosFilter"><option value="ALL">${L('All Positions','كل المراكز')}</option><option value="FW">FW</option><option value="MID">MID</option><option value="CB">CB</option><option value="RB">RB</option><option value="LB">LB</option><option value="GK">GK</option></select><select id="playerAvailabilityFilter"><option value="ALL">${L('All Players','كل اللاعبين')}</option><option value="available">${L('Available','متاح')}</option><option value="doubtful">${L('Doubtful','مشكوك فيه')}</option><option value="unavailable">${L('Unavailable','غائب/موقوف')}</option></select></div><div class="player-table-shell"><div class="player-table-head"><button data-psort="name">${L('Player','اللاعب')}</button><button data-psort="pos">${L('Pos','مركز')}</button><button data-psort="apps">${L('Apps','لعب')}</button><button data-psort="bench">SUB</button><button data-psort="goals">G</button><button data-psort="assists">A</button><button data-psort="xg">xG</button><button data-psort="xa">xA</button><span></span></div><div class="player-list" id="playerList"></div><div class="player-table-note">${L('Tap a player row to select them. Injured and suspended players cannot be selected.','اضغط على صف اللاعب لاختياره. المصاب والموقوف لا يمكن اختيارهم.')}</div></div></div></div>`;
+  let comp=competition,sortKey='goals',sortDir='desc',posFilter='ALL',availabilityFilter='ALL';
+  const rank=p=>{const g=playerPositionGroup(p?.pos);if(g==='FW')return 0;if(g==='MID')return 1;if(['CB','RB','LB'].includes(g))return 2;if(g==='GK')return 3;return 4};
+  const valueFor=(p,key)=>{const st=p.stats?.[comp]||p.stats?.ALL||statsZeroV1077();if(key==='name')return normalizeSearchText(p.name);if(key==='pos')return rank(p);return Number(st?.[key]??0)};
+  const compareDefault=(a,b)=>{
+    let d=safeNumV1077(b.stats?.[comp]?.goals??b.stats?.ALL?.goals)-safeNumV1077(a.stats?.[comp]?.goals??a.stats?.ALL?.goals);
+    if(!d)d=rank(a)-rank(b);
+    if(!d)d=String(a.name||'').localeCompare(String(b.name||''));
+    return d;
+  };
+  const draw=()=>{
+    const q=normalizeSearchText($('#playerSearch').value||'');
+    let list=(players[team]||[]).filter(p=>normalizeSearchText(p.name).includes(q)).filter(p=>posFilter==='ALL'||playerPositionGroup(p.pos)===posFilter).filter(p=>availabilityFilter==='ALL'||(availabilityFilter==='unavailable'?['out','suspended'].includes(p.status):p.status===availabilityFilter));
+    if(sortKey==='goals'&&sortDir==='desc')list.sort(compareDefault);
+    else list.sort((a,b)=>{const av=valueFor(a,sortKey),bv=valueFor(b,sortKey);let d=typeof av==='string'?String(av).localeCompare(String(bv)):av-bv;if(!d&&sortKey!=='name')d=String(a.name||'').localeCompare(String(b.name||''));return sortDir==='asc'?d:-d});
+    $('#playerList').innerHTML=list.map(p=>playerRow(p,comp,mid)).join('')||`<div class="notice" style="margin:10px">${L('No players match these filters.','مفيش لعيبة مطابقة للفلاتر دي.')}</div>`;
+    $$('[data-psort]').forEach(b=>{b.classList.toggle('sort-active',b.dataset.psort===sortKey);b.dataset.arrow=b.dataset.psort===sortKey?(sortDir==='asc'?'↑':'↓'):''});
+  };
+  draw();$('#playerSearch').oninput=draw;$('#playerPosFilter').onchange=e=>{posFilter=e.target.value;draw()};$('#playerAvailabilityFilter').onchange=e=>{availabilityFilter=e.target.value;draw()};
+  $$('[data-pcomp]').forEach(b=>b.onclick=()=>{$$('[data-pcomp]').forEach(x=>x.classList.remove('active'));b.classList.add('active');comp=b.dataset.pcomp;sortKey='goals';sortDir='desc';draw()});
+  $$('[data-psort]').forEach(b=>b.onclick=()=>{if(sortKey===b.dataset.psort)sortDir=sortDir==='asc'?'desc':'asc';else{sortKey=b.dataset.psort;sortDir=['name','pos'].includes(sortKey)?'asc':'desc'}draw()});
+};
+
+/* ---------- Production fixture browser ---------- */
+async function ensureAdminPoolV1077(){
+  if(adminPoolLoadedV1077||adminPoolLoadingV1077||!currentUser()?.admin)return;
+  adminPoolLoadingV1077=true;
+  try{
+    const dates=[];const start=new Date();
+    for(let i=0;i<10;i++){const d=new Date(start);d.setDate(d.getDate()+i);dates.push(d.toISOString().slice(0,10))}
+    const results=await Promise.allSettled(dates.map(date=>edgeV1077('fixtures',{date})));
+    const existingByApi=new Map([...(state.fixtures||[]),...(state.nextFixtures||[])].map(f=>[Number(f.apiFixtureId),f]));
+    const pool=[...(state.fixtures||[]),...(state.nextFixtures||[])];
+    for(const r of results){
+      if(r.status!=='fulfilled')continue;
+      for(const x of (r.value?.response||[])){
+        if(!V1077_SUPPORTED.test(String(x?.league?.name||'')))continue;
+        const f=providerFixtureV1077(x);if(!f)continue;
+        const old=existingByApi.get(Number(f.apiFixtureId));
+        if(old)continue;
+        existingByApi.set(Number(f.apiFixtureId),f);pool.push(f);
+      }
+    }
+    state.fixturePool=pool.sort((a,b)=>new Date(a.kickoff)-new Date(b.kickoff));
+    adminPoolLoadedV1077=true;
+  }catch(e){console.error('Admin fixture feed failed',e)}
+  finally{adminPoolLoadingV1077=false;if(state.view==='admin')render()}
+}
+window.ensureAdminPoolV1077=ensureAdminPoolV1077;
+
+/* ---------- Production-safe Admin writes ---------- */
+window.toggleAdminFixture=async function(mid,target,checked){
+  const ctx=window.prodCtxV1073;if(!ctx||!currentUser()?.admin)return;
+  const pool=(state.fixturePool||[]).find(f=>String(f.id)===String(mid));if(!pool)return;
+  if(target==='current'&&isRoundLocked())return toast(L('The current Gameweek is locked.','الجولة الحالية مقفولة.'),'warn');
+  try{
+    if(target==='current'){
+      if(checked){
+        let f=pool;
+        if(String(f.id).startsWith('api-')){
+          const {data,error}=await ctx.supa.from('mastaba_fixtures').insert(dbRowForFixtureV1077(f,ctx.gw.id)).select('*').single();if(error)throw error;
+          const oldId=f.id;f={...f,id:data.id,apiPayload:data.api_payload||f.apiPayload};const idx=state.fixturePool.findIndex(x=>x.id===oldId);if(idx>=0)state.fixturePool[idx]=f;ctx.fxById[f.id]=data;
+        }
+        if(!state.fixtures.some(x=>x.id===f.id)){
+          state.fixtures.push(f);state.fixtures.sort((a,b)=>new Date(a.kickoff)-new Date(b.kickoff));
+          state.users.forEach(u=>{state.predictions[u.id]=state.predictions[u.id]||{};state.predictions[u.id][f.id]={home:'',away:'',firstTeam:'none',firstScorer:'none',double:false,touched:false}});
+        }
+      }else{
+        const selected=state.fixtures.find(x=>String(x.id)===String(mid));if(!selected)return;
+        if(!confirm(L('Remove this match from the current Gameweek? Any saved predictions for this match will also be deleted.','تشيل الماتش من الجولة الحالية؟ أي توقعات محفوظة للماتش ده هتتمسح كمان.')))return render();
+        if(!String(selected.id).startsWith('api-')){const {error}=await ctx.supa.from('mastaba_fixtures').delete().eq('id',selected.id);if(error)throw error}
+        state.fixtures=state.fixtures.filter(x=>x.id!==selected.id);
+        state.users.forEach(u=>{delete state.predictions[u.id]?.[selected.id];delete state.savedDrafts[u.id]?.[selected.id];delete state.officialPredictions[u.id]?.[selected.id]});
+      }
+    }else{
+      state.nextFixtures=state.nextFixtures||[];
+      if(checked&&!state.nextFixtures.some(x=>String(x.id)===String(mid)))state.nextFixtures.push({...pool});
+      if(!checked)state.nextFixtures=state.nextFixtures.filter(x=>String(x.id)!==String(mid));
+      state.nextFixtures.sort((a,b)=>new Date(a.kickoff)-new Date(b.kickoff));
+      state.nextPublished=false;
+    }
+    save();render();
+  }catch(e){console.error(e);toast(L('Admin change could not be saved.','تعذر حفظ تعديل الأدمن.'),'warn');render()}
+};
+window.publishNextGameweek=async function(){
+  const ctx=window.prodCtxV1073;if(!ctx||!currentUser()?.admin)return;
+  if(!(state.nextFixtures||[]).length)return toast(L('Select at least one upcoming match first.','اختار ماتش واحد على الأقل للجولة الجاية.'),'warn');
+  try{
+    const number=Number(state.week)+1;
+    const {data:gw,error:gwErr}=await ctx.supa.from('mastaba_gameweeks').upsert({gameweek_number:number,name_en:`Gameweek ${number}`,name_ar:`الجولة ${number}`,status:'setup',updated_at:new Date().toISOString()},{onConflict:'gameweek_number'}).select('*').single();if(gwErr)throw gwErr;
+    nextGwV1077=gw;
+    const wanted=new Set(state.nextFixtures.map(f=>Number(f.apiFixtureId)));
+    const {data:existing,error:exErr}=await ctx.supa.from('mastaba_fixtures').select('id,api_fixture_id').eq('gameweek_id',gw.id);if(exErr)throw exErr;
+    const remove=(existing||[]).filter(x=>!wanted.has(Number(x.api_fixture_id))).map(x=>x.id);
+    if(remove.length){const {error}=await ctx.supa.from('mastaba_fixtures').delete().in('id',remove);if(error)throw error}
+    const persisted=[];
+    for(const f of state.nextFixtures){
+      const {data,error}=await ctx.supa.from('mastaba_fixtures').upsert(dbRowForFixtureV1077(f,gw.id),{onConflict:'api_fixture_id'}).select('*').single();if(error)throw error;
+      persisted.push({...f,id:data.id,apiPayload:data.api_payload||f.apiPayload});
+    }
+    state.nextFixtures=persisted;state.nextPublished=true;
+    state.fixturePool=(state.fixturePool||[]).map(x=>persisted.find(p=>Number(p.apiFixtureId)===Number(x.apiFixtureId))||x);
+    save();render();toast(L('Upcoming Gameweek saved to Production.','تم حفظ الجولة الجاية على النسخة الحية.'),'good');
+  }catch(e){console.error(e);toast(L('Upcoming Gameweek could not be saved.','تعذر حفظ الجولة الجاية.'),'warn')}
+};
+window.openNextGameweekV1077=async function(){
+  const ctx=window.prodCtxV1073;if(!ctx||!nextGwV1077||!currentUser()?.admin)return;
+  if(!(state.fixtures||[]).length||!state.fixtures.every(f=>f.phase==='final'))return toast(L('Finalize every current match before opening the next Gameweek.','ثبّت نتيجة كل ماتش في الجولة الحالية قبل فتح الجولة الجاية.'),'warn');
+  try{
+    const now=new Date().toISOString();
+    let r=await ctx.supa.from('mastaba_gameweeks').update({status:'final',finalized_at:now,updated_at:now}).eq('id',ctx.gw.id);if(r.error)throw r.error;
+    r=await ctx.supa.from('mastaba_gameweeks').update({status:'open',opens_at:now,updated_at:now}).eq('id',nextGwV1077.id);if(r.error)throw r.error;
+    toast(L('Next Gameweek is now open.','الجولة الجاية اتفتحت.'),'good');setTimeout(()=>location.reload(),500);
+  }catch(e){console.error(e);toast(L('Could not open the next Gameweek.','تعذر فتح الجولة الجاية.'),'warn')}
+};
+window.startMatch=async function(mid){
+  const ctx=window.prodCtxV1073,f=fixtureById(mid);if(!ctx||!f||!currentUser()?.admin)return;
+  if(!isRoundLocked())return toast(L('The Gameweek must be locked before kickoff.','لازم الجولة تكون مقفولة قبل بداية الماتش.'),'warn');
+  const h=Number($(`#rh-${mid}`)?.value||0),a=Number($(`#ra-${mid}`)?.value||0);
+  try{
+    const {error}=await ctx.supa.from('mastaba_fixtures').update({fixture_status:'1H',home_goals:h,away_goals:a,result_final:false,updated_at:new Date().toISOString(),last_synced_at:new Date().toISOString()}).eq('id',mid);if(error)throw error;
+    f.phase='live';f.liveScore={home:h,away:a};save();render();toast(L('Match marked live in Production.','تم بدء الماتش على النسخة الحية.'),'good');
+  }catch(e){console.error(e);toast(L('Could not update the match.','تعذر تحديث الماتش.'),'warn')}
+};
+window.finalizeMatch=async function(mid){
+  const ctx=window.prodCtxV1073,f=fixtureById(mid);if(!ctx||!f||!currentUser()?.admin)return;
+  const h=Number($(`#rh-${mid}`)?.value||0),a=Number($(`#ra-${mid}`)?.value||0);
+  let firstTeam=$(`#rt-${mid}`)?.value||'none',firstScorer=$(`#rs-${mid}`)?.value||'none';
+  if(h===0&&a===0){firstTeam='none';firstScorer='none'}
+  if((h||a)&&(firstTeam==='none'||firstScorer==='none'))return toast(L('Choose first scoring team and scorer.','اختار أول فريق وأول هداف.'),'warn');
+  const firstTeamId=firstTeam===f.home?Number(f.homeTeamId):firstTeam===f.away?Number(f.awayTeamId):null;
+  const scorer=firstScorer!=='none'?playerById(String(firstScorer)):null;
+  try{
+    const now=new Date().toISOString();
+    const {error}=await ctx.supa.from('mastaba_fixtures').update({fixture_status:'FT',home_goals:h,away_goals:a,first_scoring_team_id:firstTeamId,first_scorer_id:scorer?Number(scorer.id):null,first_scorer_name:scorer?.name||null,result_final:true,updated_at:now,last_synced_at:now}).eq('id',mid);if(error)throw error;
+    f.result={home:h,away:a,firstTeam,firstScorer};f.liveScore=null;f.phase='final';state.lastUpdate=now;save();render();toast(L('Result finalized in Production and points updated.','تم تثبيت النتيجة على النسخة الحية وتحديث النقاط.'),'good');
+  }catch(e){console.error(e);toast(L('Could not finalize the result.','تعذر تثبيت النتيجة.'),'warn')}
+};
+window.adminResetUser=async function(uid){
+  const ctx=window.prodCtxV1073,u=state.users.find(x=>x.id===uid);if(!ctx||!u||!currentUser()?.admin)return;
+  if(!confirm(L(`Reset current Gameweek data for ${u.name}?`,`تصفّر بيانات الجولة الحالية لـ ${u.name}؟`)))return;
+  try{
+    const {error}=await ctx.supa.from('mastaba_predictions').delete().eq('user_id',u.authUserId).eq('gameweek_id',ctx.gw.id);if(error)throw error;
+    state.predictions[uid]={};state.savedDrafts[uid]={};state.officialPredictions[uid]={};
+    state.fixtures.forEach(f=>state.predictions[uid][f.id]={home:'',away:'',firstTeam:'none',firstScorer:'none',double:false,touched:false});
+    state.roundMeta[uid]={draftSavedAt:null,submittedAt:null,editing:true};save();renderAdmin();toast(L('User Gameweek reset in Production.','تم تصفير جولة المستخدم على النسخة الحية.'),'good');
+  }catch(e){console.error(e);toast(L('Could not reset this user.','تعذر تصفير المستخدم.'),'warn')}
+};
+window.adminToggleUser=async function(uid){
+  const ctx=window.prodCtxV1073,u=state.users.find(x=>x.id===uid);if(!ctx||!u||u.admin||!currentUser()?.admin)return;
+  const makeActive=u.active===false;if(!makeActive&&!confirm(L(`Deactivate ${u.name}? Their history will be kept.`,`توقف ${u.name}؟ تاريخه هيفضل محفوظ.`)))return;
+  try{
+    const {error}=await ctx.supa.from('mastaba_profiles').update({active:makeActive,updated_at:new Date().toISOString()}).eq('id',u.authUserId);if(error)throw error;
+    u.active=makeActive;save();render();toast(makeActive?L('User reactivated.','تم إعادة تفعيل المستخدم.'):L('User deactivated.','تم إيقاف المستخدم.'),makeActive?'good':'warn');
+  }catch(e){console.error(e);toast(L('Could not update this user.','تعذر تحديث المستخدم.'),'warn')}
+};
+
+/* Read-only admin troubleshooting view */
+window.adminViewAs=function(uid){
+  const u=state.users.find(x=>x.id===uid);if(!u||!adminSlotV1077)return;
+  if(uid===adminSlotV1077)return toast(L('You are already viewing your own account.','أنت بالفعل فاتح حسابك.'),'good');
+  viewAsTargetV1077=uid;state.currentUser=uid;state.view='home';render();toast(L(`Read-only view as ${u.name}`,`عرض فقط كمستخدم ${u.name}`),'good');
+};
+window.exitAdminViewAsV1077=function(){if(!adminSlotV1077)return;viewAsTargetV1077=null;state.currentUser=adminSlotV1077;state.view='admin';render()};
+const isRoundLockedBaseV1077=window.isRoundLocked||isRoundLocked;
+window.isRoundLocked=function(){return !!viewAsTargetV1077||isRoundLockedBaseV1077()};
+
+/* ---------- Account menu / Sign Out ---------- */
+function closeAccountMenuV1077(){document.querySelector('.mastaba-account-menu-v1077')?.remove()}
+function openAccountMenuV1077(ev){
+  ev?.preventDefault();ev?.stopPropagation();closeAccountMenuV1077();
+  const btn=document.querySelector('#userSwitcher');if(!btn)return;
+  const u=currentUser(),menu=document.createElement('div');menu.className='mastaba-account-menu-v1077';
+  menu.innerHTML=`<div class="account-head-v1077"><strong>${escapeHTML(u?.name||'Mastaba')}</strong><small>${escapeHTML(state.authProfileV1064?.email||'')}</small></div>${viewAsTargetV1077?`<button type="button" data-account-action="return">${L('Return to Admin Account','الرجوع لحساب الأدمن')}</button>`:`<button type="button" data-account-action="profile">${L('Profile','الملف الشخصي')}</button>`}<button type="button" class="account-signout-v1077" data-account-action="signout">${L('Sign Out','تسجيل الخروج')}</button>`;
+  document.body.appendChild(menu);
+  const r=btn.getBoundingClientRect(),w=menu.offsetWidth;
+  menu.style.top=`${Math.min(window.innerHeight-menu.offsetHeight-8,r.bottom+7)}px`;
+  menu.style.left=`${Math.max(8,Math.min(window.innerWidth-w-8,r.right-w))}px`;
+  menu.querySelector('[data-account-action="profile"]')?.addEventListener('click',()=>{closeAccountMenuV1077();go('profile')});
+  menu.querySelector('[data-account-action="return"]')?.addEventListener('click',()=>{closeAccountMenuV1077();exitAdminViewAsV1077()});
+  menu.querySelector('[data-account-action="signout"]')?.addEventListener('click',async()=>{closeAccountMenuV1077();await window.mastabaSignOutV1064?.()});
+}
+function installAccountMenuV1077(){
+  const btn=document.querySelector('#userSwitcher');if(!btn)return;
+  btn.onclick=openAccountMenuV1077;btn.setAttribute('aria-haspopup','menu');btn.setAttribute('title',L('Account menu','قائمة الحساب'));
+}
+document.addEventListener('click',e=>{if(!e.target.closest('.mastaba-account-menu-v1077')&&!e.target.closest('#userSwitcher'))closeAccountMenuV1077()});
+window.addEventListener('resize',closeAccountMenuV1077);
+
+/* ---------- Post-render production cleanup ---------- */
+const renderBaseV1077=window.render||render;
+window.render=function(){
+  const out=renderBaseV1077();
+  lockProductionTitleV1077();
+  setTimeout(()=>{
+    installAccountMenuV1077();
+    lockProductionTitleV1077();
+    if(state.view==='admin'&&currentUser()?.admin){
+      ensureAdminPoolV1077();
+      const panel=document.querySelector('#view-admin .admin-focus-panel');
+      if(panel&&!panel.querySelector('.admin-production-note-v1077')){
+        panel.insertAdjacentHTML('beforeend',`<div class="admin-production-note-v1077">${adminPoolLoadingV1077?L('Loading the live fixture feed…','جاري تحميل جدول الماتشات الحي…'):L('Fixture selections and Admin changes are saved to Production.','اختيارات الماتشات وتعديلات الأدمن بتتحفظ على النسخة الحية.')}</div>`);
+      }
+      if(nextGwV1077&&state.nextPublished&&state.fixtures.every(f=>f.phase==='final')&&!document.querySelector('.admin-open-next-v1077')){
+        panel?.insertAdjacentHTML('beforeend',`<button class="btn btn-primary btn-wide admin-open-next-v1077" onclick="openNextGameweekV1077()">${L(`Open Gameweek ${Number(state.week)+1}`,`افتح الجولة ${Number(state.week)+1}`)}</button>`);
+      }
+    }
+    if(viewAsTargetV1077){
+      const host=document.querySelector('main');const target=state.users.find(x=>x.id===viewAsTargetV1077);
+      if(host&&!host.querySelector('.mastaba-viewas-v1077'))host.insertAdjacentHTML('afterbegin',`<div class="mastaba-viewas-v1077"><span><strong>${L('Admin troubleshooting view','عرض الأدمن للتشخيص')}</strong> · ${escapeHTML(target?.name||'')}</span><button class="btn btn-secondary" onclick="exitAdminViewAsV1077()">${L('Return to Admin','الرجوع للأدمن')}</button></div>`);
+    }
+  },0);
+  return out;
+};
+installAccountMenuV1077();
+lockProductionTitleV1077();
+})();
+</script>
 
 </body>
 </html>
