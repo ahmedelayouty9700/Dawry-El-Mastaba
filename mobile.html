@@ -6839,25 +6839,23 @@ html[data-theme="acmilan"] .league-insights-v22 .form-table th{background:#2a161
 </head>
 <body class="auth-pending-v1064">
 
+  
   <section id="authGateV1064" class="auth-shell-v1064" dir="ltr" aria-label="Mastaba account access">
     <div class="auth-frame-v1064">
       <div class="auth-top-v1064">
-        <div class="auth-brand-v1064"><div class="auth-mark-v1064" aria-hidden="true">م</div><div class="auth-brand-copy-v1064"><strong>المصطبة</strong><small>Sandbox · V10.64</small></div></div>
+        <div class="auth-brand-v1064">
+          <div class="auth-brand-logo-wrap-v1064"><img class="auth-brand-logo-img-v1064" alt="Mastaba logo"></div>
+          <div class="auth-brand-copy-v1064"><strong>المصطبة</strong><small>Sandbox · V10.65</small></div>
+        </div>
         <button id="authLangV1064" class="auth-lang-v1064" type="button" aria-label="Change language">ع</button>
       </div>
       <div class="auth-main-v1064">
-        <div class="auth-story-v1064">
-          <div class="auth-kicker-v1064" data-auth-copy="kicker">Mastaba Prediction League</div>
-          <h1 data-auth-copy="hero">Predict it. Own the Mastaba.</h1>
-          <p data-auth-copy="intro">Sign in to your Mastaba account or create one in the Sandbox. Your supported club sets your starting theme automatically.</p>
-          <div class="auth-proof-v1064">
-            <div><b data-auth-copy="proof1a">Real account</b><small data-auth-copy="proof1b">Stored in Mastaba Sandbox</small></div>
-            <div><b data-auth-copy="proof2a">Private picks</b><small data-auth-copy="proof2b">Hidden from others until kickoff</small></div>
-            <div><b data-auth-copy="proof3a">Club identity</b><small data-auth-copy="proof3b">Theme chosen from your team</small></div>
-          </div>
-        </div>
         <div class="auth-card-v1064">
-          <div class="auth-card-head-v1064"><h2 data-auth-copy="cardTitle">Welcome back</h2><p data-auth-copy="cardSub">Use your Mastaba account to continue.</p></div>
+          <div class="auth-card-head-v1064">
+            <p data-auth-copy="cardEyebrow">Please enter your details</p>
+            <h2 id="authCardTitleV1064" data-auth-copy="loginTitle">Welcome back</h2>
+            <span id="authCardSubV1064" class="auth-card-sub-v1064" data-auth-copy="loginSub">Sign in to continue to Mastaba Sandbox.</span>
+          </div>
           <div class="auth-tabs-v1064" role="tablist">
             <button id="authLoginTabV1064" class="auth-tab-v1064 active" type="button" data-auth-mode="login" data-auth-copy="loginTab">Log In</button>
             <button id="authSignupTabV1064" class="auth-tab-v1064" type="button" data-auth-mode="signup" data-auth-copy="signupTab">Create Account</button>
@@ -6866,24 +6864,45 @@ html[data-theme="acmilan"] .league-insights-v22 .form-table th{background:#2a161
           <form id="authLoginFormV1064" class="auth-form-v1064 active" autocomplete="on">
             <div class="auth-field-v1064"><label for="authLoginEmailV1064" data-auth-copy="email">Email</label><input id="authLoginEmailV1064" type="email" autocomplete="email" required placeholder="you@example.com"></div>
             <div class="auth-field-v1064"><label for="authLoginPasswordV1064" data-auth-copy="password">Password</label><input id="authLoginPasswordV1064" type="password" autocomplete="current-password" required minlength="8" placeholder="••••••••"></div>
-            <button id="authLoginSubmitV1064" class="auth-submit-v1064" type="submit" data-auth-copy="loginButton">Log In</button>
+            <div class="auth-inline-row-v1064">
+              <label class="auth-check-v1064" for="authRememberLoginV1064"><input id="authRememberLoginV1064" type="checkbox" checked><span data-auth-copy="stayLoggedIn">Stay logged in</span></label>
+              <button id="authForgotPasswordV1064" class="auth-link-btn-v1064" type="button" data-auth-copy="forgotPassword">Forgot password?</button>
+            </div>
+            <button id="authLoginSubmitV1064" class="auth-submit-v1064" type="submit" data-auth-copy="loginButton">Sign in with Email</button>
+            <div class="auth-divider-v1064" data-auth-copy="oauthDivider">or continue with</div>
+            <div class="auth-oauth-v1064">
+              <button id="authGoogleLoginV1064" class="auth-oauth-btn-v1064" type="button"><svg viewBox="0 0 48 48" aria-hidden="true"><path fill="#FFC107" d="M43.6 20.5H42V20H24v8h11.3C33.7 32.7 29.3 36 24 36c-6.6 0-12-5.4-12-12s5.4-12 12-12c3 0 5.7 1.1 7.8 3l5.7-5.7C34.1 6.1 29.3 4 24 4 12.9 4 4 12.9 4 24s8.9 20 20 20 20-8.9 20-20c0-1.3-.1-2.3-.4-3.5z"></path><path fill="#FF3D00" d="M6.3 14.7l6.6 4.8C14.7 15 18.9 12 24 12c3 0 5.7 1.1 7.8 3l5.7-5.7C34.1 6.1 29.3 4 24 4 16.3 4 9.7 8.3 6.3 14.7z"></path><path fill="#4CAF50" d="M24 44c5.2 0 10-2 13.6-5.3l-6.3-5.3C29.2 34.9 26.7 36 24 36c-5.3 0-9.7-3.3-11.4-8l-6.5 5C9.4 39.6 16.1 44 24 44z"></path><path fill="#1976D2" d="M43.6 20.5H42V20H24v8h11.3c-1 2.8-2.9 4.8-5.3 6.3l.1-.1 6.3 5.3C36 39 44 34 44 24c0-1.3-.1-2.3-.4-3.5z"></path></svg><span data-auth-copy="googleButton">Sign in with Google</span></button>
+              <button id="authAppleLoginV1064" class="auth-oauth-btn-v1064" type="button"><svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M16.7 12.7c0-2 1.6-3 1.7-3-.9-1.3-2.4-1.5-2.9-1.5-1.2-.1-2.4.7-3 .7-.6 0-1.5-.7-2.5-.7-1.3 0-2.5.8-3.1 1.9-1.4 2.4-.3 6 1 7.9.7 1 1.4 2.1 2.5 2.1 1 0 1.4-.6 2.6-.6 1.2 0 1.5.6 2.6.6 1.1 0 1.8-1 2.5-2 .7-.9 1-1.8 1-1.9 0 0-2-.8-2-3.5zM14.6 6.9c.6-.8 1.1-1.8 1-2.9-.9.1-2 .6-2.7 1.4-.6.7-1.1 1.8-1 2.8 1 .1 2.1-.5 2.7-1.3z"/></svg><span data-auth-copy="appleButton">Sign in with Apple</span></button>
+            </div>
+            <div class="auth-switch-v1064"><span data-auth-copy="noAccount">Don't have an account?</span> <button class="auth-switch-btn-v1064" type="button" data-auth-switch="signup" data-auth-copy="signupCta">Sign up</button></div>
           </form>
           <form id="authSignupFormV1064" class="auth-form-v1064" autocomplete="on">
             <div class="auth-grid-v1064">
-              <div class="auth-field-v1064"><label for="authDisplayNameV1064" data-auth-copy="displayName">Display name</label><input id="authDisplayNameV1064" type="text" required maxlength="40" autocomplete="name"></div>
-              <div class="auth-field-v1064"><label for="authUsernameV1064" data-auth-copy="username">Username</label><input id="authUsernameV1064" type="text" required minlength="3" maxlength="24" autocomplete="username" autocapitalize="none" spellcheck="false"><div class="auth-hint-v1064" data-auth-copy="usernameHint">3–24 letters, numbers or underscores.</div></div>
-              <div class="auth-field-v1064 full"><label for="authSignupEmailV1064" data-auth-copy="email">Email</label><input id="authSignupEmailV1064" type="email" autocomplete="email" required></div>
-              <div class="auth-field-v1064 full"><label for="authSignupPasswordV1064" data-auth-copy="password">Password</label><input id="authSignupPasswordV1064" type="password" autocomplete="new-password" required minlength="8"><div class="auth-hint-v1064" data-auth-copy="passwordHint">Use at least 8 characters.</div></div>
-              <div class="auth-field-v1064 full"><label for="authTeamV1064" data-auth-copy="team">Which team do you support?</label><select id="authTeamV1064" required></select></div>
+              <div class="auth-field-v1064 full"><label for="authDisplayNameV1064" data-auth-copy="displayName">Display name</label><input id="authDisplayNameV1064" type="text" required maxlength="40" autocomplete="name" placeholder="Ahmed Ayooti"></div>
+              <div class="auth-field-v1064 full"><label for="authSignupEmailV1064" data-auth-copy="email">Email</label><input id="authSignupEmailV1064" type="email" autocomplete="email" required placeholder="you@example.com"></div>
+              <div class="auth-field-v1064"><label for="authSignupPasswordV1064" data-auth-copy="password">Password</label><input id="authSignupPasswordV1064" type="password" autocomplete="new-password" required minlength="8" placeholder="••••••••"><div class="auth-hint-v1064" data-auth-copy="passwordHint">Use at least 8 characters.</div></div>
+              <div class="auth-field-v1064"><label for="authSignupPasswordConfirmV1064" data-auth-copy="confirmPassword">Confirm password</label><input id="authSignupPasswordConfirmV1064" type="password" autocomplete="new-password" required minlength="8" placeholder="••••••••"></div>
+              <div class="auth-field-v1064 full"><label for="authTeamSearchV1064" data-auth-copy="team">Which team do you support?</label><input id="authTeamSearchV1064" type="text" list="authTeamListV1064" autocomplete="off" required placeholder="Search your team"></div>
             </div>
-            <div class="auth-team-note-v1064"><span class="auth-team-dot-v1064"></span><span data-auth-copy="teamNote">If your club has a Mastaba theme, it becomes your starting theme automatically. You can change it later from Profile.</span></div>
-            <button id="authSignupSubmitV1064" class="auth-submit-v1064" type="submit" data-auth-copy="signupButton">Create Account</button>
+            <div class="auth-team-note-v1064"><span class="auth-team-dot-v1064"></span><span data-auth-copy="teamNote">Search from the available team list. If your club has a Mastaba theme, it becomes your starting theme automatically. You can change it later from Profile.</span></div>
+            <div class="auth-inline-row-v1064">
+              <label class="auth-check-v1064" for="authRememberSignupV1064"><input id="authRememberSignupV1064" type="checkbox" checked><span data-auth-copy="stayLoggedIn">Stay logged in</span></label>
+            </div>
+            <button id="authSignupSubmitV1064" class="auth-submit-v1064" type="submit" data-auth-copy="signupButton">Create account with Email</button>
+            <div class="auth-divider-v1064" data-auth-copy="oauthDivider">or continue with</div>
+            <div class="auth-oauth-v1064">
+              <button id="authGoogleSignupV1064" class="auth-oauth-btn-v1064" type="button"><svg viewBox="0 0 48 48" aria-hidden="true"><path fill="#FFC107" d="M43.6 20.5H42V20H24v8h11.3C33.7 32.7 29.3 36 24 36c-6.6 0-12-5.4-12-12s5.4-12 12-12c3 0 5.7 1.1 7.8 3l5.7-5.7C34.1 6.1 29.3 4 24 4 12.9 4 4 12.9 4 24s8.9 20 20 20 20-8.9 20-20c0-1.3-.1-2.3-.4-3.5z"></path><path fill="#FF3D00" d="M6.3 14.7l6.6 4.8C14.7 15 18.9 12 24 12c3 0 5.7 1.1 7.8 3l5.7-5.7C34.1 6.1 29.3 4 24 4 16.3 4 9.7 8.3 6.3 14.7z"></path><path fill="#4CAF50" d="M24 44c5.2 0 10-2 13.6-5.3l-6.3-5.3C29.2 34.9 26.7 36 24 36c-5.3 0-9.7-3.3-11.4-8l-6.5 5C9.4 39.6 16.1 44 24 44z"></path><path fill="#1976D2" d="M43.6 20.5H42V20H24v8h11.3c-1 2.8-2.9 4.8-5.3 6.3l.1-.1 6.3 5.3C36 39 44 34 44 24c0-1.3-.1-2.3-.4-3.5z"></path></svg><span data-auth-copy="googleButton">Sign in with Google</span></button>
+              <button id="authAppleSignupV1064" class="auth-oauth-btn-v1064" type="button"><svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M16.7 12.7c0-2 1.6-3 1.7-3-.9-1.3-2.4-1.5-2.9-1.5-1.2-.1-2.4.7-3 .7-.6 0-1.5-.7-2.5-.7-1.3 0-2.5.8-3.1 1.9-1.4 2.4-.3 6 1 7.9.7 1 1.4 2.1 2.5 2.1 1 0 1.4-.6 2.6-.6 1.2 0 1.5.6 2.6.6 1.1 0 1.8-1 2.5-2 .7-.9 1-1.8 1-1.9 0 0-2-.8-2-3.5zM14.6 6.9c.6-.8 1.1-1.8 1-2.9-.9.1-2 .6-2.7 1.4-.6.7-1.1 1.8-1 2.8 1 .1 2.1-.5 2.7-1.3z"/></svg><span data-auth-copy="appleButton">Sign in with Apple</span></button>
+            </div>
+            <div class="auth-switch-v1064"><span data-auth-copy="hasAccount">Already have an account?</span> <button class="auth-switch-btn-v1064" type="button" data-auth-switch="login" data-auth-copy="loginCta">Log in</button></div>
           </form>
           <div class="auth-foot-v1064" data-auth-copy="sandboxFoot">Sandbox accounts and data are separate from Mastaba Production.</div>
         </div>
       </div>
     </div>
+    <datalist id="authTeamListV1064"></datalist>
   </section>
+
 
   <div id="app" class="app-shell">
     <header class="topbar">
@@ -12453,29 +12472,55 @@ html:is([data-theme="mastaba"],[data-theme="barcelona"],[data-theme="realmadrid"
 }
 
 
-/* ---------- V10.64 Sandbox authentication ---------- */
+
+/* ---------- V10.65 Sandbox authentication ---------- */
 body.auth-pending-v1064 #app,body.auth-required-v1064 #app{display:none!important}
 body.auth-pending-v1064,body.auth-required-v1064{overflow:hidden!important}
 body.auth-ready-v1064 #authGateV1064{display:none!important}
-.auth-shell-v1064{position:fixed;inset:0;z-index:100000;overflow:auto;background:radial-gradient(circle at 13% 8%,rgba(229,31,54,.19),transparent 25%),radial-gradient(circle at 88% 84%,rgba(53,86,145,.26),transparent 30%),linear-gradient(135deg,#080d18 0 48%,#101b31 48% 76%,#170b12 76% 100%);color:#fff;font-family:Inter,"Segoe UI",Tahoma,Arial,sans-serif}
-.auth-frame-v1064{width:min(1120px,calc(100% - 32px));min-height:100%;margin:0 auto;display:flex;flex-direction:column;padding:20px 0 34px}
-.auth-top-v1064{display:flex;align-items:center;justify-content:space-between;gap:16px;min-height:58px}
-.auth-brand-v1064{display:flex;align-items:center;gap:11px}.auth-mark-v1064{width:44px;height:44px;display:grid;place-items:center;border-radius:14px 22px 14px 22px;background:linear-gradient(145deg,#e31e24,#98131a);border:1px solid rgba(255,255,255,.18);font-weight:1000;font-size:1.45rem;box-shadow:0 12px 30px rgba(0,0,0,.24)}
-.auth-brand-copy-v1064 strong{display:block;font-size:1.08rem;font-weight:1000}.auth-brand-copy-v1064 small{display:inline-flex;margin-top:3px;padding:2px 7px;border-radius:99px;border:1px solid rgba(255,204,214,.25);background:rgba(229,31,54,.10);color:#ffc7d0;font-size:.58rem!important;letter-spacing:.11em;text-transform:uppercase}
-.auth-lang-v1064{width:44px;height:42px;border-radius:12px;border:1px solid rgba(255,255,255,.16);background:rgba(18,29,50,.92);color:#fff;font-weight:950}
-.auth-main-v1064{flex:1;display:grid;grid-template-columns:minmax(0,.9fr) minmax(420px,520px);gap:clamp(34px,7vw,90px);align-items:center;padding:36px 0}
-.auth-story-v1064{max-width:530px}.auth-kicker-v1064{display:inline-flex;align-items:center;gap:8px;color:#ffbdc7;font-size:.73rem;font-weight:900;letter-spacing:.12em;text-transform:uppercase}.auth-kicker-v1064:before{content:"";width:24px;height:3px;border-radius:99px;background:#e31e24}
-.auth-story-v1064 h1{margin:14px 0 14px;font-size:clamp(2.7rem,6.7vw,5.6rem);line-height:.92;letter-spacing:-.055em;font-weight:1000}.auth-story-v1064 p{margin:0;max-width:480px;color:#c8d1df;font-size:1rem;line-height:1.65}.auth-proof-v1064{display:grid;grid-template-columns:repeat(3,1fr);gap:9px;margin-top:26px}.auth-proof-v1064 div{padding:12px;border-radius:6px 18px 6px 18px;background:rgba(255,255,255,.055);border:1px solid rgba(255,255,255,.09)}.auth-proof-v1064 b{display:block;font-size:.83rem}.auth-proof-v1064 small{display:block;margin-top:4px;color:#9facbd;font-size:.66rem!important;line-height:1.35}
-.auth-card-v1064{border-radius:8px 28px 8px 28px;border:1px solid rgba(255,255,255,.13);background:linear-gradient(180deg,rgba(20,31,53,.97),rgba(10,18,33,.985));box-shadow:0 28px 70px rgba(0,0,0,.35);padding:22px;backdrop-filter:blur(18px)}
-.auth-card-head-v1064{margin-bottom:17px}.auth-card-head-v1064 h2{margin:0;font-size:1.6rem;font-weight:1000;letter-spacing:-.03em}.auth-card-head-v1064 p{margin:6px 0 0;color:#9eacbd;font-size:.82rem;line-height:1.45}
-.auth-tabs-v1064{display:grid;grid-template-columns:1fr 1fr;gap:5px;padding:5px;border-radius:14px;background:#0a1424;border:1px solid rgba(255,255,255,.08);margin-bottom:18px}.auth-tab-v1064{border:0;border-radius:10px;padding:10px 12px;background:transparent;color:#9eacbd;font-weight:900}.auth-tab-v1064.active{background:#e31e24;color:#fff;box-shadow:0 7px 18px rgba(227,30,36,.18)}
-.auth-form-v1064{display:none;gap:13px}.auth-form-v1064.active{display:grid}.auth-grid-v1064{display:grid;grid-template-columns:1fr 1fr;gap:12px}.auth-field-v1064{display:grid;gap:6px}.auth-field-v1064.full{grid-column:1/-1}.auth-field-v1064 label{font-size:.72rem;font-weight:900;color:#dce3eb}.auth-field-v1064 input,.auth-field-v1064 select{width:100%;height:47px;border-radius:11px;border:1px solid #30405a;background:#0d1829;color:#fff;padding:0 12px;outline:none}.auth-field-v1064 input:focus,.auth-field-v1064 select:focus{border-color:#e34a57;box-shadow:0 0 0 3px rgba(227,30,36,.11)}.auth-field-v1064 select option{background:#0d1829;color:#fff}.auth-hint-v1064{color:#8291a4;font-size:.66rem;line-height:1.35}
-.auth-submit-v1064{width:100%;min-height:48px;border:0;border-radius:11px;background:linear-gradient(180deg,#ee233d,#b70f25);color:#fff;font-weight:1000;box-shadow:0 10px 24px rgba(213,18,45,.23)}.auth-submit-v1064:disabled{opacity:.55;cursor:wait}.auth-message-v1064{display:none;padding:11px 12px;border-radius:11px;font-size:.76rem;font-weight:750;line-height:1.45}.auth-message-v1064.show{display:block}.auth-message-v1064.error{background:#3b151c;border:1px solid #7e2938;color:#ffd8df}.auth-message-v1064.good{background:#102c24;border:1px solid #28624d;color:#c8f2df}.auth-message-v1064.info{background:#13243e;border:1px solid #2c4e7a;color:#dbe9fb}
-.auth-foot-v1064{margin-top:13px;text-align:center;color:#78879a;font-size:.66rem;line-height:1.45}.auth-team-note-v1064{display:flex;align-items:flex-start;gap:8px;padding:10px 11px;border-radius:11px;border:1px solid rgba(212,175,55,.22);background:rgba(212,175,55,.07);color:#dfd2ae;font-size:.68rem;line-height:1.4}.auth-team-dot-v1064{width:8px;height:8px;border-radius:50%;background:#d4af37;margin-top:3px;flex:0 0 auto}
+.auth-shell-v1064{position:fixed;inset:0;z-index:100000;overflow:auto;background:radial-gradient(circle at 12% 12%,rgba(227,30,36,.12),transparent 28%),radial-gradient(circle at 85% 18%,rgba(212,175,55,.10),transparent 24%),radial-gradient(circle at 82% 84%,rgba(39,71,147,.12),transparent 28%),linear-gradient(180deg,#f5f6fa 0%,#eef1f7 100%);color:#202638;font-family:Inter,"Segoe UI",Tahoma,Arial,sans-serif}
+.auth-frame-v1064{width:min(1180px,calc(100% - 32px));min-height:100%;margin:0 auto;display:flex;flex-direction:column;padding:22px 0 34px}
+.auth-top-v1064{display:flex;align-items:center;justify-content:space-between;gap:16px;min-height:62px}
+.auth-brand-v1064{display:flex;align-items:center;gap:14px}
+.auth-brand-logo-wrap-v1064{width:54px;height:54px;display:grid;place-items:center;border-radius:18px;background:#12171f;box-shadow:0 14px 32px rgba(18,23,31,.14);border:1px solid rgba(18,23,31,.08);overflow:hidden}
+.auth-brand-logo-img-v1064{width:100%;height:100%;object-fit:cover;display:block}
+.auth-brand-copy-v1064 strong{display:block;font-size:1.2rem;line-height:1.1;font-weight:1000;color:#111827}
+.auth-brand-copy-v1064 small{display:inline-flex;align-items:center;margin-top:5px;padding:4px 10px;border-radius:999px;background:rgba(227,30,36,.08);color:#a1131e;font-size:.62rem!important;font-weight:900;letter-spacing:.11em;text-transform:uppercase}
+.auth-lang-v1064{min-width:44px;height:42px;padding:0 12px;border-radius:13px;border:1px solid rgba(17,24,39,.10);background:#fff;color:#111827;font-weight:1000;box-shadow:0 8px 22px rgba(17,24,39,.07)}
+.auth-main-v1064{flex:1;display:flex;align-items:center;justify-content:center;padding:32px 0}
+.auth-card-v1064{width:min(100%,560px);border-radius:26px;background:rgba(255,255,255,.96);border:1px solid rgba(17,24,39,.08);box-shadow:0 28px 80px rgba(17,24,39,.12);padding:34px 34px 24px;backdrop-filter:blur(12px)}
+.auth-card-head-v1064{margin-bottom:18px}
+.auth-card-head-v1064 p{margin:0 0 10px;color:#8a90a2;font-size:1rem;line-height:1.4}
+.auth-card-head-v1064 h2{margin:0;font-size:clamp(2.2rem,5vw,3rem);line-height:1.02;letter-spacing:-.045em;font-weight:1000;color:#202638}
+.auth-card-sub-v1064{display:block;margin-top:12px;color:#636b7d;font-size:.95rem;line-height:1.55}
+.auth-tabs-v1064{display:grid;grid-template-columns:1fr 1fr;gap:8px;padding:6px;border-radius:16px;background:#f0f3f8;border:1px solid rgba(17,24,39,.08);margin:16px 0 18px}
+.auth-tab-v1064{border:0;border-radius:12px;padding:12px 14px;background:transparent;color:#667085;font-weight:900;font-size:.95rem}
+.auth-tab-v1064.active{background:#fff;color:#1c2538;box-shadow:0 10px 24px rgba(17,24,39,.08)}
+.auth-message-v1064{display:none;padding:12px 14px;border-radius:14px;font-size:.83rem;font-weight:750;line-height:1.45;margin-bottom:14px}.auth-message-v1064.show{display:block}.auth-message-v1064.error{background:#fff0f2;border:1px solid #fecdd3;color:#9f1239}.auth-message-v1064.good{background:#ecfdf3;border:1px solid #a7f3d0;color:#166534}.auth-message-v1064.info{background:#eef4ff;border:1px solid #bfd3ff;color:#23408e}
+.auth-form-v1064{display:none;gap:14px}.auth-form-v1064.active{display:grid}
+.auth-grid-v1064{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.auth-field-v1064{display:grid;gap:7px}.auth-field-v1064.full{grid-column:1/-1}
+.auth-field-v1064 label{font-size:.75rem;font-weight:900;color:#2a3246;letter-spacing:.02em}
+.auth-field-v1064 input{width:100%;height:52px;border-radius:14px;border:1px solid #d7dce5;background:#fff;color:#1f2937;padding:0 16px;outline:none;font-size:1rem}
+.auth-field-v1064 input::placeholder{color:#9aa2b1}
+.auth-field-v1064 input:focus{border-color:#4f7ef7;box-shadow:0 0 0 4px rgba(79,126,247,.12)}
+.auth-hint-v1064{color:#7c8598;font-size:.72rem;line-height:1.45}
+.auth-inline-row-v1064{display:flex;align-items:center;justify-content:space-between;gap:14px;flex-wrap:wrap}
+.auth-check-v1064{display:inline-flex;align-items:center;gap:10px;color:#2f374a;font-size:.96rem;font-weight:500}
+.auth-check-v1064 input{width:20px;height:20px;margin:0;accent-color:#3f7cf6}
+.auth-link-btn-v1064,.auth-switch-btn-v1064{border:0;background:none;padding:0;color:#2563eb;font-weight:700;text-decoration:underline;text-underline-offset:2px;cursor:pointer}
+.auth-submit-v1064{width:100%;min-height:54px;border:0;border-radius:14px;background:linear-gradient(180deg,#4b80f8,#3268ea);color:#fff;font-weight:1000;font-size:1rem;box-shadow:0 14px 28px rgba(50,104,234,.22)}
+.auth-submit-v1064:disabled{opacity:.58;cursor:wait}
+.auth-divider-v1064{display:flex;align-items:center;gap:12px;margin:4px 0 0;color:#8a90a2;font-size:.83rem;font-weight:700}.auth-divider-v1064::before,.auth-divider-v1064::after{content:"";flex:1;height:1px;background:#d9dfea}
+.auth-oauth-v1064{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.auth-oauth-btn-v1064{min-height:54px;border-radius:14px;border:1px solid #d7dce5;background:#fff;color:#202638;font-weight:800;font-size:.98rem;display:inline-flex;align-items:center;justify-content:center;gap:10px;box-shadow:0 8px 24px rgba(17,24,39,.04)}
+.auth-oauth-btn-v1064 svg{width:20px;height:20px;flex:0 0 auto}
+.auth-switch-v1064{text-align:center;color:#7b8496;font-size:.96rem;line-height:1.5}
+.auth-team-note-v1064{display:flex;align-items:flex-start;gap:10px;padding:12px 14px;border-radius:14px;border:1px solid rgba(212,175,55,.25);background:rgba(212,175,55,.10);color:#6b5730;font-size:.77rem;line-height:1.5}.auth-team-dot-v1064{width:8px;height:8px;border-radius:50%;background:#c99d1e;margin-top:5px;flex:0 0 auto}
+.auth-foot-v1064{margin-top:6px;text-align:center;color:#8b93a4;font-size:.72rem;line-height:1.45}
 .auth-account-panel-v1064{display:flex!important;align-items:center;justify-content:space-between;gap:14px;margin-bottom:16px;background:var(--theme-surface)!important;border-color:var(--theme-border)!important;color:var(--theme-text)!important}.auth-account-copy-v1064 small{display:block;color:var(--theme-muted)!important;font-size:.68rem!important}.auth-account-copy-v1064 strong{display:block;margin-top:3px;font-size:.95rem;word-break:break-word}.auth-signout-v1064{flex:0 0 auto}
-html[dir="rtl"] .auth-card-v1064{border-radius:28px 8px 28px 8px}.auth-shell-v1064[dir="rtl"] .auth-mark-v1064{border-radius:22px 14px 22px 14px}
-@media(max-width:860px){.auth-main-v1064{grid-template-columns:1fr;gap:28px;padding:24px 0 34px}.auth-story-v1064{max-width:620px}.auth-story-v1064 h1{font-size:clamp(2.55rem,12vw,4.4rem)}.auth-story-v1064 p{font-size:.9rem}.auth-proof-v1064{display:none}.auth-card-v1064{width:100%}}
-@media(max-width:560px){.auth-frame-v1064{width:min(100% - 22px,520px);padding-top:10px}.auth-main-v1064{padding-top:18px;gap:22px}.auth-story-v1064 h1{margin-top:10px}.auth-card-v1064{padding:17px 14px;border-radius:7px 23px 7px 23px}.auth-grid-v1064{grid-template-columns:1fr}.auth-field-v1064.full{grid-column:auto}.auth-top-v1064{min-height:50px}.auth-mark-v1064{width:40px;height:40px}.auth-account-panel-v1064{align-items:flex-start;flex-direction:column}.auth-signout-v1064{width:100%}}
+html[dir="rtl"] .auth-card-v1064{text-align:right}
+@media(max-width:720px){.auth-frame-v1064{width:min(100% - 20px,560px);padding-top:10px}.auth-main-v1064{padding:18px 0 28px}.auth-card-v1064{padding:24px 18px 18px;border-radius:22px}.auth-grid-v1064{grid-template-columns:1fr}.auth-field-v1064.full{grid-column:auto}.auth-oauth-v1064{grid-template-columns:1fr}.auth-inline-row-v1064{align-items:flex-start;flex-direction:column}.auth-check-v1064{font-size:.92rem}.auth-card-head-v1064 p{font-size:.92rem}.auth-card-sub-v1064{font-size:.88rem}.auth-account-panel-v1064{align-items:flex-start;flex-direction:column}.auth-signout-v1064{width:100%}}
+
 </style>
 
 <script id="v1043-wildcards-script">
@@ -13327,91 +13372,78 @@ renderRankings=function(){
 </script>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
 <script id="v1064-sandbox-auth-script">
 (function(){
 'use strict';
 const MASTABA_SANDBOX_URL='https://otrsmctblczyymmmapmm.supabase.co';
 const MASTABA_SANDBOX_PUBLISHABLE_KEY='sb_publishable_X7EbUwcEPNZjbBqwlB8W0Q_ti08z_FU';
 const REVIEWER_USER_SLOT_V1064='u1';
+const AUTH_STORAGE_KEY_V1064='mastaba-sandbox-auth-v1065';
+const AUTH_REMEMBER_KEY_V1064='mastaba_auth_remember_v1065';
 const AUTH_COPY_V1064={
- en:{kicker:'Mastaba Prediction League',hero:'Predict it. Own the Mastaba.',intro:'Sign in to your Mastaba account or create one in the Sandbox. Your supported club sets your starting theme automatically.',proof1a:'Real account',proof1b:'Stored in Mastaba Sandbox',proof2a:'Private picks',proof2b:'Hidden from others until kickoff',proof3a:'Club identity',proof3b:'Theme chosen from your team',cardTitle:'Welcome back',cardSub:'Use your Mastaba account to continue.',loginTab:'Log In',signupTab:'Create Account',email:'Email',password:'Password',displayName:'Display name',username:'Username',usernameHint:'3–24 letters, numbers or underscores.',passwordHint:'Use at least 8 characters.',team:'Which team do you support?',teamNote:'If your club has a Mastaba theme, it becomes your starting theme automatically. You can change it later from Profile.',loginButton:'Log In',signupButton:'Create Account',sandboxFoot:'Sandbox accounts and data are separate from Mastaba Production.',teamPlaceholder:'Choose your team',otherTeam:'Other / not listed',loggingIn:'Logging in…',creating:'Creating account…',confirmEmail:'Account created. Check your email to confirm it, then return here and log in.',signedOut:'You have been signed out.',badUsername:'Username must be 3–24 letters, numbers or underscores.',badPassword:'Password must be at least 8 characters.',missingTeam:'Choose the team you support.',connectionError:'Could not connect to Mastaba Sandbox. Refresh and try again.',profileError:'Your account is signed in, but the Sandbox profile could not be loaded.',signedInAs:'Signed in as',signOut:'Sign Out'},
- ar:{kicker:'دوري توقعات المصطبة',hero:'توقّعها. وامتلك المصطبة.',intro:'سجّل دخولك لحساب المصطبة أو اعمل حساب جديد في الـ Sandbox. النادي اللي بتشجعه بيحدد الثيم المبدئي تلقائيًا.',proof1a:'حساب حقيقي',proof1b:'محفوظ في Mastaba Sandbox',proof2a:'توقعات خاصة',proof2b:'مخفية عن الباقي لحد بداية الماتش',proof3a:'هوية ناديك',proof3b:'الثيم بيتحدد من فريقك',cardTitle:'أهلاً بيك',cardSub:'استخدم حساب المصطبة عشان تكمل.',loginTab:'تسجيل الدخول',signupTab:'حساب جديد',email:'البريد الإلكتروني',password:'كلمة السر',displayName:'الاسم الظاهر',username:'اسم المستخدم',usernameHint:'من 3 لـ 24 حرف إنجليزي أو رقم أو _.',passwordHint:'استخدم 8 خانات على الأقل.',team:'بتشجع مين؟',teamNote:'لو ناديك له ثيم في المصطبة، هيبقى ثيمك المبدئي تلقائيًا. تقدر تغيّره بعدين من الملف الشخصي.',loginButton:'تسجيل الدخول',signupButton:'إنشاء الحساب',sandboxFoot:'حسابات وبيانات الـ Sandbox منفصلة تمامًا عن Mastaba Production.',teamPlaceholder:'اختار فريقك',otherTeam:'فريق آخر / مش موجود',loggingIn:'جاري تسجيل الدخول…',creating:'جاري إنشاء الحساب…',confirmEmail:'الحساب اتعمل. افتح الإيميل وأكد الحساب، وبعدها ارجع هنا وسجّل دخول.',signedOut:'تم تسجيل خروجك.',badUsername:'اسم المستخدم لازم يكون من 3 لـ 24 حرف إنجليزي أو رقم أو _.',badPassword:'كلمة السر لازم تكون 8 خانات على الأقل.',missingTeam:'اختار الفريق اللي بتشجعه.',connectionError:'تعذر الاتصال بـ Mastaba Sandbox. اعمل Refresh وحاول تاني.',profileError:'الحساب مسجل دخول، لكن ملف الـ Sandbox ما اتحملش.',signedInAs:'مسجل الدخول باسم',signOut:'تسجيل الخروج'}
+ en:{cardEyebrow:'Please enter your details',loginTitle:'Welcome back',loginSub:'Sign in to continue to Mastaba Sandbox.',signupTitle:'Create your account',signupSub:'Use email to create your Mastaba Sandbox account.',loginTab:'Log In',signupTab:'Create Account',email:'Email address',password:'Password',displayName:'Display name',confirmPassword:'Confirm password',passwordHint:'Use at least 8 characters.',team:'Choose Team',teamPlaceholder:'Search your team',teamNote:'Search from the available team list. If your club has a Mastaba theme, it becomes your starting theme automatically. You can change it later from Profile.',loginButton:'Sign in with Email',signupButton:'Create account with Email',stayLoggedIn:'Stay logged in',forgotPassword:'Forgot password',oauthDivider:'or continue with',googleButton:'Sign in with Google',appleButton:'Sign in with Apple',noAccount:"Don't have an account?",hasAccount:'Already have an account?',signupCta:'Sign up',loginCta:'Log in',sandboxFoot:'Sandbox accounts and data are separate from Mastaba Production.',loggingIn:'Signing in…',creating:'Creating account…',resetting:'Sending reset link…',confirmEmail:'Account created. Check your email to confirm it, then return here and sign in.',resetSent:'Password reset email sent. Check your inbox.',signedOut:'You have been signed out.',badPassword:'Password must be at least 8 characters.',passwordMismatch:'Passwords do not match.',missingTeam:'Choose the team you support.',connectionError:'Could not connect to Mastaba Sandbox. Refresh and try again.',profileError:'Your account is signed in, but the Sandbox profile could not be loaded.',signedInAs:'Signed in as',signOut:'Sign Out',enterEmailReset:'Enter your email first, then press Forgot password.',oauthError:'This sign-in method is not available yet.'},
+ ar:{cardEyebrow:'من فضلك أدخل بياناتك',loginTitle:'أهلاً بيك',loginSub:'سجّل دخولك عشان تكمل في Mastaba Sandbox.',signupTitle:'اعمل حسابك',signupSub:'استخدم الإيميل لإنشاء حسابك في Mastaba Sandbox.',loginTab:'تسجيل الدخول',signupTab:'حساب جديد',email:'البريد الإلكتروني',password:'كلمة السر',displayName:'الاسم الظاهر',confirmPassword:'تأكيد كلمة السر',passwordHint:'استخدم 8 خانات على الأقل.',team:'اختار الفريق',teamPlaceholder:'ابحث عن فريقك',teamNote:'ابحث من قائمة الفرق المتاحة. لو ناديك له ثيم في المصطبة، هيبقى ثيمك المبدئي تلقائيًا. تقدر تغيّره بعدين من الملف الشخصي.',loginButton:'الدخول بالإيميل',signupButton:'إنشاء الحساب بالإيميل',stayLoggedIn:'خلّيني مسجل دخول',forgotPassword:'نسيت كلمة السر؟',oauthDivider:'أو كمّل باستخدام',googleButton:'الدخول بجوجل',appleButton:'الدخول بآبل',noAccount:'معندكش حساب؟',hasAccount:'عندك حساب بالفعل؟',signupCta:'اعمل حساب',loginCta:'سجّل دخول',sandboxFoot:'حسابات وبيانات الـ Sandbox منفصلة تمامًا عن Mastaba Production.',loggingIn:'جاري تسجيل الدخول…',creating:'جاري إنشاء الحساب…',resetting:'جاري إرسال رابط الاستعادة…',confirmEmail:'الحساب اتعمل. افتح الإيميل وأكد الحساب، وبعدها ارجع هنا وسجّل دخول.',resetSent:'تم إرسال رسالة استعادة كلمة السر. راجع بريدك الإلكتروني.',signedOut:'تم تسجيل خروجك.',badPassword:'كلمة السر لازم تكون 8 خانات على الأقل.',passwordMismatch:'كلمتا السر غير متطابقتين.',missingTeam:'اختار الفريق اللي بتشجعه.',connectionError:'تعذر الاتصال بـ Mastaba Sandbox. اعمل Refresh وحاول تاني.',profileError:'الحساب مسجل دخول، لكن ملف الـ Sandbox ما اتحملش.',signedInAs:'مسجل الدخول باسم',signOut:'تسجيل الخروج',enterEmailReset:'اكتب الإيميل الأول ثم اضغط نسيت كلمة السر.',oauthError:'طريقة الدخول دي غير متاحة حاليًا.'}
 };
 const AUTH_TEAMS_V1064=[
- ['acmilan','AC Milan','ميلان'],['alahly','Al Ahly','الأهلي'],['alahlisaudi','Al Ahli Saudi','الأهلي السعودي'],['alhilal','Al Hilal','الهلال'],['alittihad','Al Ittihad','الاتحاد'],['alnassr','Al Nassr','النصر'],['arsenal','Arsenal','أرسنال'],['barcelona','Barcelona','برشلونة'],['bayern','Bayern Munich','بايرن ميونخ'],['chelsea','Chelsea','تشيلسي'],['inter','Inter Milan','إنتر ميلان'],['juventus','Juventus','يوفنتوس'],['liverpool','Liverpool','ليفربول'],['mancity','Manchester City','مانشستر سيتي'],['manunited','Manchester United','مانشستر يونايتد'],['psg','Paris Saint-Germain','باريس سان جيرمان'],['realmadrid','Real Madrid','ريال مدريد'],['roma','AS Roma','روما'],['zamalek','Zamalek','الزمالك'],['other','Other / not listed','فريق آخر / مش موجود']
+ {key:'acmilan',en:'AC Milan',ar:'ميلان',aliases:['ac milan','milan']},
+ {key:'alahly',en:'Al Ahly',ar:'الأهلي',aliases:['al ahly','ahly']},
+ {key:'alahlisaudi',en:'Al Ahli Saudi',ar:'الأهلي السعودي',aliases:['al ahli saudi','al ahli','ahli saudi']},
+ {key:'alhilal',en:'Al Hilal',ar:'الهلال',aliases:['al hilal','hilal']},
+ {key:'alittihad',en:'Al Ittihad',ar:'الاتحاد',aliases:['al ittihad','ittihad','al الاتحاد']},
+ {key:'alnassr',en:'Al Nassr',ar:'النصر',aliases:['al nassr','nassr']},
+ {key:'arsenal',en:'Arsenal',ar:'أرسنال',aliases:['arsenal']},
+ {key:'barcelona',en:'Barcelona',ar:'برشلونة',aliases:['barcelona','barca']},
+ {key:'bayern',en:'Bayern Munich',ar:'بايرن ميونخ',aliases:['bayern munich','bayern']},
+ {key:'chelsea',en:'Chelsea',ar:'تشيلسي',aliases:['chelsea']},
+ {key:'inter',en:'Inter Milan',ar:'إنتر ميلان',aliases:['inter milan','inter']},
+ {key:'juventus',en:'Juventus',ar:'يوفنتوس',aliases:['juventus','juve']},
+ {key:'liverpool',en:'Liverpool',ar:'ليفربول',aliases:['liverpool']},
+ {key:'mancity',en:'Manchester City',ar:'مانشستر سيتي',aliases:['manchester city','man city','mancity']},
+ {key:'manunited',en:'Manchester United',ar:'مانشستر يونايتد',aliases:['manchester united','man united','manunited']},
+ {key:'psg',en:'Paris Saint-Germain',ar:'باريس سان جيرمان',aliases:['paris saint-germain','paris saint germain','psg']},
+ {key:'realmadrid',en:'Real Madrid',ar:'ريال مدريد',aliases:['real madrid']},
+ {key:'roma',en:'AS Roma',ar:'روما',aliases:['as roma','roma']},
+ {key:'zamalek',en:'Zamalek',ar:'الزمالك',aliases:['zamalek']},
+ {key:'other',en:'Other / not listed',ar:'فريق آخر / مش موجود',aliases:['other','not listed']}
 ];
 let authLangV1064=localStorage.getItem('mastaba_auth_lang_v1064')||((typeof state!=='undefined'&&state.lang==='ar')?'ar':'en');
-let authModeV1064='login',mastabaSandboxV1064=null,activeAuthUserV1064=null,profileHookInstalledV1064=false;
+let authModeV1064='login',mastabaSandboxV1064=null,activeAuthUserV1064=null,profileHookInstalledV1064=false,authSubscriptionV1064=null,rememberChoiceV1064=true;
 const qV1064=(s)=>document.querySelector(s);
 function copyV1064(k){return AUTH_COPY_V1064[authLangV1064]?.[k]||AUTH_COPY_V1064.en[k]||k}
-function authMessageV1064(text,type='info'){
- const el=qV1064('#authMessageV1064');if(!el)return;el.textContent=text||'';el.className=`auth-message-v1064 ${text?'show ':''}${type}`;
-}
-function renderTeamOptionsV1064(){const el=qV1064('#authTeamV1064');if(!el)return;const prev=el.value;el.innerHTML=`<option value="">${copyV1064('teamPlaceholder')}</option>`+AUTH_TEAMS_V1064.map(([k,en,ar])=>`<option value="${k}">${authLangV1064==='ar'?ar:en}</option>`).join('');if([...el.options].some(o=>o.value===prev))el.value=prev}
-function syncAuthCopyV1064(){
- const shell=qV1064('#authGateV1064');if(shell){shell.dir=authLangV1064==='ar'?'rtl':'ltr';shell.lang=authLangV1064}
- document.querySelectorAll('[data-auth-copy]').forEach(el=>{const key=el.dataset.authCopy;if(copyV1064(key)!=null)el.textContent=copyV1064(key)});
- const lang=qV1064('#authLangV1064');if(lang)lang.textContent=authLangV1064==='en'?'ع':'EN';renderTeamOptionsV1064();syncAuthModeV1064(false)
-}
-function syncAuthModeV1064(clearMessage=true){
- document.querySelectorAll('[data-auth-mode]').forEach(b=>b.classList.toggle('active',b.dataset.authMode===authModeV1064));
- qV1064('#authLoginFormV1064')?.classList.toggle('active',authModeV1064==='login');qV1064('#authSignupFormV1064')?.classList.toggle('active',authModeV1064==='signup');
- const h=qV1064('.auth-card-head-v1064 h2'),p=qV1064('.auth-card-head-v1064 p');if(h)h.textContent=authModeV1064==='login'?copyV1064('cardTitle'):copyV1064('signupTab');if(p)p.textContent=authModeV1064==='login'?copyV1064('cardSub'):copyV1064('teamNote');if(clearMessage)authMessageV1064('')
-}
+function authMessageV1064(text,type='info'){const el=qV1064('#authMessageV1064');if(!el)return;el.textContent=text||'';el.className=`auth-message-v1064 ${text?'show ':''}${type}`}
+function teamLabelV1064(team){return authLangV1064==='ar'?team.ar:team.en}
+function renderTeamOptionsV1064(){const list=qV1064('#authTeamListV1064');if(!list)return;list.innerHTML=AUTH_TEAMS_V1064.map(t=>`<option value="${teamLabelV1064(t)}"></option>`).join('');const input=qV1064('#authTeamSearchV1064');if(input)input.placeholder=copyV1064('teamPlaceholder')}
+function syncAuthCopyV1064(){const shell=qV1064('#authGateV1064');if(shell){shell.dir=authLangV1064==='ar'?'rtl':'ltr';shell.lang=authLangV1064}document.querySelectorAll('[data-auth-copy]').forEach(el=>{const key=el.dataset.authCopy;if(copyV1064(key)!=null)el.textContent=copyV1064(key)});const lang=qV1064('#authLangV1064');if(lang)lang.textContent=authLangV1064==='en'?'ع':'EN';renderTeamOptionsV1064();syncAuthModeV1064(false)}
+function syncAuthModeV1064(clearMessage=true){document.querySelectorAll('[data-auth-mode]').forEach(b=>b.classList.toggle('active',b.dataset.authMode===authModeV1064));qV1064('#authLoginFormV1064')?.classList.toggle('active',authModeV1064==='login');qV1064('#authSignupFormV1064')?.classList.toggle('active',authModeV1064==='signup');const h=qV1064('#authCardTitleV1064'),p=qV1064('#authCardSubV1064');if(h)h.textContent=copyV1064(authModeV1064==='login'?'loginTitle':'signupTitle');if(p)p.textContent=copyV1064(authModeV1064==='login'?'loginSub':'signupSub');if(clearMessage)authMessageV1064('')}
 function setAuthModeV1064(mode){authModeV1064=mode==='signup'?'signup':'login';syncAuthModeV1064()}
-function setBusyV1064(which,busy){const btn=qV1064(which==='login'?'#authLoginSubmitV1064':'#authSignupSubmitV1064');if(!btn)return;btn.disabled=!!busy;btn.textContent=busy?copyV1064(which==='login'?'loggingIn':'creating'):copyV1064(which==='login'?'loginButton':'signupButton')}
-function showAuthV1064(message='',type='info'){
- activeAuthUserV1064=null;document.body.classList.remove('auth-ready-v1064','auth-pending-v1064');document.body.classList.add('auth-required-v1064');syncAuthCopyV1064();if(message)authMessageV1064(message,type)
-}
+function setBusyV1064(which,busy){const submit=qV1064(which==='login'?'#authLoginSubmitV1064':'#authSignupSubmitV1064');if(submit){submit.disabled=!!busy;submit.textContent=busy?copyV1064(which==='login'?'loggingIn':'creating'):copyV1064(which==='login'?'loginButton':'signupButton')}if(which==='login'){const forgot=qV1064('#authForgotPasswordV1064');if(forgot){forgot.disabled=!!busy;forgot.textContent=copyV1064('forgotPassword')}}document.querySelectorAll('.auth-oauth-btn-v1064').forEach(btn=>btn.disabled=!!busy)}
+function showAuthV1064(message='',type='info'){activeAuthUserV1064=null;document.body.classList.remove('auth-ready-v1064','auth-pending-v1064');document.body.classList.add('auth-required-v1064');syncAuthCopyV1064();syncRememberInputsV1064();if(message)authMessageV1064(message,type)}
 function showAppV1064(){document.body.classList.remove('auth-required-v1064','auth-pending-v1064');document.body.classList.add('auth-ready-v1064')}
-async function loadProfileV1064(user){
- let lastError=null;for(let attempt=0;attempt<3;attempt++){
-  const {data,error}=await mastabaSandboxV1064.from('mastaba_profiles').select('id,username,display_name,primary_team_key,theme_key,language,avatar_url').eq('id',user.id).maybeSingle();
-  if(!error&&data)return data;lastError=error;if(attempt<2)await new Promise(r=>setTimeout(r,160*(attempt+1)));
- }
- if(lastError)console.error('Mastaba profile load failed',lastError);return null
-}
-function bridgeProfileToReviewerV1064(profile,user){
- if(typeof state==='undefined'||!Array.isArray(state.users))return;
- const slot=state.users.find(u=>u.id===REVIEWER_USER_SLOT_V1064);if(!slot)return;
- const display=profile?.display_name||user?.user_metadata?.display_name||profile?.username||user?.email?.split('@')[0]||slot.name;
- slot.name=display;slot.nickname=display;slot.username=profile?.username||'';slot.authUserId=user?.id||'';slot.email=user?.email||'';
- const team=profile?.primary_team_key||user?.user_metadata?.primary_team_key||'';slot.club=(typeof CLUBS!=='undefined'&&CLUBS[team])?team:'mastaba';slot.theme=profile?.theme_key||(typeof themeForSupportedTeamV1054==='function'?themeForSupportedTeamV1054(team):'mastaba');
- if(profile?.avatar_url)slot.avatar=profile.avatar_url;if(profile?.language==='ar'||profile?.language==='en')state.lang=profile.language;
- state.currentUser=REVIEWER_USER_SLOT_V1064;state.authProfileV1064={id:user?.id||'',email:user?.email||'',username:profile?.username||'',displayName:display,team,theme:slot.theme};
- try{save()}catch{};
- try{render()}catch(e){console.error('Mastaba reviewer render after auth failed',e)}
-}
-function installProfileAccountPanelV1064(){
- if(profileHookInstalledV1064||typeof renderProfile!=='function')return;profileHookInstalledV1064=true;const base=renderProfile;
- renderProfile=function(){base();const root=qV1064('#view-profile');if(!root||root.querySelector('.auth-account-panel-v1064')||!state?.authProfileV1064)return;const a=state.authProfileV1064;root.insertAdjacentHTML('afterbegin',`<div class="panel auth-account-panel-v1064"><div class="auth-account-copy-v1064"><small>${copyV1064('signedInAs')}</small><strong>${escapeHTML(a.email||a.displayName||'')}</strong></div><button class="btn btn-secondary auth-signout-v1064" type="button" onclick="mastabaSignOutV1064()">${copyV1064('signOut')}</button></div>`)};
-}
-async function enterAppV1064(session){
- if(!session?.user)return showAuthV1064();if(activeAuthUserV1064===session.user.id&&document.body.classList.contains('auth-ready-v1064'))return;
- activeAuthUserV1064=session.user.id;const profile=await loadProfileV1064(session.user);if(!profile){activeAuthUserV1064=null;return showAuthV1064(copyV1064('profileError'),'error')}
- authLangV1064=profile.language==='ar'?'ar':'en';localStorage.setItem('mastaba_auth_lang_v1064',authLangV1064);bridgeProfileToReviewerV1064(profile,session.user);installProfileAccountPanelV1064();showAppV1064();try{render()}catch{}
-}
-async function handleLoginV1064(ev){
- ev.preventDefault();authMessageV1064('');const email=qV1064('#authLoginEmailV1064')?.value.trim(),password=qV1064('#authLoginPasswordV1064')?.value||'';setBusyV1064('login',true);
- try{const {data,error}=await mastabaSandboxV1064.auth.signInWithPassword({email,password});if(error)throw error;if(data?.session)await enterAppV1064(data.session)}catch(e){authMessageV1064(e?.message||copyV1064('connectionError'),'error')}finally{setBusyV1064('login',false)}
-}
-async function handleSignupV1064(ev){
- ev.preventDefault();authMessageV1064('');const displayName=qV1064('#authDisplayNameV1064')?.value.trim(),username=qV1064('#authUsernameV1064')?.value.trim().toLowerCase(),email=qV1064('#authSignupEmailV1064')?.value.trim(),password=qV1064('#authSignupPasswordV1064')?.value||'',team=qV1064('#authTeamV1064')?.value||'';
- if(!/^[a-z0-9_]{3,24}$/.test(username||''))return authMessageV1064(copyV1064('badUsername'),'error');if(password.length<8)return authMessageV1064(copyV1064('badPassword'),'error');if(!team)return authMessageV1064(copyV1064('missingTeam'),'error');
- setBusyV1064('signup',true);try{
-  const {data,error}=await mastabaSandboxV1064.auth.signUp({email,password,options:{data:{display_name:displayName,username,primary_team_key:team,language:authLangV1064}}});if(error)throw error;
-  if(data?.session){await enterAppV1064(data.session)}else{qV1064('#authLoginEmailV1064').value=email||'';setAuthModeV1064('login');authMessageV1064(copyV1064('confirmEmail'),'good')}
- }catch(e){authMessageV1064(e?.message||copyV1064('connectionError'),'error')}finally{setBusyV1064('signup',false)}
-}
-window.mastabaSignOutV1064=async function(){try{await mastabaSandboxV1064?.auth.signOut()}catch(e){console.error(e)}showAuthV1064(copyV1064('signedOut'),'info')};
-async function bootAuthV1064(){
- syncAuthCopyV1064();document.querySelectorAll('[data-auth-mode]').forEach(b=>b.addEventListener('click',()=>setAuthModeV1064(b.dataset.authMode)));qV1064('#authLangV1064')?.addEventListener('click',()=>{authLangV1064=authLangV1064==='en'?'ar':'en';localStorage.setItem('mastaba_auth_lang_v1064',authLangV1064);syncAuthCopyV1064()});qV1064('#authLoginFormV1064')?.addEventListener('submit',handleLoginV1064);qV1064('#authSignupFormV1064')?.addEventListener('submit',handleSignupV1064);
- if(!window.supabase?.createClient)return showAuthV1064(copyV1064('connectionError'),'error');
- try{mastabaSandboxV1064=window.supabase.createClient(MASTABA_SANDBOX_URL,MASTABA_SANDBOX_PUBLISHABLE_KEY,{auth:{persistSession:true,autoRefreshToken:true,detectSessionInUrl:true}});window.mastabaSandboxV1064=mastabaSandboxV1064;const {data,error}=await mastabaSandboxV1064.auth.getSession();if(error)throw error;if(data?.session)await enterAppV1064(data.session);else showAuthV1064();mastabaSandboxV1064.auth.onAuthStateChange((event,session)=>{if(event==='SIGNED_OUT'||!session)return showAuthV1064();if(['SIGNED_IN','TOKEN_REFRESHED','USER_UPDATED','INITIAL_SESSION'].includes(event))setTimeout(()=>enterAppV1064(session),0)})}catch(e){console.error('Mastaba Sandbox auth boot failed',e);showAuthV1064(copyV1064('connectionError'),'error')}
-}
+function createStorageAdapterV1064(type){const store=type==='session'?window.sessionStorage:window.localStorage;return{getItem:(k)=>store.getItem(k),setItem:(k,v)=>store.setItem(k,v),removeItem:(k)=>store.removeItem(k)}}
+function detectRememberChoiceV1064(){if(window.localStorage.getItem(AUTH_STORAGE_KEY_V1064))return true;if(window.sessionStorage.getItem(AUTH_STORAGE_KEY_V1064))return false;return localStorage.getItem(AUTH_REMEMBER_KEY_V1064)!=='0'}
+function syncRememberInputsV1064(){['#authRememberLoginV1064','#authRememberSignupV1064'].forEach(sel=>{const el=qV1064(sel);if(el)el.checked=!!rememberChoiceV1064})}
+function currentRememberChoiceV1064(mode){const el=qV1064(mode==='signup'?'#authRememberSignupV1064':'#authRememberLoginV1064');return el?!!el.checked:!!rememberChoiceV1064}
+async function buildSupabaseClientV1064(remember){rememberChoiceV1064=!!remember;localStorage.setItem(AUTH_REMEMBER_KEY_V1064,rememberChoiceV1064?'1':'0');const storage=createStorageAdapterV1064(rememberChoiceV1064?'local':'session');mastabaSandboxV1064=window.supabase.createClient(MASTABA_SANDBOX_URL,MASTABA_SANDBOX_PUBLISHABLE_KEY,{auth:{persistSession:true,autoRefreshToken:true,detectSessionInUrl:true,storage,storageKey:AUTH_STORAGE_KEY_V1064}});window.mastabaSandboxV1064=mastabaSandboxV1064;if(authSubscriptionV1064?.subscription?.unsubscribe)authSubscriptionV1064.subscription.unsubscribe();authSubscriptionV1064=mastabaSandboxV1064.auth.onAuthStateChange((event,session)=>{if(event==='SIGNED_OUT'||!session){window.localStorage.removeItem(AUTH_STORAGE_KEY_V1064);window.sessionStorage.removeItem(AUTH_STORAGE_KEY_V1064);return showAuthV1064()}if(['SIGNED_IN','TOKEN_REFRESHED','USER_UPDATED','INITIAL_SESSION','PASSWORD_RECOVERY'].includes(event))setTimeout(()=>enterAppV1064(session),0)});return mastabaSandboxV1064}
+function slugFromTextV1064(text){return (text||'').toLowerCase().replace(/[^a-z0-9]+/g,'_').replace(/^_+|_+$/g,'').slice(0,18)||'user'}
+function makeHiddenUsernameV1064(displayName,email){const base=slugFromTextV1064(displayName)||slugFromTextV1064((email||'').split('@')[0]);const suffix=Math.random().toString(36).slice(2,6);return `${base}_${suffix}`.slice(0,24)}
+function normalizeTextV1064(text){return (text||'').trim().toLowerCase().replace(/\s+/g,' ')}
+function resolveTeamKeyV1064(value){const v=normalizeTextV1064(value);if(!v)return '';const match=AUTH_TEAMS_V1064.find(t=>normalizeTextV1064(t.en)===v||normalizeTextV1064(t.ar)===v||(t.aliases||[]).some(a=>normalizeTextV1064(a)===v));return match?match.key:'other'}
+function populateAuthBrandLogoV1064(){const src=document.querySelector('.brand-logo')?.getAttribute('src');if(src)document.querySelectorAll('.auth-brand-logo-img-v1064').forEach(img=>img.setAttribute('src',src))}
+async function loadProfileV1064(user){let lastError=null;for(let attempt=0;attempt<3;attempt++){const {data,error}=await mastabaSandboxV1064.from('mastaba_profiles').select('id,username,display_name,primary_team_key,theme_key,language,avatar_url').eq('id',user.id).maybeSingle();if(!error&&data)return data;lastError=error;if(attempt<2)await new Promise(r=>setTimeout(r,160*(attempt+1)))}if(lastError)console.error('Mastaba profile load failed',lastError);return null}
+function bridgeProfileToReviewerV1064(profile,user){if(typeof state==='undefined'||!Array.isArray(state.users))return;const slot=state.users.find(u=>u.id===REVIEWER_USER_SLOT_V1064);if(!slot)return;const display=profile?.display_name||user?.user_metadata?.display_name||user?.email?.split('@')[0]||slot.name;slot.name=display;slot.nickname=display;slot.username=profile?.username||'';slot.authUserId=user?.id||'';slot.email=user?.email||'';const team=profile?.primary_team_key||user?.user_metadata?.primary_team_key||'';slot.club=(typeof CLUBS!=='undefined'&&CLUBS[team])?team:'mastaba';slot.theme=profile?.theme_key||(typeof themeForSupportedTeamV1054==='function'?themeForSupportedTeamV1054(team):'mastaba');if(profile?.avatar_url)slot.avatar=profile.avatar_url;if(profile?.language==='ar'||profile?.language==='en')state.lang=profile.language;state.currentUser=REVIEWER_USER_SLOT_V1064;state.authProfileV1064={id:user?.id||'',email:user?.email||'',displayName:display,team,theme:slot.theme};try{save()}catch{}try{render()}catch(e){console.error('Mastaba reviewer render after auth failed',e)}}
+function installProfileAccountPanelV1064(){if(profileHookInstalledV1064||typeof renderProfile!=='function')return;profileHookInstalledV1064=true;const base=renderProfile;renderProfile=function(){base();const root=qV1064('#view-profile');if(!root||root.querySelector('.auth-account-panel-v1064')||!state?.authProfileV1064)return;const a=state.authProfileV1064;root.insertAdjacentHTML('afterbegin',`<div class="panel auth-account-panel-v1064"><div class="auth-account-copy-v1064"><small>${copyV1064('signedInAs')}</small><strong>${escapeHTML(a.email||a.displayName||'')}</strong></div><button class="btn btn-secondary auth-signout-v1064" type="button" onclick="mastabaSignOutV1064()">${copyV1064('signOut')}</button></div>`)}}
+async function enterAppV1064(session){if(!session?.user)return showAuthV1064();if(activeAuthUserV1064===session.user.id&&document.body.classList.contains('auth-ready-v1064'))return;activeAuthUserV1064=session.user.id;const profile=await loadProfileV1064(session.user);if(!profile){activeAuthUserV1064=null;return showAuthV1064(copyV1064('profileError'),'error')}authLangV1064=profile.language==='ar'?'ar':'en';localStorage.setItem('mastaba_auth_lang_v1064',authLangV1064);bridgeProfileToReviewerV1064(profile,session.user);installProfileAccountPanelV1064();showAppV1064();try{render()}catch{}}
+async function handleLoginV1064(ev){ev.preventDefault();authMessageV1064('');const email=qV1064('#authLoginEmailV1064')?.value.trim(),password=qV1064('#authLoginPasswordV1064')?.value||'',remember=currentRememberChoiceV1064('login');setBusyV1064('login',true);try{await buildSupabaseClientV1064(remember);const {data,error}=await mastabaSandboxV1064.auth.signInWithPassword({email,password});if(error)throw error;if(data?.session)await enterAppV1064(data.session)}catch(e){authMessageV1064(e?.message||copyV1064('connectionError'),'error')}finally{setBusyV1064('login',false)}}
+async function handleSignupV1064(ev){ev.preventDefault();authMessageV1064('');const displayName=qV1064('#authDisplayNameV1064')?.value.trim(),email=qV1064('#authSignupEmailV1064')?.value.trim(),password=qV1064('#authSignupPasswordV1064')?.value||'',confirm=qV1064('#authSignupPasswordConfirmV1064')?.value||'',teamInput=qV1064('#authTeamSearchV1064')?.value||'',team=resolveTeamKeyV1064(teamInput),remember=currentRememberChoiceV1064('signup');if(password.length<8)return authMessageV1064(copyV1064('badPassword'),'error');if(password!==confirm)return authMessageV1064(copyV1064('passwordMismatch'),'error');if(!team)return authMessageV1064(copyV1064('missingTeam'),'error');const username=makeHiddenUsernameV1064(displayName,email);setBusyV1064('signup',true);try{await buildSupabaseClientV1064(remember);const {data,error}=await mastabaSandboxV1064.auth.signUp({email,password,options:{data:{display_name:displayName,username,primary_team_key:team,language:authLangV1064}}});if(error)throw error;if(data?.session){await enterAppV1064(data.session)}else{qV1064('#authLoginEmailV1064').value=email||'';setAuthModeV1064('login');authMessageV1064(copyV1064('confirmEmail'),'good')}}catch(e){authMessageV1064(e?.message||copyV1064('connectionError'),'error')}finally{setBusyV1064('signup',false)}}
+async function handleForgotPasswordV1064(){const btn=qV1064('#authForgotPasswordV1064');const email=qV1064('#authLoginEmailV1064')?.value.trim()||qV1064('#authSignupEmailV1064')?.value.trim()||'';if(!email)return authMessageV1064(copyV1064('enterEmailReset'),'error');const original=copyV1064('forgotPassword');if(btn){btn.disabled=true;btn.textContent=copyV1064('resetting')}try{const remember=currentRememberChoiceV1064(authModeV1064);await buildSupabaseClientV1064(remember);const {error}=await mastabaSandboxV1064.auth.resetPasswordForEmail(email,{redirectTo:window.location.href});if(error)throw error;authMessageV1064(copyV1064('resetSent'),'good')}catch(e){authMessageV1064(e?.message||copyV1064('connectionError'),'error')}finally{if(btn){btn.disabled=false;btn.textContent=original}}}
+async function handleOAuthV1064(provider){authMessageV1064('');try{const remember=currentRememberChoiceV1064(authModeV1064);await buildSupabaseClientV1064(remember);const {error}=await mastabaSandboxV1064.auth.signInWithOAuth({provider,options:{redirectTo:window.location.href}});if(error)throw error}catch(e){authMessageV1064(e?.message||copyV1064('oauthError'),'error')}}
+window.mastabaSignOutV1064=async function(){try{await mastabaSandboxV1064?.auth.signOut()}catch(e){console.error(e)}window.localStorage.removeItem(AUTH_STORAGE_KEY_V1064);window.sessionStorage.removeItem(AUTH_STORAGE_KEY_V1064);showAuthV1064(copyV1064('signedOut'),'info')};
+async function bootAuthV1064(){syncAuthCopyV1064();populateAuthBrandLogoV1064();rememberChoiceV1064=detectRememberChoiceV1064();syncRememberInputsV1064();document.querySelectorAll('[data-auth-mode]').forEach(b=>b.addEventListener('click',()=>setAuthModeV1064(b.dataset.authMode)));document.querySelectorAll('[data-auth-switch]').forEach(b=>b.addEventListener('click',()=>setAuthModeV1064(b.dataset.authSwitch)));qV1064('#authLangV1064')?.addEventListener('click',()=>{authLangV1064=authLangV1064==='en'?'ar':'en';localStorage.setItem('mastaba_auth_lang_v1064',authLangV1064);syncAuthCopyV1064()});qV1064('#authLoginFormV1064')?.addEventListener('submit',handleLoginV1064);qV1064('#authSignupFormV1064')?.addEventListener('submit',handleSignupV1064);qV1064('#authForgotPasswordV1064')?.addEventListener('click',handleForgotPasswordV1064);['#authGoogleLoginV1064','#authGoogleSignupV1064'].forEach(sel=>qV1064(sel)?.addEventListener('click',()=>handleOAuthV1064('google')));['#authAppleLoginV1064','#authAppleSignupV1064'].forEach(sel=>qV1064(sel)?.addEventListener('click',()=>handleOAuthV1064('apple')));['#authRememberLoginV1064','#authRememberSignupV1064'].forEach(sel=>qV1064(sel)?.addEventListener('change',e=>{rememberChoiceV1064=!!e.target.checked;syncRememberInputsV1064();localStorage.setItem(AUTH_REMEMBER_KEY_V1064,rememberChoiceV1064?'1':'0')}));if(!window.supabase?.createClient)return showAuthV1064(copyV1064('connectionError'),'error');try{await buildSupabaseClientV1064(rememberChoiceV1064);const {data,error}=await mastabaSandboxV1064.auth.getSession();if(error)throw error;if(data?.session)await enterAppV1064(data.session);else showAuthV1064()}catch(e){console.error('Mastaba Sandbox auth boot failed',e);showAuthV1064(copyV1064('connectionError'),'error')}}
 bootAuthV1064();
 })();
 </script>
+
 
 </body>
 </html>
