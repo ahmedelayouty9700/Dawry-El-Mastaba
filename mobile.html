@@ -7121,14 +7121,8 @@ const players={
  ]
 };
 
-players.HIL=[
- {id:'hil1',name:'Demo Al Hilal Forward',pos:'FW',status:'available',stats:{ALL:S(18,10,4,9.2,3.0),'Saudi Pro League':S(18,10,4,9.2,3.0)}},
- {id:'hil2',name:'Demo Al Hilal Midfielder',pos:'AM',status:'available',stats:{ALL:S(17,5,7,4.1,6.2),'Saudi Pro League':S(17,5,7,4.1,6.2)}}
-];
-players.NAS=[
- {id:'nas1',name:'Demo Al Nassr Forward',pos:'FW',status:'available',stats:{ALL:S(19,12,3,10.8,2.5),'Saudi Pro League':S(19,12,3,10.8,2.5)}},
- {id:'nas2',name:'Demo Al Nassr Midfielder',pos:'AM',status:'available',stats:{ALL:S(18,4,8,3.7,6.9),'Saudi Pro League':S(18,4,8,3.7,6.9)}}
-];
+players.HIL=[];
+players.NAS=[];
 
 function sandboxFixturePool(){const t=Date.now()+36*3600000;return[
  {id:'m1',competition:'Premier League',home:'ARS',away:'LIV',stadium:'Emirates Stadium',kickoff:new Date(t).toISOString(),phase:'upcoming',result:null},
@@ -7378,19 +7372,14 @@ function arabicHighlightDescriptor(type){return({
  }[type]||'لقطة الجولة')}
 
 
-const discoverableLeagues=[
- {id:'cairo-matchday',nameEn:'Cairo Matchday',nameAr:'ماتش داي القاهرة',members:18,visibility:'public',competitions:['Premier League','Champions League']},
- {id:'europe-nights',nameEn:'European Nights',nameAr:'ليالي أوروبا',members:31,visibility:'public',competitions:['Champions League','LaLiga']},
- {id:'weekend-pundits',nameEn:'Weekend Pundits',nameAr:'محللين الويك إند',members:12,visibility:'public',competitions:['Premier League','Serie A']},
- {id:'egypt-football-room',nameEn:'Egypt Football Room',nameAr:'قعدة كورة مصر',members:24,visibility:'public',competitions:['Egyptian League','Champions League']}
-];
+const discoverableLeagues=[]; // Production leagues are hydrated only from Supabase.
 const leagueDiscoveryUI={q:''};
 function leagueVisibility(l){return l?.visibility||((l?.id==='weekend')?'public':'private')}
 function renderLeagueResults(){const root=$('#leagueResultList');if(!root)return;const q=normalizeSearchText(leagueDiscoveryUI.q);const rows=discoverableLeagues.filter(l=>!q||normalizeSearchText(`${l.nameEn} ${l.nameAr} ${l.competitions.join(' ')}`).includes(q));root.innerHTML=rows.length?rows.map(l=>{const joined=(state.leagues||[]).some(x=>x.id===l.id&&x.members.includes(state.currentUser));return`<div class="league-result"><div><h3>${state.lang==='ar'?l.nameAr:l.nameEn}</h3><p>${l.members} ${L('members','عضو')} · ${L('Public league — join instantly','دوري عام — انضم فورًا')}</p><div class="league-meta"><span class="league-tag">${L('Public','عام')}</span>${l.competitions.map(c=>`<span class="league-tag">${c}</span>`).join('')}</div></div><button class="btn ${joined?'btn-secondary':'btn-primary'}" ${joined?'disabled':''} onclick="joinPublicLeague('${l.id}')">${joined?L('Joined','منضم'):L('Join League','انضم للدوري')}</button></div>`}).join(''):`<div class="league-empty">${L('No public leagues match your search.','مفيش دوريات عامة مطابقة للبحث.')}</div>`}
-function renderLeagues(){const root=$('#view-leagues');if(!root)return;const mine=memberLeagues(state.currentUser);root.innerHTML=`<h1 class="page-title">${L('Join a League','انضم لدوري')}</h1><p class="page-sub">${L('Public leagues are open to join instantly. Private leagues stay hidden and require an invite code and league approval.','الدوريات العامة تقدر تنضم لها فورًا. الدوريات الخاصة مخفية وبتحتاج كود دعوة وموافقة الدوري.')}</p><div class="section-title">${L('Your Leagues','دورياتك')}</div><div class="your-leagues-strip">${mine.map(l=>`<span class="your-league-chip">${leagueName(l)} · ${leagueVisibility(l)==='private'?L('Private','خاص'):L('Public','عام')}</span>`).join('')}</div><div class="section-title">${L('Find a Public League','دور على دوري عام')}</div><div class="league-access-layout"><div class="league-discovery-panel"><div class="league-search-row"><input id="leagueSearch" class="text-input" placeholder="${L('Search public leagues…','ابحث في الدوريات العامة…')}" value="${escapeHTML(leagueDiscoveryUI.q)}"><button class="btn btn-secondary" onclick="clearLeagueSearch()">${L('Clear','مسح')}</button></div><div id="leagueResultList" class="league-result-list"></div></div><div class="private-league-panel"><h3>${L('Private League','دوري خاص')}</h3><p>${L('Private leagues do not appear in search. Enter the owner’s invite code to request access.','الدوريات الخاصة مش بتظهر في البحث. اكتب كود الدعوة من صاحب الدوري عشان تطلب الدخول.')}</p><div class="private-code-row"><input id="privateLeagueCode" class="text-input" placeholder="${L('Invite code','كود الدعوة')}"><button class="btn btn-primary" onclick="requestPrivateLeague()">${L('Request Access','اطلب الدخول')}</button></div><div class="muted" style="font-size:.68rem;margin-top:9px">${L('Sandbox example code: MASTABA26','كود تجريبي للساندبوكس: MASTABA26')}</div></div></div>`;renderLeagueResults();const input=$('#leagueSearch');if(input)input.oninput=e=>{leagueDiscoveryUI.q=e.target.value;renderLeagueResults()}}
+function renderLeagues(){const root=$('#view-leagues');if(!root)return;const mine=memberLeagues(state.currentUser);root.innerHTML=`<h1 class="page-title">${L('Join a League','انضم لدوري')}</h1><p class="page-sub">${L('Public leagues are open to join instantly. Private leagues stay hidden and require an invite code and league approval.','الدوريات العامة تقدر تنضم لها فورًا. الدوريات الخاصة مخفية وبتحتاج كود دعوة وموافقة الدوري.')}</p><div class="section-title">${L('Your Leagues','دورياتك')}</div><div class="your-leagues-strip">${mine.map(l=>`<span class="your-league-chip">${leagueName(l)} · ${leagueVisibility(l)==='private'?L('Private','خاص'):L('Public','عام')}</span>`).join('')}</div><div class="section-title">${L('Find a Public League','دور على دوري عام')}</div><div class="league-access-layout"><div class="league-discovery-panel"><div class="league-search-row"><input id="leagueSearch" class="text-input" placeholder="${L('Search public leagues…','ابحث في الدوريات العامة…')}" value="${escapeHTML(leagueDiscoveryUI.q)}"><button class="btn btn-secondary" onclick="clearLeagueSearch()">${L('Clear','مسح')}</button></div><div id="leagueResultList" class="league-result-list"></div></div><div class="private-league-panel"><h3>${L('Private League','دوري خاص')}</h3><p>${L('Private leagues do not appear in search. Enter the owner’s invite code to request access.','الدوريات الخاصة مش بتظهر في البحث. اكتب كود الدعوة من صاحب الدوري عشان تطلب الدخول.')}</p><div class="private-code-row"><input id="privateLeagueCode" class="text-input" placeholder="${L('Invite code','كود الدعوة')}"><button class="btn btn-primary" onclick="requestPrivateLeague()">${L('Request Access','اطلب الدخول')}</button></div><div class="muted" style="font-size:.68rem;margin-top:9px">${L('Use the private invite code provided by the league admin.','استخدم كود الدعوة الخاص من أدمن الدوري.')}</div></div></div>`;renderLeagueResults();const input=$('#leagueSearch');if(input)input.oninput=e=>{leagueDiscoveryUI.q=e.target.value;renderLeagueResults()}}
 window.clearLeagueSearch=function(){leagueDiscoveryUI.q='';renderLeagues()}
 window.joinPublicLeague=function(id){const src=discoverableLeagues.find(l=>l.id===id);if(!src)return;const hadNoLeagues=memberLeagues(state.currentUser).length===0;let existing=(state.leagues||[]).find(l=>l.id===id);if(!existing){existing={id:src.id,nameEn:src.nameEn,nameAr:src.nameAr,members:[],visibility:'public',competitions:[...src.competitions]};state.leagues.push(existing)}if(!existing.members.includes(state.currentUser))existing.members.push(state.currentUser);if(hadNoLeagues){state.homeLeagueId=id;state.selectedLeagueId=id}save();renderLeagues();toast(L('You joined the public league.','انضمّيت للدوري العام.'),'good')}
-window.requestPrivateLeague=function(){const code=($('#privateLeagueCode')?.value||'').trim().toUpperCase();if(!code)return toast(L('Enter an invite code first.','اكتب كود الدعوة الأول.'));if(code!=='MASTABA26')return toast(L('Invite code not found in this sandbox.','كود الدعوة مش موجود في الساندبوكس.'));state.joinRequests=state.joinRequests||[];if(!state.joinRequests.includes('private-demo'))state.joinRequests.push('private-demo');save();toast(L('Private league request sent for approval.','طلب الدوري الخاص اتبعت للموافقة.'),'good')}
+window.requestPrivateLeague=function(){toast(L('Production invite service is loading.','خدمة الدعوات الحية جاري تحميلها.'),'info')}
 
 function renderPredict(){const past=Number(state.selectedPredictWeek)<Number(state.week);const meta=state.roundMeta[state.currentUser]||{};const locked=isRoundLocked();const submitted=userSubmittedLocked();$('#view-predict').innerHTML=`
  <h1 class="page-title">${L('Gameweek Predictions','توقعات الجولة')}</h1>
@@ -7489,7 +7478,7 @@ function canvasBlob(c){return new Promise(res=>c.toBlob(res,'image/png'))}
 window.downloadShareCard=async function(){const c=await makeShareCanvas(),b=await canvasBlob(c),a=document.createElement('a');a.href=URL.createObjectURL(b);a.download=`almastaba-GW${state.week}-${currentUser().name.replace(/\s+/g,'-')}.png`;a.click();setTimeout(()=>URL.revokeObjectURL(a.href),1000)}
 window.nativeShare=async function(){const c=await makeShareCanvas(),b=await canvasBlob(c),file=new File([b],`almastaba-GW${state.week}.png`,{type:'image/png'});if(navigator.share&&(!navigator.canShare||navigator.canShare({files:[file]}))){try{await navigator.share({title:'دوري المصطبة',text:L(`My Gameweek ${state.week} predictions`,`توقعاتي للجولة ${state.week}`),files:[file]});return}catch(e){if(e?.name==='AbortError')return}}openSocialFallback()}
 function openSocialFallback(){const url=encodeURIComponent(location.href),text=encodeURIComponent(L(`My المصطبة Gameweek ${state.week} predictions`,`توقعاتي في المصطبة للجولة ${state.week}`));const root=$('#modalRoot');root.innerHTML=`<div class="modal-backdrop"><div class="modal"><div class="panel-head"><h3>${L('Share To…','مشاركة إلى…')}</h3><button class="icon-button" onclick="closeModal()">×</button></div><div class="share-grid"><a class="social-btn" target="_blank" href="https://wa.me/?text=${text}%20${url}">WhatsApp</a><a class="social-btn" target="_blank" href="https://www.facebook.com/sharer/sharer.php?u=${url}">Facebook</a><a class="social-btn" target="_blank" href="https://twitter.com/intent/tweet?text=${text}&url=${url}">X / Twitter</a><a class="social-btn" target="_blank" href="https://www.instagram.com/">Instagram</a></div><button class="btn btn-secondary btn-wide" style="margin-top:10px" onclick="copyShareLink()">${L('Copy Link','نسخ الرابط')}</button><div class="native-share-note">${L('Desktop fallback shown. On supported phones the native share sheet can pass the image directly to installed apps.','دي نسخة احتياطية للكمبيوتر. على الموبايل المدعوم، قائمة المشاركة الأصلية تقدر تبعت الصورة مباشرة للتطبيقات.')}</div></div></div>`}
-window.copyShareLink=async()=>{try{await navigator.clipboard.writeText(location.href);toast(L('Link copied.','الرابط اتنسخ.'),'good')}catch{toast(L('Copy is not available in this sandbox.','النسخ مش متاح في الساندبوكس ده.'),'warn')}}
+window.copyShareLink=async()=>{try{await navigator.clipboard.writeText(location.href);toast(L('Link copied.','الرابط اتنسخ.'),'good')}catch{toast(L('Copy is not available in this browser.','النسخ مش متاح في المتصفح ده.'),'warn')}}
 function roundRect(ctx,x,y,w,h,r,fill,stroke){if(w<2*r)r=w/2;if(h<2*r)r=h/2;ctx.beginPath();ctx.moveTo(x+r,y);ctx.arcTo(x+w,y,x+w,y+h,r);ctx.arcTo(x+w,y+h,x,y+h,r);ctx.arcTo(x,y+h,x,y,r);ctx.arcTo(x,y,x+w,y,r);ctx.closePath();if(fill)ctx.fill();if(stroke)ctx.stroke()}
 
 function renderRankings(){
@@ -7639,12 +7628,12 @@ window.setAdminFixtureDay=function(target,value){adminBrowserState[target].date=
 window.toggleAdminFixture=function(mid,target,checked){const pool=(state.fixturePool||sandboxFixturePool()).find(f=>f.id===mid);if(!pool)return;if(target==='current'&&isRoundLocked())return toast(L('The current Gameweek is locked.','الجولة الحالية مقفولة.'),'warn');const key=target==='current'?'fixtures':'nextFixtures';state[key]=state[key]||[];if(checked&&!state[key].some(f=>f.id===mid)){state[key].push(clone(pool));state[key].sort((a,b)=>new Date(a.kickoff)-new Date(b.kickoff));if(target==='current'){state.users.forEach(u=>{state.predictions[u.id]=state.predictions[u.id]||{};state.predictions[u.id][mid]={home:0,away:0,firstTeam:'none',firstScorer:'none',double:false,touched:false}})}}else if(!checked){state[key]=state[key].filter(f=>f.id!==mid);if(target==='current')state.users.forEach(u=>{delete state.predictions[u.id]?.[mid];delete state.savedDrafts[u.id]?.[mid];delete state.officialPredictions[u.id]?.[mid]})}if(target==='next')state.nextPublished=false;save();render()}
 window.publishNextGameweek=function(){if(!(state.nextFixtures||[]).length)return toast(L('Select at least one upcoming match first.','اختار ماتش واحد على الأقل للجولة الجاية.'),'warn');state.nextPublished=true;save();render();toast(L('Upcoming Gameweek published to the bulletin.','الجولة الجاية ظهرت في لوحة الجولة.'),'good')}
 function adminMatch(f){const eligible=[...(players[f.home]||[]),...(players[f.away]||[])].filter(p=>!['out','suspended'].includes(p.status));return`<div class="admin-match"><h4>${TEAM[f.home].name} vs ${TEAM[f.away].name} <span class="status-chip ${f.phase}">${phaseLabel(f.phase)}</span></h4><div class="muted" style="font-size:.75rem">${f.stadium} · ${formatTime(f.kickoff)}</div><div class="admin-controls"><input id="rh-${f.id}" type="number" min="0" value="${f.result?.home??0}"><input id="ra-${f.id}" type="number" min="0" value="${f.result?.away??0}"><select id="rt-${f.id}"><option value="none">${L('No Team to Score','لا يوجد فريق')}</option><option value="${f.home}">${TEAM[f.home].name}</option><option value="${f.away}">${TEAM[f.away].name}</option></select><select id="rs-${f.id}"><option value="none">${L('No Goalscorer','لا يوجد هداف')}</option>${eligible.map(p=>`<option value="${p.id}">${p.name}</option>`).join('')}</select></div><div class="admin-buttons"><button class="btn btn-secondary" onclick="startMatch('${f.id}')">${L('Start Match','ابدأ الماتش')}</button><button class="btn btn-primary" onclick="finalizeMatch('${f.id}')">${L('Finalize Result','ثبت النتيجة')}</button></div></div>`}
-window.generatePicks=function(){state.users.forEach((u,ui)=>{state.fixtures.forEach((f,fi)=>{let h=Math.floor(Math.random()*4),a=Math.floor(Math.random()*4);if(fi===0){if(ui<5){h=2;a=1}else if(ui===5){h=0;a=1}else{h=1;a=1}}let firstTeam='none',firstScorer='none';if(h||a){if(h>0&&a===0)firstTeam=f.home;else if(a>0&&h===0)firstTeam=f.away;else firstTeam=Math.random()<.5?f.home:f.away;const avail=(players[firstTeam]||[]).filter(p=>!['out','suspended'].includes(p.status));firstScorer=avail.length?avail[Math.floor(Math.random()*avail.length)].id:'none'}state.predictions[u.id][f.id]={home:h,away:a,firstTeam,firstScorer,double:fi===(ui%state.fixtures.length),touched:true}});state.savedDrafts[u.id]=clone(state.predictions[u.id]);state.roundMeta[u.id].draftSavedAt=new Date().toISOString();state.roundMeta[u.id].submittedAt=new Date().toISOString();state.roundMeta[u.id].editing=false});save();render();toast(L('Fake picks generated for all 7 users.','اتعملت توقعات تجريبية للـ7.'),'good')}
-window.simulateDeadline=function(){if(!state.users.every(u=>Object.keys(state.savedDrafts[u.id]||{}).length))return toast(L('Generate picks first.','اعمل توقعات الأول.'),'warn');lockRound('sandbox');render();toast(L('Gameweek Deadline Simulated','تم قفل الجولة تجريبيًا'),'good')}
+window.generatePicks=function(){toast(L('Demo controls are disabled on Production.','أدوات التجربة مقفولة على النسخة الحية.'),'warn')}
+window.simulateDeadline=window.generatePicks;
 window.startMatch=function(mid){if(!isRoundLocked())return toast(L('Lock the Gameweek first.','اقفل الجولة الأول.'),'warn');const f=fixtureById(mid);f.phase='live';const h=Number($(`#rh-${mid}`)?.value||0),a=Number($(`#ra-${mid}`)?.value||0);f.liveScore={home:h,away:a};save();render();toast(L('Kickoff simulated. Picks are now visible.','بداية الماتش اتجربت وتوقعات الناس ظهرت.'),'good')}
 window.finalizeMatch=function(mid){if(!isRoundLocked())return toast(L('Lock the Gameweek first.','اقفل الجولة الأول.'),'warn');const f=fixtureById(mid);if(f.phase==='upcoming')f.phase='live';const h=Number($(`#rh-${mid}`).value),a=Number($(`#ra-${mid}`).value);let firstTeam=$(`#rt-${mid}`).value,firstScorer=$(`#rs-${mid}`).value;if(h===0&&a===0){firstTeam='none';firstScorer='none'}if((h||a)&&(firstTeam==='none'||firstScorer==='none'))return toast(L('Choose first scoring team and scorer.','اختار أول فريق وأول هداف.'),'warn');f.result={home:h,away:a,firstTeam,firstScorer};f.liveScore=null;f.phase='final';state.lastUpdate=new Date().toISOString();save();render();toast(L('Result finalized and points updated.','النتيجة اتثبتت والنقاط اتحدثت.'),'good')}
-window.demoResults=function(){if(!state.users.every(u=>Object.keys(state.savedDrafts[u.id]||{}).length))generatePicks();if(!isRoundLocked())lockRound('sandbox');state.fixtures.forEach((f,i)=>{f.phase='final';if(i%3===2)f.result={home:0,away:0,firstTeam:'none',firstScorer:'none'};else if(i%3===1)f.result={home:1,away:1,firstTeam:f.away,firstScorer:(players[f.away]||[]).find(p=>!['out','suspended'].includes(p.status))?.id||'none'};else f.result={home:2,away:1,firstTeam:f.home,firstScorer:(players[f.home]||[]).find(p=>!['out','suspended'].includes(p.status))?.id||'none'}});save();render();toast(L('Full Gameweek simulated.','الجولة كلها اتجربت.'),'good')}
-window.resetSandbox=function(){if(confirm(L('Reset the entire sandbox?','تمسح كل بيانات الساندبوكس؟'))){localStorage.removeItem(STORAGE_KEY);state=initialState();render();toast(L('Sandbox Reset','تمت إعادة الضبط'))}}
+window.demoResults=window.generatePicks;
+window.resetSandbox=window.generatePicks;
 
 window.go=function(v){state.view=v;save();render()};$$('.nav-item').forEach(b=>b.onclick=()=>{if(b.style.display==='none')return;go(b.dataset.view)});$('#langToggle').onclick=()=>{state.lang=state.lang==='en'?'ar':'en';save();render()};$('#userSwitcher').onclick=()=>openUserSwitcher();
 function openUserSwitcher(){const root=$('#modalRoot');root.innerHTML=`<div class="modal-backdrop"><div class="modal"><div class="panel-head"><h3>${L('Switch Test User','غيّر المستخدم التجريبي')}</h3><button class="icon-button" onclick="closeModal()">×</button></div><div class="user-list">${state.users.map(u=>`<button class="user-option ${u.id===state.currentUser?'active':''}" data-switch="${u.id}"><span class="avatar tiny" id="sw-${u.id}"></span><span><b>${u.name}</b><br><small class="muted">${u.admin?L('Admin','أدمن'):L('Member','عضو')}</small></span></button>`).join('')}</div></div></div>`;state.users.forEach(u=>renderAvatar($(`#sw-${u.id}`),u));$$('[data-switch]').forEach(b=>b.onclick=()=>{state.currentUser=b.dataset.switch;if(!currentUser().admin&&state.view==='admin')state.view='home';save();closeModal();render()})}
@@ -7867,12 +7856,7 @@ function installMatchInsightsLaunchers(){
       </button>`);
   });
 }
-function deterministicGlobalConsensus(mid){
-  const s=[...String(mid)].reduce((a,c)=>a+c.charCodeAt(0),0);
-  let h=44+(s%23),d=17+((s*3)%11),a=100-h-d;
-  if(a<10){a=10;h=100-d-a}
-  return{H:h,D:d,A:a,total:100};
-}
+function deterministicGlobalConsensus(mid){return{H:0,D:0,A:0,total:0}}
 function leagueConsensusFor(mid,past=false){
   const league=leagueById(v18LeagueId()),ids=league?.members||[];
   const counts={H:0,D:0,A:0};let total=0;
@@ -7912,7 +7896,7 @@ function consensusHTMLV1018(f,c,scope){
   const items=[[TEAM[f.home].short,'H',c.H],[L('Draw','تعادل'),'D',c.D],[TEAM[f.away].short,'A',c.A]];
   return`<section class="insight-section"><div class="insight-kicker">${L('Prediction Split','تقسيمة التوقعات')}</div><h4>${scope==='global'?L('Across the platform','على مستوى المنصة'):leagueName(leagueById(v18LeagueId()))}</h4>
     ${c.total===0?`<div class="consensus-caption">${L('Consensus unlocks once predictions are available after kickoff.','الإجماع بيظهر لما التوقعات تتفتح بعد بداية الماتش.')}</div>`:items.map(([label,key,pct])=>`<div class="consensus-row"><b>${label}</b><div class="consensus-track"><div class="consensus-fill" style="width:${pct}%"></div></div><strong>${pct}%</strong></div>`).join('')}
-    <div class="consensus-caption">${scope==='global'?L('Global view is a sandbox preview of platform-wide prediction percentages.','العرض العام هنا نموذج تجريبي لنسب توقعات كل المنصة.'):L(`${c.total} league predictions included.`,`${c.total} توقع من الدوري داخل الحساب.`)}</div>
+    <div class="consensus-caption">${scope==='global'?L('Global view uses Production platform-wide submitted prediction percentages.','العرض العام يستخدم نسب التوقعات المرسلة الفعلية على المنصة.'):L(`${c.total} league predictions included.`,`${c.total} توقع من الدوري داخل الحساب.`)}</div>
   </section>`;
 }
 function projectedPointsForV18(uid,f,past=false){
@@ -8906,7 +8890,7 @@ window.setLeagueVisibilityV20=function(v){v18NewLeagueVisibility=v==='private'?'
 renderLeagues=function(){
   const root=$('#view-leagues');if(!root)return;
   const mode=state.leagueHubModeV20==='create'?'create':'join',mine=memberLeagues(state.currentUser);
-  root.innerHTML=`<h1 class="page-title">${L('Leagues','الدوريات')}</h1><p class="page-sub">${mode==='join'?L('Find a public league or use a private invite code.','دور على دوري عام أو استخدم كود دعوة لدوري خاص.'):L('Create a league without leaving the League Hub.','اعمل دوري من نفس صفحة الدوريات من غير ما تفتح شاشة منفصلة.')}</p>${renderLeagueHubTabsV20()}${mode==='create'?createLeaguePageHTMLV20():`<div class="section-title">${L('Your Leagues','دورياتك')}</div><div class="your-leagues-strip">${mine.map(l=>`<span class="your-league-chip">${leagueName(l)} · ${leagueVisibility(l)==='private'?L('Private','خاص'):L('Public','عام')}${l.adminId===state.currentUser?` · ${L('Fixture Admin','أدمن الماتشات')}`:''}</span>`).join('')}</div><div class="section-title">${L('Find a Public League','دور على دوري عام')}</div><div class="league-access-layout"><div class="league-discovery-panel"><div class="league-search-row"><input id="leagueSearch" class="text-input" placeholder="${L('Search public leagues…','ابحث في الدوريات العامة…')}" value="${escapeHTML(leagueDiscoveryUI.q)}"><button class="btn btn-secondary" onclick="clearLeagueSearch()">${L('Clear','مسح')}</button></div><div id="leagueResultList" class="league-result-list"></div></div><div class="private-league-panel"><h3>${L('Private League','دوري خاص')}</h3><p>${L('Private leagues stay out of search. Enter the invite code to request access.','الدوريات الخاصة مش بتظهر في البحث. اكتب كود الدعوة عشان تطلب الدخول.')}</p><div class="private-code-row"><input id="privateLeagueCode" class="text-input" placeholder="${L('Invite code','كود الدعوة')}"><button class="btn btn-primary" onclick="requestPrivateLeague()">${L('Request Access','اطلب الدخول')}</button></div><div class="muted" style="font-size:.68rem;margin-top:9px">${L('Sandbox example code: MASTABA26','كود تجريبي للساندبوكس: MASTABA26')}</div></div></div>`}`;
+  root.innerHTML=`<h1 class="page-title">${L('Leagues','الدوريات')}</h1><p class="page-sub">${mode==='join'?L('Find a public league or use a private invite code.','دور على دوري عام أو استخدم كود دعوة لدوري خاص.'):L('Create a league without leaving the League Hub.','اعمل دوري من نفس صفحة الدوريات من غير ما تفتح شاشة منفصلة.')}</p>${renderLeagueHubTabsV20()}${mode==='create'?createLeaguePageHTMLV20():`<div class="section-title">${L('Your Leagues','دورياتك')}</div><div class="your-leagues-strip">${mine.map(l=>`<span class="your-league-chip">${leagueName(l)} · ${leagueVisibility(l)==='private'?L('Private','خاص'):L('Public','عام')}${l.adminId===state.currentUser?` · ${L('Fixture Admin','أدمن الماتشات')}`:''}</span>`).join('')}</div><div class="section-title">${L('Find a Public League','دور على دوري عام')}</div><div class="league-access-layout"><div class="league-discovery-panel"><div class="league-search-row"><input id="leagueSearch" class="text-input" placeholder="${L('Search public leagues…','ابحث في الدوريات العامة…')}" value="${escapeHTML(leagueDiscoveryUI.q)}"><button class="btn btn-secondary" onclick="clearLeagueSearch()">${L('Clear','مسح')}</button></div><div id="leagueResultList" class="league-result-list"></div></div><div class="private-league-panel"><h3>${L('Private League','دوري خاص')}</h3><p>${L('Private leagues stay out of search. Enter the invite code to request access.','الدوريات الخاصة مش بتظهر في البحث. اكتب كود الدعوة عشان تطلب الدخول.')}</p><div class="private-code-row"><input id="privateLeagueCode" class="text-input" placeholder="${L('Invite code','كود الدعوة')}"><button class="btn btn-primary" onclick="requestPrivateLeague()">${L('Request Access','اطلب الدخول')}</button></div><div class="muted" style="font-size:.68rem;margin-top:9px">${L('Use the private invite code provided by the league admin.','استخدم كود الدعوة الخاص من أدمن الدوري.')}</div></div></div>`}`;
   if(mode==='join'){renderLeagueResults();const input=$('#leagueSearch');if(input)input.oninput=e=>{leagueDiscoveryUI.q=e.target.value;renderLeagueResults()}}
   else v18NewLeagueVisibility='public';
   requestAnimationFrame(positionLeagueHubGliderV20);
@@ -9445,7 +9429,7 @@ window.setLeagueVisibilityV21=function(v){v18NewLeagueVisibility=v==='private'?'
 renderLeagues=function(){
   const root=$('#view-leagues');if(!root)return;
   const mode=state.leagueHubModeV20==='create'?'create':'join',mine=memberLeagues(state.currentUser);
-  root.innerHTML=`<h1 class="page-title">${L('Leagues','الدوريات')}</h1><p class="page-sub">${L('Join an existing league or build your own from the same place.','انضم لدوري موجود أو اعمل دوري جديد من نفس المكان.')}</p>${renderLeagueHubTabsV20()}${mode==='create'?createLeaguePageHTMLV21():`<div class="section-title">${L('Your Leagues','دورياتك')}</div><div class="your-leagues-strip">${mine.map(l=>`<span class="your-league-chip">${leagueName(l)} · ${leagueVisibility(l)==='private'?L('Private','خاص'):L('Public','عام')}${l.adminId===state.currentUser?` · ${L('Fixture Admin','أدمن الماتشات')}`:''}</span>`).join('')}</div><div class="section-title">${L('Find a Public League','دور على دوري عام')}</div><div class="league-access-layout"><div class="league-discovery-panel"><h2 style="margin:0 0 5px;font-size:1.38rem">${L('Join a League','انضم لدوري')}</h2><p style="margin:0 0 14px;color:var(--theme-muted);font-size:.79rem">${L('Search public leagues and join immediately.','ابحث في الدوريات العامة وانضم فورًا.')}</p><div class="league-search-row"><input id="leagueSearch" class="text-input" placeholder="${L('Search public leagues…','ابحث في الدوريات العامة…')}" value="${escapeHTML(leagueDiscoveryUI.q)}"><button class="btn btn-secondary" onclick="clearLeagueSearch()">${L('Clear','مسح')}</button></div><div id="leagueResultList" class="league-result-list"></div></div><div class="private-league-panel"><h3>${L('Private League','دوري خاص')}</h3><p>${L('Private leagues stay hidden from search. Enter the invite code to request access.','الدوريات الخاصة مش بتظهر في البحث. اكتب كود الدعوة عشان تطلب الدخول.')}</p><div class="private-code-row"><input id="privateLeagueCode" class="text-input" placeholder="${L('Invite code','كود الدعوة')}"><button class="btn btn-primary" onclick="requestPrivateLeague()">${L('Request Access','اطلب الدخول')}</button></div><div class="muted" style="font-size:.68rem;margin-top:9px">${L('Sandbox example code: MASTABA26','كود تجريبي للساندبوكس: MASTABA26')}</div></div></div>`}`;
+  root.innerHTML=`<h1 class="page-title">${L('Leagues','الدوريات')}</h1><p class="page-sub">${L('Join an existing league or build your own from the same place.','انضم لدوري موجود أو اعمل دوري جديد من نفس المكان.')}</p>${renderLeagueHubTabsV20()}${mode==='create'?createLeaguePageHTMLV21():`<div class="section-title">${L('Your Leagues','دورياتك')}</div><div class="your-leagues-strip">${mine.map(l=>`<span class="your-league-chip">${leagueName(l)} · ${leagueVisibility(l)==='private'?L('Private','خاص'):L('Public','عام')}${l.adminId===state.currentUser?` · ${L('Fixture Admin','أدمن الماتشات')}`:''}</span>`).join('')}</div><div class="section-title">${L('Find a Public League','دور على دوري عام')}</div><div class="league-access-layout"><div class="league-discovery-panel"><h2 style="margin:0 0 5px;font-size:1.38rem">${L('Join a League','انضم لدوري')}</h2><p style="margin:0 0 14px;color:var(--theme-muted);font-size:.79rem">${L('Search public leagues and join immediately.','ابحث في الدوريات العامة وانضم فورًا.')}</p><div class="league-search-row"><input id="leagueSearch" class="text-input" placeholder="${L('Search public leagues…','ابحث في الدوريات العامة…')}" value="${escapeHTML(leagueDiscoveryUI.q)}"><button class="btn btn-secondary" onclick="clearLeagueSearch()">${L('Clear','مسح')}</button></div><div id="leagueResultList" class="league-result-list"></div></div><div class="private-league-panel"><h3>${L('Private League','دوري خاص')}</h3><p>${L('Private leagues stay hidden from search. Enter the invite code to request access.','الدوريات الخاصة مش بتظهر في البحث. اكتب كود الدعوة عشان تطلب الدخول.')}</p><div class="private-code-row"><input id="privateLeagueCode" class="text-input" placeholder="${L('Invite code','كود الدعوة')}"><button class="btn btn-primary" onclick="requestPrivateLeague()">${L('Request Access','اطلب الدخول')}</button></div><div class="muted" style="font-size:.68rem;margin-top:9px">${L('Use the private invite code provided by the league admin.','استخدم كود الدعوة الخاص من أدمن الدوري.')}</div></div></div>`}`;
   if(mode==='join'){renderLeagueResults();const input=$('#leagueSearch');if(input)input.oninput=e=>{leagueDiscoveryUI.q=e.target.value;renderLeagueResults()}}
   else v18NewLeagueVisibility='public';
   requestAnimationFrame(positionLeagueHubGliderV20);
@@ -9639,7 +9623,7 @@ function renderFailureCardV10211(id,label,error){
   root.innerHTML=`
     <h1 class="page-title">${label}</h1>
     <div class="notice" style="margin-top:14px">
-      ${L('This reviewer page recovered from an old saved sandbox state. Reload the page once; your current build is still intact.',
+      ${L('This page recovered from an old saved local state. Reload the page once; your current build is still intact.',
           'صفحة المعاينة دي واجهت بيانات قديمة محفوظة. اعمل Reload مرة واحدة؛ النسخة الحالية سليمة.')}
     </div>`;
 }
@@ -9802,7 +9786,7 @@ safeRenderV10211=function(label,id,fn){
     }catch(secondError){
       console.error(`[Mastaba reviewer] ${label} retry failed`,secondError);
       const root=$(id);
-      if(root)root.innerHTML=`<h1 class="page-title">${label}</h1><div class="notice" style="margin-top:14px">${L('The sandbox could not rebuild this page. Use Reset Demo Round from Admin.','الساندبوكس مقدرش يعيد بناء الصفحة. استخدم Reset Demo Round من صفحة الإدارة.')}</div>`;
+      if(root)root.innerHTML=`<h1 class="page-title">${label}</h1><div class="notice" style="margin-top:14px">${L('Production could not refresh this page. Reload the site and try again.','تعذر تحديث الصفحة في النسخة الحية. أعد تحميل الموقع وحاول مرة أخرى.')}</div>`;
     }
   }
 };
@@ -13515,7 +13499,7 @@ const saveProfileLocalV1073=window.saveProfile;window.saveProfile=async function
 })();
 </script>
 
-<script id="v1064-sandbox-auth-script">
+<script id="v1064-production-auth-script">
 (function(){
 'use strict';
 const MASTABA_SANDBOX_URL='https://bnwjtrtlwnlbldfhaggg.supabase.co';
@@ -13523,9 +13507,10 @@ const MASTABA_SANDBOX_PUBLISHABLE_KEY='sb_publishable_wTG6mR4MWoMzi70yz506JA_rMr
 const REVIEWER_USER_SLOT_V1064='u1';
 const AUTH_STORAGE_KEY_V1064='mastaba-production-auth-v1073';
 const AUTH_REMEMBER_KEY_V1064='mastaba_prod_auth_remember_v1073';
+const OAUTH_PENDING_KEY_V1097='mastaba_oauth_onboarding_v1097';
 const AUTH_COPY_V1064={
  en:{cardEyebrow:'Please enter your details',loginTitle:'Welcome back',loginSub:'Sign in to continue to Mastaba.',signupTitle:'Create your account',signupSub:'Use email to create your Mastaba account.',loginTab:'Log In',signupTab:'Create Account',email:'Email address',password:'Password',displayName:'Display name',confirmPassword:'Confirm password',passwordHint:'Use at least 8 characters.',team:'Choose Team',teamPlaceholder:'Search your team',teamNote:'Search from the available team list. If your club has a Mastaba theme, it becomes your starting theme automatically. You can change it later from Profile.',loginButton:'Sign in with Email',signupButton:'Create account with Email',stayLoggedIn:'Stay logged in',forgotPassword:'Forgot password',oauthDivider:'or continue with',googleButton:'Sign in with Google',appleButton:'Sign in with Apple',googleSignupButton:'Sign Up with Google',appleSignupButton:'Sign Up with Apple',noAccount:"Don't have an account?",hasAccount:'Already have an account?',signupCta:'Sign up',loginCta:'Log in',sandboxFoot:'Your Mastaba account and predictions are securely synced.',loggingIn:'Signing in…',creating:'Creating account…',resetting:'Sending reset link…',confirmEmail:'Account created. Check your email to confirm it, then return here and sign in.',resetSent:'Password reset email sent. Check your inbox.',signedOut:'You have been signed out.',badPassword:'Password must be at least 8 characters.',passwordMismatch:'Passwords do not match.',missingTeam:'Choose the team you support.',connectionError:'Could not connect to Mastaba. Refresh and try again.',profileError:'Your account is signed in, but your Mastaba profile could not be loaded.',signedInAs:'Signed in as',signOut:'Sign Out',enterEmailReset:'Enter your email first, then press Forgot password.',oauthError:'This sign-in method is not available yet.'},
- ar:{cardEyebrow:'من فضلك أدخل بياناتك',loginTitle:'أهلاً بيك',loginSub:'سجّل دخولك عشان تكمل في المصطبة.',signupTitle:'اعمل حسابك',signupSub:'استخدم الإيميل لإنشاء حسابك في المصطبة.',loginTab:'تسجيل الدخول',signupTab:'حساب جديد',email:'البريد الإلكتروني',password:'كلمة السر',displayName:'الاسم الظاهر',confirmPassword:'تأكيد كلمة السر',passwordHint:'استخدم 8 خانات على الأقل.',team:'اختار الفريق',teamPlaceholder:'ابحث عن فريقك',teamNote:'ابحث من قائمة الفرق المتاحة. لو ناديك له ثيم في المصطبة، هيبقى ثيمك المبدئي تلقائيًا. تقدر تغيّره بعدين من الملف الشخصي.',loginButton:'الدخول بالإيميل',signupButton:'إنشاء الحساب بالإيميل',stayLoggedIn:'خلّيني مسجل دخول',forgotPassword:'نسيت كلمة السر؟',oauthDivider:'أو كمّل باستخدام',googleButton:'الدخول بجوجل',appleButton:'الدخول بآبل',googleSignupButton:'إنشاء حساب بجوجل',appleSignupButton:'إنشاء حساب بآبل',noAccount:'معندكش حساب؟',hasAccount:'عندك حساب بالفعل؟',signupCta:'اعمل حساب',loginCta:'سجّل دخول',sandboxFoot:'الحساب متصل بنسخة المصطبة الحية.',loggingIn:'جاري تسجيل الدخول…',creating:'جاري إنشاء الحساب…',resetting:'جاري إرسال رابط الاستعادة…',confirmEmail:'الحساب اتعمل. افتح الإيميل وأكد الحساب، وبعدها ارجع هنا وسجّل دخول.',resetSent:'تم إرسال رسالة استعادة كلمة السر. راجع بريدك الإلكتروني.',signedOut:'تم تسجيل خروجك.',badPassword:'كلمة السر لازم تكون 8 خانات على الأقل.',passwordMismatch:'كلمتا السر غير متطابقتين.',missingTeam:'اختار الفريق اللي بتشجعه.',connectionError:'تعذر الاتصال بالمصطبة. اعمل Refresh وحاول تاني.',profileError:'الحساب مسجل دخول، لكن ملف الـ Sandbox ما اتحملش.',signedInAs:'مسجل الدخول باسم',signOut:'تسجيل الخروج',enterEmailReset:'اكتب الإيميل الأول ثم اضغط نسيت كلمة السر.',oauthError:'طريقة الدخول دي غير متاحة حاليًا.'}
+ ar:{cardEyebrow:'من فضلك أدخل بياناتك',loginTitle:'أهلاً بيك',loginSub:'سجّل دخولك عشان تكمل في المصطبة.',signupTitle:'اعمل حسابك',signupSub:'استخدم الإيميل لإنشاء حسابك في المصطبة.',loginTab:'تسجيل الدخول',signupTab:'حساب جديد',email:'البريد الإلكتروني',password:'كلمة السر',displayName:'الاسم الظاهر',confirmPassword:'تأكيد كلمة السر',passwordHint:'استخدم 8 خانات على الأقل.',team:'اختار الفريق',teamPlaceholder:'ابحث عن فريقك',teamNote:'ابحث من قائمة الفرق المتاحة. لو ناديك له ثيم في المصطبة، هيبقى ثيمك المبدئي تلقائيًا. تقدر تغيّره بعدين من الملف الشخصي.',loginButton:'الدخول بالإيميل',signupButton:'إنشاء الحساب بالإيميل',stayLoggedIn:'خلّيني مسجل دخول',forgotPassword:'نسيت كلمة السر؟',oauthDivider:'أو كمّل باستخدام',googleButton:'الدخول بجوجل',appleButton:'الدخول بآبل',googleSignupButton:'إنشاء حساب بجوجل',appleSignupButton:'إنشاء حساب بآبل',noAccount:'معندكش حساب؟',hasAccount:'عندك حساب بالفعل؟',signupCta:'اعمل حساب',loginCta:'سجّل دخول',sandboxFoot:'الحساب متصل بنسخة المصطبة الحية.',loggingIn:'جاري تسجيل الدخول…',creating:'جاري إنشاء الحساب…',resetting:'جاري إرسال رابط الاستعادة…',confirmEmail:'الحساب اتعمل. افتح الإيميل وأكد الحساب، وبعدها ارجع هنا وسجّل دخول.',resetSent:'تم إرسال رسالة استعادة كلمة السر. راجع بريدك الإلكتروني.',signedOut:'تم تسجيل خروجك.',badPassword:'كلمة السر لازم تكون 8 خانات على الأقل.',passwordMismatch:'كلمتا السر غير متطابقتين.',missingTeam:'اختار الفريق اللي بتشجعه.',connectionError:'تعذر الاتصال بالمصطبة. اعمل Refresh وحاول تاني.',profileError:'الحساب مسجل دخول، لكن ملف المصطبة ما اتحملش.',signedInAs:'مسجل الدخول باسم',signOut:'تسجيل الخروج',enterEmailReset:'اكتب الإيميل الأول ثم اضغط نسيت كلمة السر.',oauthError:'طريقة الدخول دي غير متاحة حاليًا.'}
 };
 const AUTH_TEAMS_V1064=[
  {key:'acmilan',en:'AC Milan',ar:'ميلان',aliases:['ac milan','milan']},
@@ -13581,13 +13566,15 @@ function populateAuthBrandLogoV1064(){const src=document.querySelector('.brand-l
 async function loadProfileV1064(user){let lastError=null;for(let attempt=0;attempt<3;attempt++){const {data,error}=await mastabaSandboxV1064.from('mastaba_profiles').select('id,username,display_name,primary_team_key,theme_key,language,avatar_url').eq('id',user.id).maybeSingle();if(!error&&data)return data;lastError=error;if(attempt<2)await new Promise(r=>setTimeout(r,160*(attempt+1)))}if(lastError)console.error('Mastaba profile load failed',lastError);return null}
 function bridgeProfileToReviewerV1064(profile,user){if(typeof state==='undefined'||!Array.isArray(state.users))return;const slot=state.users.find(u=>u.id===REVIEWER_USER_SLOT_V1064);if(!slot)return;const display=profile?.display_name||user?.user_metadata?.display_name||user?.email?.split('@')[0]||slot.name;slot.name=display;slot.nickname=display;slot.username=profile?.username||'';slot.authUserId=user?.id||'';slot.email=user?.email||'';const team=profile?.primary_team_key||user?.user_metadata?.primary_team_key||'';slot.club=(typeof CLUBS!=='undefined'&&CLUBS[team])?team:'mastaba';slot.theme=profile?.theme_key||(typeof themeForSupportedTeamV1054==='function'?themeForSupportedTeamV1054(team):'mastaba');if(profile?.avatar_url)slot.avatar=profile.avatar_url;if(profile?.language==='ar'||profile?.language==='en')state.lang=profile.language;state.currentUser=REVIEWER_USER_SLOT_V1064;state.authProfileV1064={id:user?.id||'',email:user?.email||'',displayName:display,team,theme:slot.theme};try{save()}catch{}try{render()}catch(e){console.error('Mastaba reviewer render after auth failed',e)}}
 function installProfileAccountPanelV1064(){if(profileHookInstalledV1064||typeof renderProfile!=='function')return;profileHookInstalledV1064=true;const base=renderProfile;renderProfile=function(){base();const root=qV1064('#view-profile');if(!root||root.querySelector('.auth-account-panel-v1064')||!state?.authProfileV1064)return;const a=state.authProfileV1064;root.insertAdjacentHTML('afterbegin',`<div class="panel auth-account-panel-v1064"><div class="auth-account-copy-v1064"><small>${copyV1064('signedInAs')}</small><strong>${escapeHTML(a.email||a.displayName||'')}</strong></div><button class="btn btn-secondary auth-signout-v1064" type="button" onclick="mastabaSignOutV1064()">${copyV1064('signOut')}</button></div>`)}}
-async function enterAppV1064(session){if(!session?.user)return showAuthV1064();if(activeAuthUserV1064===session.user.id&&document.body.classList.contains('auth-ready-v1064'))return;activeAuthUserV1064=session.user.id;const profile=await loadProfileV1064(session.user);if(!profile){activeAuthUserV1064=null;return showAuthV1064(copyV1064('profileError'),'error')}authLangV1064=profile.language==='ar'?'ar':'en';localStorage.setItem('mastaba_auth_lang_v1064',authLangV1064);try{await window.hydrateProductionV1073(profile,session.user,mastabaSandboxV1064)}catch(e){console.error('Production hydrate failed',e);activeAuthUserV1064=null;return showAuthV1064(e?.message||copyV1064('connectionError'),'error')}installProfileAccountPanelV1064();showAppV1064();try{render()}catch{}}
+function pendingOAuthV1097(){try{const raw=sessionStorage.getItem(OAUTH_PENDING_KEY_V1097);if(!raw)return null;const value=JSON.parse(raw);if(!value?.createdAt||Date.now()-Number(value.createdAt)>20*60*1000){sessionStorage.removeItem(OAUTH_PENDING_KEY_V1097);return null}return value}catch{sessionStorage.removeItem(OAUTH_PENDING_KEY_V1097);return null}}
+async function applyPendingOAuthV1097(session){const pending=pendingOAuthV1097();if(!pending||!session?.user)return;try{const {data:profile,error:readError}=await mastabaSandboxV1064.from('mastaba_profiles').select('display_name,primary_team_key,theme_key,language').eq('id',session.user.id).maybeSingle();if(readError)throw readError;const patch={updated_at:new Date().toISOString()};if(!profile?.display_name||profile.display_name==='Mastaba Player')patch.display_name=pending.displayName;if(!profile?.primary_team_key){patch.primary_team_key=pending.team;patch.theme_key=typeof themeForSupportedTeamV1054==='function'?themeForSupportedTeamV1054(pending.team):'mastaba'}if(!profile?.language)patch.language=pending.language==='ar'?'ar':'en';if(Object.keys(patch).length>1){const {error:updateError}=await mastabaSandboxV1064.from('mastaba_profiles').update(patch).eq('id',session.user.id);if(updateError)throw updateError;await mastabaSandboxV1064.auth.updateUser({data:{display_name:pending.displayName,primary_team_key:pending.team,language:pending.language}})}sessionStorage.removeItem(OAUTH_PENDING_KEY_V1097)}catch(e){console.error('Mastaba social profile onboarding failed',e)}}
+async function enterAppV1064(session){if(!session?.user)return showAuthV1064();if(activeAuthUserV1064===session.user.id&&document.body.classList.contains('auth-ready-v1064'))return;await applyPendingOAuthV1097(session);activeAuthUserV1064=session.user.id;const profile=await loadProfileV1064(session.user);if(!profile){activeAuthUserV1064=null;return showAuthV1064(copyV1064('profileError'),'error')}authLangV1064=profile.language==='ar'?'ar':'en';localStorage.setItem('mastaba_auth_lang_v1064',authLangV1064);try{await window.hydrateProductionV1073(profile,session.user,mastabaSandboxV1064)}catch(e){console.error('Production hydrate failed',e);activeAuthUserV1064=null;return showAuthV1064(e?.message||copyV1064('connectionError'),'error')}installProfileAccountPanelV1064();showAppV1064();try{render()}catch{}}
 async function handleLoginV1064(ev){ev.preventDefault();authMessageV1064('');const email=qV1064('#authLoginEmailV1064')?.value.trim(),password=qV1064('#authLoginPasswordV1064')?.value||'',remember=currentRememberChoiceV1064('login');setBusyV1064('login',true);try{await buildSupabaseClientV1064(remember);const {data,error}=await mastabaSandboxV1064.auth.signInWithPassword({email,password});if(error)throw error;if(data?.session)await enterAppV1064(data.session)}catch(e){authMessageV1064(e?.message||copyV1064('connectionError'),'error')}finally{setBusyV1064('login',false)}}
 async function handleSignupV1064(ev){ev.preventDefault();authMessageV1064('');const displayName=qV1064('#authDisplayNameV1064')?.value.trim(),email=qV1064('#authSignupEmailV1064')?.value.trim(),password=qV1064('#authSignupPasswordV1064')?.value||'',confirm=qV1064('#authSignupPasswordConfirmV1064')?.value||'',teamInput=qV1064('#authTeamSearchV1064')?.value||'',team=qV1064('#authTeamKeyV1074')?.value||resolveTeamKeyV1064(teamInput),remember=currentRememberChoiceV1064('signup');if(password.length<8)return authMessageV1064(copyV1064('badPassword'),'error');if(password!==confirm)return authMessageV1064(copyV1064('passwordMismatch'),'error');if(!team)return authMessageV1064(copyV1064('missingTeam'),'error');setBusyV1064('signup',true);try{await buildSupabaseClientV1064(remember);const {data,error}=await mastabaSandboxV1064.auth.signUp({email,password,options:{emailRedirectTo:authRedirectUrlV1064(),data:{display_name:displayName,primary_team_key:team,language:authLangV1064}}});if(error)throw error;if(data?.session){await enterAppV1064(data.session)}else{qV1064('#authLoginEmailV1064').value=email||'';setAuthModeV1064('login');authMessageV1064(copyV1064('confirmEmail'),'good')}}catch(e){authMessageV1064(e?.message||copyV1064('connectionError'),'error')}finally{setBusyV1064('signup',false)}}
 async function handleForgotPasswordV1064(){const btn=qV1064('#authForgotPasswordV1064');const email=qV1064('#authLoginEmailV1064')?.value.trim()||qV1064('#authSignupEmailV1064')?.value.trim()||'';if(!email)return authMessageV1064(copyV1064('enterEmailReset'),'error');const original=copyV1064('forgotPassword');if(btn){btn.disabled=true;btn.textContent=copyV1064('resetting')}try{const remember=currentRememberChoiceV1064(authModeV1064);await buildSupabaseClientV1064(remember);const {error}=await mastabaSandboxV1064.auth.resetPasswordForEmail(email,{redirectTo:authRedirectUrlV1064()});if(error)throw error;authMessageV1064(copyV1064('resetSent'),'good')}catch(e){authMessageV1064(e?.message||copyV1064('connectionError'),'error')}finally{if(btn){btn.disabled=false;btn.textContent=original}}}
-async function handleOAuthV1064(provider){authMessageV1064('');try{const remember=currentRememberChoiceV1064(authModeV1064);await buildSupabaseClientV1064(remember);const {error}=await mastabaSandboxV1064.auth.signInWithOAuth({provider,options:{redirectTo:authRedirectUrlV1064()}});if(error)throw error}catch(e){authMessageV1064(e?.message||copyV1064('oauthError'),'error')}}
+async function handleOAuthV1064(provider){authMessageV1064('');if(authModeV1064==='signup'){const displayName=qV1064('#authDisplayNameV1064')?.value.trim()||'',teamInput=qV1064('#authTeamSearchV1064')?.value||'',team=qV1064('#authTeamKeyV1074')?.value||resolveTeamKeyV1064(teamInput);if(!displayName)return authMessageV1064(authLangV1064==='ar'?'اكتب الاسم الظاهر قبل ما تكمل.':'Enter your display name before continuing.','error');if(!team)return authMessageV1064(copyV1064('missingTeam'),'error');sessionStorage.setItem(OAUTH_PENDING_KEY_V1097,JSON.stringify({displayName,team,language:authLangV1064,provider,createdAt:Date.now()}))}else sessionStorage.removeItem(OAUTH_PENDING_KEY_V1097);try{const remember=currentRememberChoiceV1064(authModeV1064);await buildSupabaseClientV1064(remember);const options={redirectTo:authRedirectUrlV1064()};if(provider==='google')options.queryParams={prompt:'select_account'};const {error}=await mastabaSandboxV1064.auth.signInWithOAuth({provider,options});if(error)throw error}catch(e){sessionStorage.removeItem(OAUTH_PENDING_KEY_V1097);authMessageV1064(e?.message||copyV1064('oauthError'),'error')}}
 window.mastabaSignOutV1064=async function(){try{await mastabaSandboxV1064?.auth.signOut()}catch(e){console.error(e)}window.localStorage.removeItem(AUTH_STORAGE_KEY_V1064);window.sessionStorage.removeItem(AUTH_STORAGE_KEY_V1064);showAuthV1064(copyV1064('signedOut'),'info')};
-async function bootAuthV1064(){syncAuthCopyV1064();populateAuthBrandLogoV1064();rememberChoiceV1064=detectRememberChoiceV1064();syncRememberInputsV1064();document.querySelectorAll('[data-auth-mode]').forEach(b=>b.addEventListener('click',()=>setAuthModeV1064(b.dataset.authMode)));document.querySelectorAll('[data-auth-switch]').forEach(b=>b.addEventListener('click',()=>setAuthModeV1064(b.dataset.authSwitch)));qV1064('#authLangV1064')?.addEventListener('click',()=>{authLangV1064=authLangV1064==='en'?'ar':'en';localStorage.setItem('mastaba_auth_lang_v1064',authLangV1064);syncAuthCopyV1064()});qV1064('#authLoginFormV1064')?.addEventListener('submit',handleLoginV1064);qV1064('#authSignupFormV1064')?.addEventListener('submit',handleSignupV1064);qV1064('#authForgotPasswordV1064')?.addEventListener('click',handleForgotPasswordV1064);['#authGoogleLoginV1064','#authGoogleSignupV1064'].forEach(sel=>qV1064(sel)?.addEventListener('click',()=>handleOAuthV1064('google')));['#authAppleLoginV1064','#authAppleSignupV1064'].forEach(sel=>qV1064(sel)?.addEventListener('click',()=>handleOAuthV1064('apple')));['#authRememberLoginV1064','#authRememberSignupV1064'].forEach(sel=>qV1064(sel)?.addEventListener('change',e=>{rememberChoiceV1064=!!e.target.checked;syncRememberInputsV1064();localStorage.setItem(AUTH_REMEMBER_KEY_V1064,rememberChoiceV1064?'1':'0')}));const teamInputV1074=qV1064('#authTeamSearchV1064'),teamResultsV1074=qV1064('#authTeamResultsV1074');teamInputV1074?.addEventListener('focus',showTeamResultsV1074);teamInputV1074?.addEventListener('click',showTeamResultsV1074);teamInputV1074?.addEventListener('input',()=>{const hidden=qV1064('#authTeamKeyV1074');if(hidden)hidden.value='';showTeamResultsV1074()});teamInputV1074?.addEventListener('keydown',e=>{if(e.key==='Escape'){hideTeamResultsV1074();return}const opts=[...(teamResultsV1074?.querySelectorAll('.auth-team-option-v1074')||[])];if(!opts.length)return;const active=document.activeElement.closest?.('.auth-team-option-v1074');let i=opts.indexOf(active);if(e.key==='ArrowDown'){e.preventDefault();(opts[Math.min(opts.length-1,i+1)]||opts[0]).focus()}else if(e.key==='ArrowUp'){e.preventDefault();(opts[Math.max(0,i-1)]||opts[opts.length-1]).focus()}});teamResultsV1074?.addEventListener('pointerdown',e=>{const btn=e.target.closest('.auth-team-option-v1074');if(!btn)return;e.preventDefault();selectTeamV1074(btn.dataset.teamKey,btn.dataset.teamLabel)});teamResultsV1074?.addEventListener('click',e=>{const btn=e.target.closest('.auth-team-option-v1074');if(btn)selectTeamV1074(btn.dataset.teamKey,btn.dataset.teamLabel)});document.addEventListener('pointerdown',e=>{if(!e.target.closest('.auth-team-picker-v1074'))hideTeamResultsV1074()});if(!window.supabase?.createClient)return showAuthV1064(copyV1064('connectionError'),'error');try{await buildSupabaseClientV1064(rememberChoiceV1064);const {data,error}=await mastabaSandboxV1064.auth.getSession();if(error)throw error;if(data?.session)await enterAppV1064(data.session);else showAuthV1064()}catch(e){console.error('Mastaba Sandbox auth boot failed',e);showAuthV1064(copyV1064('connectionError'),'error')}}
+async function bootAuthV1064(){syncAuthCopyV1064();populateAuthBrandLogoV1064();rememberChoiceV1064=detectRememberChoiceV1064();syncRememberInputsV1064();document.querySelectorAll('[data-auth-mode]').forEach(b=>b.addEventListener('click',()=>setAuthModeV1064(b.dataset.authMode)));document.querySelectorAll('[data-auth-switch]').forEach(b=>b.addEventListener('click',()=>setAuthModeV1064(b.dataset.authSwitch)));qV1064('#authLangV1064')?.addEventListener('click',()=>{authLangV1064=authLangV1064==='en'?'ar':'en';localStorage.setItem('mastaba_auth_lang_v1064',authLangV1064);syncAuthCopyV1064()});qV1064('#authLoginFormV1064')?.addEventListener('submit',handleLoginV1064);qV1064('#authSignupFormV1064')?.addEventListener('submit',handleSignupV1064);qV1064('#authForgotPasswordV1064')?.addEventListener('click',handleForgotPasswordV1064);['#authGoogleLoginV1064','#authGoogleSignupV1064'].forEach(sel=>qV1064(sel)?.addEventListener('click',()=>handleOAuthV1064('google')));['#authAppleLoginV1064','#authAppleSignupV1064'].forEach(sel=>qV1064(sel)?.addEventListener('click',()=>handleOAuthV1064('apple')));['#authRememberLoginV1064','#authRememberSignupV1064'].forEach(sel=>qV1064(sel)?.addEventListener('change',e=>{rememberChoiceV1064=!!e.target.checked;syncRememberInputsV1064();localStorage.setItem(AUTH_REMEMBER_KEY_V1064,rememberChoiceV1064?'1':'0')}));const teamInputV1074=qV1064('#authTeamSearchV1064'),teamResultsV1074=qV1064('#authTeamResultsV1074');teamInputV1074?.addEventListener('focus',showTeamResultsV1074);teamInputV1074?.addEventListener('click',showTeamResultsV1074);teamInputV1074?.addEventListener('input',()=>{const hidden=qV1064('#authTeamKeyV1074');if(hidden)hidden.value='';showTeamResultsV1074()});teamInputV1074?.addEventListener('keydown',e=>{if(e.key==='Escape'){hideTeamResultsV1074();return}const opts=[...(teamResultsV1074?.querySelectorAll('.auth-team-option-v1074')||[])];if(!opts.length)return;const active=document.activeElement.closest?.('.auth-team-option-v1074');let i=opts.indexOf(active);if(e.key==='ArrowDown'){e.preventDefault();(opts[Math.min(opts.length-1,i+1)]||opts[0]).focus()}else if(e.key==='ArrowUp'){e.preventDefault();(opts[Math.max(0,i-1)]||opts[opts.length-1]).focus()}});teamResultsV1074?.addEventListener('pointerdown',e=>{const btn=e.target.closest('.auth-team-option-v1074');if(!btn)return;e.preventDefault();selectTeamV1074(btn.dataset.teamKey,btn.dataset.teamLabel)});teamResultsV1074?.addEventListener('click',e=>{const btn=e.target.closest('.auth-team-option-v1074');if(btn)selectTeamV1074(btn.dataset.teamKey,btn.dataset.teamLabel)});document.addEventListener('pointerdown',e=>{if(!e.target.closest('.auth-team-picker-v1074'))hideTeamResultsV1074()});if(!window.supabase?.createClient)return showAuthV1064(copyV1064('connectionError'),'error');try{await buildSupabaseClientV1064(rememberChoiceV1064);const {data,error}=await mastabaSandboxV1064.auth.getSession();if(error)throw error;if(data?.session)await enterAppV1064(data.session);else showAuthV1064()}catch(e){console.error('Mastaba Production auth boot failed',e);showAuthV1064(copyV1064('connectionError'),'error')}}
 bootAuthV1064();
 })();
 </script>
@@ -14619,6 +14606,7 @@ async function loadCentralAvailabilityV1083(supa){
   for(const r of data||[])(centralAvailabilityV1083[r.fixture_id]??={})[String(r.player_id)]={status:r.status||'available',reason:r.reason||null,refreshed_at:r.refreshed_at};
 }
 async function loadCentralPlayerPoolV1083(supa){
+  const selectedCodes=[...new Set((state.fixtures||[]).flatMap(f=>[f.home,f.away]).filter(Boolean))];selectedCodes.forEach(code=>players[code]=[]);
   const tids=[...new Set((state.fixtures||[]).flatMap(f=>[Number(f.homeTeamId),Number(f.awayTeamId)]).filter(Boolean))];if(!tids.length)return;
   const cacheKey=`mastaba_central_players_v1084_${window.prodCtxV1073?.gw?.id||state.week}`;
   let data=null;
@@ -16222,6 +16210,552 @@ window.render=render=function(){
 /* Keep nav access correct even after older render wrappers run. */
 setTimeout(()=>{const nav=document.querySelector('#adminNav');if(nav)nav.style.display=isPrivateMastabaMemberV1095()?'flex':'none'},0);
 window.addEventListener('resize',()=>requestAnimationFrame(positionAdminLineV1095),{passive:true});
+})();
+</script>
+
+<script id="mastaba-v1096-authoritative-league-scoring">
+/* V10.96.1 — Supabase is the authoritative score source, separately per league. */
+(function(){
+'use strict';
+const PROD_V1096=window.prodLeagueV1096=window.prodLeagueV1096||{
+  ready:false,leagueIds:{},leagueMeta:{},scores:{},gwPoints:{},gws:{},profiles:{},picks:{},publicTopAuth:[],publicVisibleAuth:[],story:{},lastLoaded:0
+};
+function uidAuthV1096(uid){
+  const u=(state.users||[]).find(x=>x.id===uid);
+  if(u?.authUserId)return u.authUserId;
+  if(String(uid||'').startsWith('pub:'))return String(uid).slice(4);
+  return null;
+}
+function uidSlotV1096(authId){return (state.users||[]).find(x=>x.authUserId===authId)?.id||`pub:${authId}`}
+window.uidAuthV1096=uidAuthV1096;window.uidSlotV1096=uidSlotV1096;
+function pickFromRowV1096(row){
+  const db=window.prodCtxV1073?.fxById?.[row.fixture_id],f=fixtureById(row.fixture_id);if(!db||!f)return null;
+  let firstTeam='none';
+  if(Number(row.first_team_id)===Number(db.home_team_id))firstTeam=f.home;
+  else if(Number(row.first_team_id)===Number(db.away_team_id))firstTeam=f.away;
+  return{home:row.home_score??'',away:row.away_score??'',firstTeam,firstScorer:row.first_scorer_id?String(row.first_scorer_id):'none',double:!!row.double_points,touched:row.home_score!=null&&row.away_score!=null,submitted:!!row.submitted};
+}
+async function loadProdLeagueV1096(supa,force=false){
+  const ctx=window.prodCtxV1073;if(!ctx?.gw?.id||!supa)return;
+  if(!force&&PROD_V1096.ready&&Date.now()-PROD_V1096.lastLoaded<12000)return;
+  try{
+    const {data:leagues,error:le}=await supa.from('mastaba_leagues').select('id,slug,status,scoring_from_gameweek,started_at');if(le)throw le;
+    PROD_V1096.leagueIds={};PROD_V1096.leagueMeta={};
+    for(const l of leagues||[]){PROD_V1096.leagueIds[l.slug]=l.id;PROD_V1096.leagueMeta[l.slug]=l}
+    const privateId=PROD_V1096.leagueIds.mastaba,publicId=PROD_V1096.leagueIds['mastaba-public'];
+    const [privMemR,topR,ownPublicR,gwsR]=await Promise.all([
+      privateId?supa.from('mastaba_league_members').select('user_id').eq('league_id',privateId):Promise.resolve({data:[],error:null}),
+      publicId?supa.from('mastaba_league_overall_standings').select('user_id,total_points,finalized_gameweeks,updated_at').eq('league_id',publicId).order('total_points',{ascending:false}).order('user_id',{ascending:true}).limit(10):Promise.resolve({data:[],error:null}),
+      publicId?supa.from('mastaba_league_overall_standings').select('user_id,total_points,finalized_gameweeks,updated_at').eq('league_id',publicId).eq('user_id',ctx.user.id).maybeSingle():Promise.resolve({data:null,error:null}),
+      supa.from('mastaba_gameweeks').select('id,gameweek_number,status,finalized_at').order('gameweek_number',{ascending:true})
+    ]);
+    for(const r of [privMemR,topR,ownPublicR,gwsR])if(r?.error)throw r.error;
+    PROD_V1096.gws=Object.fromEntries((gwsR.data||[]).map(g=>[g.id,Number(g.gameweek_number)]));
+    const privateAuth=(privMemR.data||[]).map(x=>x.user_id);
+    const top=(topR.data||[]);PROD_V1096.publicTopAuth=top.map(x=>x.user_id);
+    const visible=[...PROD_V1096.publicTopAuth];if(ownPublicR.data?.user_id&&!visible.includes(ownPublicR.data.user_id))visible.push(ownPublicR.data.user_id);PROD_V1096.publicVisibleAuth=visible;
+    PROD_V1096.publicStandings={};for(const x of top)PROD_V1096.publicStandings[x.user_id]=x;if(ownPublicR.data)PROD_V1096.publicStandings[ownPublicR.data.user_id]=ownPublicR.data;
+    const authIds=[...new Set([...privateAuth,...visible,ctx.user.id])];
+    const leagueIds=[privateId,publicId].filter(Boolean);
+    const [profilesR,scoresR,pointsR,picksR,rivalsR,chipsR]=await Promise.all([
+      authIds.length?supa.from('mastaba_profiles').select('id,display_name,username,primary_team_key,theme_key,language,active').in('id',authIds):Promise.resolve({data:[],error:null}),
+      leagueIds.length&&authIds.length?supa.from('mastaba_league_prediction_scores').select('league_id,prediction_id,user_id,fixture_id,gameweek_id,base_points,risky_points,double_multiplier,final_points,breakdown,updated_at').in('league_id',leagueIds).eq('gameweek_id',ctx.gw.id).in('user_id',authIds):Promise.resolve({data:[],error:null}),
+      leagueIds.length&&authIds.length?supa.from('mastaba_league_gameweek_points').select('league_id,user_id,gameweek_id,normal_points,rivalry_bonus,power_chip_adjustment,total_points,finalized,updated_at').in('league_id',leagueIds).in('user_id',authIds):Promise.resolve({data:[],error:null}),
+      authIds.length?supa.from('mastaba_predictions').select('id,user_id,fixture_id,gameweek_id,home_score,away_score,first_team_id,first_scorer_id,double_points,submitted,submitted_at').eq('gameweek_id',ctx.gw.id).in('user_id',authIds):Promise.resolve({data:[],error:null}),
+      privateAuth.length?supa.from('mastaba_rivalry_clubs').select('user_id,club_1,club_2').in('user_id',privateAuth):Promise.resolve({data:[],error:null}),
+      privateId?supa.from('mastaba_power_chip_uses').select('id,league_id,user_id,gameweek_id,chip_type,status,payload,result,locked_at,resolved_at').eq('league_id',privateId).in('status',['locked','resolved']):Promise.resolve({data:[],error:null})
+    ]);
+    for(const r of [profilesR,scoresR,pointsR,picksR,rivalsR,chipsR])if(r?.error)throw r.error;
+    PROD_V1096.profiles=Object.fromEntries((profilesR.data||[]).map(p=>[p.id,p]));
+    PROD_V1096.scores={};for(const r of scoresR.data||[])PROD_V1096.scores[`${r.league_id}|${r.user_id}|${r.fixture_id}`]=r;
+    PROD_V1096.gwPoints={};for(const r of pointsR.data||[])PROD_V1096.gwPoints[`${r.league_id}|${r.user_id}|${r.gameweek_id}`]=r;
+    PROD_V1096.picks={};for(const r of picksR.data||[]){const p=pickFromRowV1096(r);if(p)PROD_V1096.picks[`${r.user_id}|${r.fixture_id}`]=p}
+    PROD_V1096.story={privateAuth,rivalries:rivalsR.data||[],chips:chipsR.data||[]};
+    PROD_V1096.ready=true;PROD_V1096.lastLoaded=Date.now();if(typeof window.afterProdLeagueV1096==='function')window.afterProdLeagueV1096();
+  }catch(e){console.error('V10.96 authoritative league data load failed',e)}
+}
+window.loadProdLeagueV1096=loadProdLeagueV1096;
+function scoreRowV1096(uid,f,lid='mastaba'){
+  const auth=uidAuthV1096(uid),dbid=PROD_V1096.leagueIds[lid];if(!auth||!dbid||!f)return null;
+  return PROD_V1096.scores[`${dbid}|${auth}|${f.id}`]||null;
+}
+window.scoreRowV1096=scoreRowV1096;
+function scorePartsV1096(row){
+  const b=row?.breakdown||{},parts=[],add=(en,ar,k)=>{const v=Number(b[k]||0);if(v)parts.push([L(en,ar),v])};
+  add('Correct Outcome','النتيجة الصحيحة','outcome_points');add('Correct Goal Difference','فارق الأهداف الصحيح','goal_difference_points');add('Correct Home Team Goals','أهداف صاحب الأرض الصحيحة','home_goals_points');add('Correct Away Team Goals','أهداف الضيف الصحيحة','away_goals_points');add('Exact Score Bonus','بونص النتيجة بالظبط','exact_score_points');add('First Team to Score','أول فريق يسجل','first_team_points');add('First Goalscorer','أول لاعب يسجل','first_scorer_points');
+  if(Number(row?.risky_points||0))parts.push([L('Risky Prediction','التوقع المجازف'),Number(row.risky_points)]);
+  if(Number(row?.double_multiplier||1)===2){const pre=Number(row.base_points||0)+Number(row.risky_points||0);if(pre)parts.push([L('Double Points','دبل بوينتس'),pre])}
+  return parts;
+}
+function fallbackScoreV1096(uid,f,lid='mastaba'){
+  const p=(PROD_V1096.picks[`${uidAuthV1096(uid)}|${f.id}`]||getOfficial(uid,f.id)),r=f?.result;
+  if(!p||p.touched!==true||!r||f.phase!=='final')return{total:0,base:0,risky:0,double:false,parts:[]};
+  const s=scorelineV1090(p,r.home,r.away),parts=[],add=(en,ar,v)=>{if(v)parts.push([L(en,ar),v])};let base=s.points;
+  add('Correct Outcome','النتيجة الصحيحة',s.outcomePts);add('Correct Goal Difference','فارق الأهداف الصحيح',s.gdPts);add('Correct Home Team Goals','أهداف صاحب الأرض الصحيحة',s.homePts);add('Correct Away Team Goals','أهداف الضيف الصحيحة',s.awayPts);add('Exact Score Bonus','بونص النتيجة بالظبط',s.exactPts);
+  // A 0–0 never receives First Team / First Goalscorer points.
+  if(r.firstTeam&&r.firstTeam!=='none'&&p.firstTeam===r.firstTeam){base+=2;add('First Team to Score','أول فريق يسجل',2)}
+  if(r.firstScorer&&r.firstScorer!=='none'&&p.firstScorer===r.firstScorer){base+=3;add('First Goalscorer','أول لاعب يسجل',3)}
+  const risky=0,doubled=!!p.double,total=doubled?base*2:base;if(doubled&&base)add('Double Points','دبل بوينتس',base);
+  return{total,base,risky,double:doubled,parts,exact:s.exact,correctOutcome:s.correctOutcome,correctGD:!!s.gdPts,teamGoals:(s.homePts?1:0)+(s.awayPts?1:0)};
+}
+function scorePredictionForLeagueV1096(uid,f,lid='mastaba'){
+  if(f?.phase!=='final')return{total:0,base:0,risky:0,double:false,parts:[]};
+  const row=scoreRowV1096(uid,f,lid);
+  if(!row)return fallbackScoreV1096(uid,f,lid);
+  const b=row.breakdown||{};
+  return{total:Number(row.final_points||0),base:Number(row.base_points||0),risky:Number(row.risky_points||0),double:Number(row.double_multiplier||1)===2,parts:scorePartsV1096(row),exact:!!b.exact,correctOutcome:!!b.correct_outcome,correctGD:!!b.correct_goal_difference,teamGoals:(Number(b.home_goals_points||0)>0?1:0)+(Number(b.away_goals_points||0)>0?1:0),breakdown:b,authoritative:true};
+}
+window.scorePredictionForLeagueV1096=scorePredictionForLeagueV1096;
+// Legacy private scoring calls now read the private authoritative row, eliminating Mahdy-style display drift.
+scorePrediction=function(uid,f){return scorePredictionForLeagueV1096(uid,f,'mastaba')};window.scorePrediction=scorePrediction;
+
+const hydratePrevV1096=window.hydrateProductionV1073;
+window.hydrateProductionV1073=async function(profile,user,supa){const ok=await hydratePrevV1096(profile,user,supa);await loadProdLeagueV1096(supa,true);return ok};
+let finalSigV1096='';setInterval(()=>{const sig=(state.fixtures||[]).filter(f=>f.phase==='final').map(f=>f.id).join('|');if(sig!==finalSigV1096){const had=finalSigV1096;finalSigV1096=sig;if(had&&window.prodCtxV1073?.supa)loadProdLeagueV1096(window.prodCtxV1073.supa,true).then(()=>{if(typeof window.renderLiveSurfaceV1094==='function')window.renderLiveSurfaceV1094()})}},2500);
+})();
+</script>
+
+<style id="mastaba-v1096-public-insights-style">
+.public-scope-note-v1096{margin:8px 0 0;font-size:.64rem;color:var(--theme-muted);font-weight:800}
+.mastaba-storyline-note-v1096{font-size:.67rem;color:var(--theme-muted);margin:-4px 0 10px}
+.mastaba-storyline-grid-v1096{display:grid;gap:9px}
+.mastaba-storyline-card-v1096{border:1px solid var(--theme-border);background:var(--theme-surface-2);border-radius:14px;padding:11px 12px}
+.mastaba-storyline-card-v1096 small{display:block;font-size:.58rem;font-weight:1000;letter-spacing:.05em;color:var(--theme-muted);margin-bottom:4px}
+.mastaba-storyline-card-v1096 strong{display:block;font-size:.78rem;line-height:1.35}
+</style>
+<script id="mastaba-v1096-public-visibility-insights">
+/* V10.96.2 — Public League top-10 + you, Production Gameweek Review, league-aware live projections/storylines. */
+(function(){
+'use strict';
+const P=window.prodLeagueV1096;
+const baseUserNameV1096=window.userName||userName;
+userName=function(uid){
+  const auth=typeof window.uidAuthV1096==='function'?window.uidAuthV1096(uid):null;
+  const p=auth?P?.profiles?.[auth]:null;
+  return p?.display_name||baseUserNameV1096(uid);
+};window.userName=userName;
+function publicLeagueV1096(lid){return lid==='mastaba-public'}
+function visibleIdsV1096(lid=v18LeagueId()){
+  if(publicLeagueV1096(lid)&&P?.publicVisibleAuth?.length)return P.publicVisibleAuth.map(a=>uidSlotV1096(a));
+  return [...(leagueById(lid)?.members||[])];
+}
+window.visibleIdsV1096=visibleIdsV1096;
+function syncPublicLeagueV1096(){
+  if(!P?.ready)return;
+  const l=(state.leagues||[]).find(x=>x.id==='mastaba-public');if(l&&P.publicVisibleAuth?.length)l.members=P.publicVisibleAuth.map(a=>uidSlotV1096(a));
+}
+window.afterProdLeagueV1096=syncPublicLeagueV1096;setTimeout(syncPublicLeagueV1096,300);
+
+const baseV18PredictionV1096=window.v18Prediction||v18Prediction;
+v18Prediction=function(uid,mid,past=false){
+  if(!past){const auth=uidAuthV1096(uid),p=auth?P?.picks?.[`${auth}|${mid}`]:null;if(p)return p}
+  return baseV18PredictionV1096(uid,mid,past);
+};window.v18Prediction=v18Prediction;
+
+function leagueConsensusV1096(mid,past=false){
+  if(publicLeagueV1096(v18LeagueId())){
+    const g=state.productionConsensusV1088?.[mid]?.global;if(g)return {H:Number(g.H||0),D:Number(g.D||0),A:Number(g.A||0),total:Number(g.total||0)};
+  }else if(v18LeagueId()==='mastaba'){
+    const l=state.productionConsensusV1088?.[mid]?.league;if(l)return {H:Number(l.H||0),D:Number(l.D||0),A:Number(l.A||0),total:Number(l.total||0)};
+  }
+  const ids=visibleIdsV1096(),counts={H:0,D:0,A:0};let total=0;
+  ids.forEach(uid=>{const p=v18Prediction(uid,mid,past);if(!p||p.home==null||p.away==null)return;counts[outcome(p.home,p.away)]++;total++});
+  if(!total)return{H:0,D:0,A:0,total:0};const H=Math.round(counts.H*100/total),D=Math.round(counts.D*100/total);return{H,D,A:Math.max(0,100-H-D),total};
+}
+leagueConsensusFor=leagueConsensusV1096;window.leagueConsensusFor=leagueConsensusFor;
+
+function riskyForLeagueV1096(uid,f,lid=v18LeagueId()){
+  const row=scoreRowV1096(uid,f,lid);if(row)return Number(row.risky_points||0)>0;
+  const p=v18Prediction(uid,f.id,false);if(!p)return false;
+  if(lid==='mastaba-public'){
+    const c=state.productionConsensusV1088?.[f.id]?.global;if(!c||!Number(c.total||0))return false;
+    const key=outcome(p.home,p.away);return Number(c[key]||0)<20;
+  }
+  if(lid==='mastaba')return typeof riskyFor==='function'?riskyFor(uid,f):false;
+  return false;
+}
+window.riskyForLeagueV1096=riskyForLeagueV1096;
+function liveAuxLeagueV1096(p,f,h,a,optimistic=false){
+  // 0–0 never earns first-team / first-scorer points. They become possible only if a goal exists/is assumed in a best-case route.
+  const currentGoals=Number(f?.liveScore?.home||0)+Number(f?.liveScore?.away||0),candidateGoals=Number(h||0)+Number(a||0);let pts=0;
+  if(currentGoals>0){if(f?.liveFirstTeam&&p.firstTeam===f.liveFirstTeam)pts+=2;if(f?.liveFirstScorer&&p.firstScorer===f.liveFirstScorer)pts+=3}
+  else if(optimistic&&candidateGoals>0){if(p.firstTeam&&p.firstTeam!=='none')pts+=2;if(p.firstScorer&&p.firstScorer!=='none')pts+=3}
+  return pts;
+}
+function liveProjectedLeagueV1096(uid,f,p,h,a,optimistic=false,lid=v18LeagueId()){
+  const s=scorelineV1090(p,h,a);let pts=s.points+liveAuxLeagueV1096(p,f,h,a,optimistic);
+  if(riskyForLeagueV1096(uid,f,lid)&&s.correctOutcome)pts+=10;
+  return p.double?pts*2:pts;
+}
+window.liveProjectedLeagueV1096=liveProjectedLeagueV1096;
+projectedPointsNowV20=function(uid,f,past=false){
+  if(past){const p=state.history?.predictions?.[uid]?.[f.id];return Number(p?.points||0)}
+  const lid=v18LeagueId();if(f.phase==='final')return scorePredictionForLeagueV1096(uid,f,lid).total;
+  const p=v18Prediction(uid,f.id,false);if(!p||!f.liveScore)return 0;
+  return liveProjectedLeagueV1096(uid,f,p,Number(f.liveScore.home||0),Number(f.liveScore.away||0),false,lid);
+};window.projectedPointsNowV20=projectedPointsNowV20;
+projectedPointsForV18=projectedPointsNowV20;window.projectedPointsForV18=projectedPointsForV18;
+bestRouteFromHereV18=function(f,p){
+  if(!p||!f.liveScore)return null;const ch=Number(f.liveScore.home||0),ca=Number(f.liveScore.away||0),uid=state.currentUser,lid=v18LeagueId();let best=null;
+  const maxH=Math.max(ch,Number(p.home||0))+4,maxA=Math.max(ca,Number(p.away||0))+4;
+  for(let h=ch;h<=maxH;h++)for(let a=ca;a<=maxA;a++){const pts=liveProjectedLeagueV1096(uid,f,p,h,a,true,lid);if(!best||pts>best.pts||(pts===best.pts&&(Math.abs(h-Number(p.home))+Math.abs(a-Number(p.away)))<(Math.abs(best.h-Number(p.home))+Math.abs(best.a-Number(p.away)))))best={h,a,pts}}
+  return best;
+};window.bestRouteFromHereV18=bestRouteFromHereV18;
+
+otherPredictionsRows=function(f,past){
+  const lid=v18LeagueId(),ids=visibleIdsV1096(lid);
+  return ids.map(uid=>{const p=v18Prediction(uid,f.id,past),r=!past&&p&&riskyForLeagueV1096(uid,f,lid);return`<div class="pick-row"><span>${escapeHTML(userName(uid))}${uid===state.currentUser?` <small>(${L('You','أنت')})</small>`:''}</span><span>${p?`${p.home}–${p.away}${p.double?' · X2':''}`:'—'}${r?`<b class="risky-tag">${L('RISKY','مجازفة')}</b>`:''}</span></div>`}).join('');
+};window.otherPredictionsRows=otherPredictionsRows;
+liveSwingHTMLV1020=function(f,mid,past){
+  const lid=v18LeagueId(),ids=visibleIdsV1096(lid),rows=ids.map(uid=>({uid,pts:projectedPointsNowV20(uid,f,past)})).sort((a,b)=>b.pts-a.pts||userName(a.uid).localeCompare(userName(b.uid)));
+  const note=publicLeagueV1096(lid)?`<div class="public-scope-note-v1096">${L(`Showing the Public League Top 10${ids.length>10?' + you':''}.`,`عرض أفضل 10 في الدوري العام${ids.length>10?' + إنت':''}.`)}</div>`:'';
+  return`<section class="insight-section-v20"><div class="insight-kicker-v20">${f.phase==='live'?L('Live Points Swing','حركة النقاط لايف'):L('Match Points','نقاط الماتش')}</div><h4>${f.phase==='live'?L('If the match ended right now','لو الماتش خلص دلوقتي'):L('How this match scored for the league','الماتش ده جاب كام للدوري')}</h4><div class="swing-list-v20">${rows.map(r=>`<div class="swing-row-v20"><div class="swing-person-v20"><strong>${escapeHTML(userName(r.uid))}</strong>${r.uid===state.currentUser?`<span class="you-chip-v20">${L('You','أنت')}</span>`:''}</div><span class="swing-points-v20">${r.pts} ${L('pts','نقطة')}</span></div>`).join('')}</div>${note}</section>`;
+};window.liveSwingHTMLV1020=liveSwingHTMLV1020;
+
+function leagueDbIdV1096(lid){return P?.leagueIds?.[lid]||null}
+function pointRowV1096(uid,w,lid){const auth=uidAuthV1096(uid),dbid=leagueDbIdV1096(lid);if(!auth||!dbid)return null;const gwid=Object.keys(P.gws||{}).find(id=>Number(P.gws[id])===Number(w));return gwid?P.gwPoints?.[`${dbid}|${auth}|${gwid}`]||null:null}
+function weekPointsLeagueV1096(uid,w,lid){return Number(pointRowV1096(uid,w,lid)?.total_points||0)}
+function insightWeeksV1096(lid){
+  const dbid=leagueDbIdV1096(lid),ids=new Set(visibleIdsV1096(lid).map(uidAuthV1096).filter(Boolean)),ws=new Set();
+  Object.values(P?.gwPoints||{}).forEach(r=>{if(r.league_id===dbid&&ids.has(r.user_id)){const w=P.gws?.[r.gameweek_id];if(w)ws.add(Number(w))}});if(state.week)ws.add(Number(state.week));return [...ws].sort((a,b)=>a-b).slice(-5);
+}
+function prodKnowledgeV1096(lid){
+  const ids=visibleIdsV1096(lid),started=(state.fixtures||[]).filter(f=>f.phase==='live'||f.phase==='final'),finals=started.filter(f=>f.phase==='final'&&f.result);let submitted=0,correct=0,scored=0,exact=0,draws=0;
+  started.forEach(f=>ids.forEach(uid=>{const p=v18Prediction(uid,f.id,false);if(!p?.touched)return;submitted++;if(outcome(p.home,p.away)==='D')draws++;if(f.phase==='final'){scored++;if(outcome(p.home,p.away)===outcome(f.result.home,f.result.away))correct++;if(Number(p.home)===Number(f.result.home)&&Number(p.away)===Number(f.result.away))exact++}}));
+  const scope=publicLeagueV1096(lid)?L('Public Top 10 + your row','أفضل 10 في العام + صفك'):L('all private Mastaba members','كل أعضاء المصطبة الخاصة');
+  if(!started.length)return[L('Submitted predictions will enter this review as each match kicks off.','التوقعات المرسلة هتدخل المراجعة مع بداية كل ماتش.')];
+  const out=[L(`${submitted} submitted predictions loaded across ${started.length} started match${started.length===1?'':'es'} (${scope}).`,`${submitted} توقع مرسل متحمّل عبر ${started.length} ماتش بدأ (${scope}).`)];
+  if(scored)out.push(L(`${Math.round(correct*100/scored)}% correct-outcome rate on finalized picks · ${exact} exact score${exact===1?'':'s'}.`,`نسبة النتيجة الصحيحة ${Math.round(correct*100/scored)}% في التوقعات المحسومة · ${exact} نتيجة بالظبط.`));
+  else out.push(L('Accuracy will appear as soon as a match is finalized.','الدقة هتظهر أول ما ماتش ينتهي.'));
+  out.push(L(`${draws} draw prediction${draws===1?'':'s'} among the submitted picks currently visible.`,`${draws} توقع تعادل ضمن التوقعات المرسلة الظاهرة حاليًا.`));return out;
+}
+function currentSnapshotV1096(lid){
+  const ids=visibleIdsV1096(lid),points=ids.map(uid=>({uid,value:weekPointsLeagueV1096(uid,state.week,lid)})).sort((a,b)=>b.value-a.value||userName(a.uid).localeCompare(userName(b.uid)));let exacts=[],outcomes=[];
+  ids.forEach(uid=>{let ex=0,oc=0;(state.fixtures||[]).filter(f=>f.phase==='final').forEach(f=>{const r=scoreRowV1096(uid,f,lid);if(r?.breakdown?.exact)ex++;if(r?.breakdown?.correct_outcome)oc++});exacts.push({uid,value:ex});outcomes.push({uid,value:oc})});exacts.sort((a,b)=>b.value-a.value);outcomes.sort((a,b)=>b.value-a.value);
+  return[[L('Current Leader','متصدر الجولة حاليًا'),points[0]?`${userName(points[0].uid)} · ${points[0].value} ${L('pts','نقطة')}`:'—'],[L('Most Exact Scores','أكتر نتايج بالظبط'),exacts[0]?`${userName(exacts[0].uid)} · ${exacts[0].value}`:'—'],[L('Most Correct Outcomes','أكتر نتايج صحيحة'),outcomes[0]?`${userName(outcomes[0].uid)} · ${outcomes[0].value}`:'—']];
+}
+function recordsV1096(lid){
+  const ids=visibleIdsV1096(lid),weeks=insightWeeksV1096(lid),all=ids.map(uid=>({uid,total:weeks.reduce((s,w)=>s+weekPointsLeagueV1096(uid,w,lid),0)})).sort((a,b)=>b.total-a.total||userName(a.uid).localeCompare(userName(b.uid)));let hi=null,lo=null;
+  weeks.forEach(w=>ids.forEach(uid=>{const pts=weekPointsLeagueV1096(uid,w,lid);if(!hi||pts>hi.pts)hi={uid,w,pts};if(!lo||pts<lo.pts)lo={uid,w,pts}}));
+  return[[L('Highest Overall Total','أعلى إجمالي'),all[0]?`${userName(all[0].uid)} · ${all[0].total}`:'—'],[L('Highest Gameweek Score','أعلى نقاط جولة'),hi?`${userName(hi.uid)} · GW${hi.w} · ${hi.pts}`:'—'],[L('Lowest Gameweek Score','أقل نقاط جولة'),lo?`${userName(lo.uid)} · GW${lo.w} · ${lo.pts}`:'—']];
+}
+function specialistsV1096(lid){
+  const ids=visibleIdsV1096(lid),by={};(state.fixtures||[]).filter(f=>f.phase==='final').forEach(f=>ids.forEach(uid=>{const r=scoreRowV1096(uid,f,lid);if(!r)return;const k=f.competition;(by[k]??={});const x=by[k][uid]??={pts:0,n:0};x.pts+=Number(r.final_points||0);x.n++}));
+  return Object.entries(by).map(([comp,m])=>{let best=null;Object.entries(m).forEach(([uid,x])=>{const avg=x.n?x.pts/x.n:0;if(!best||avg>best.avg)best={uid,avg}});return best?{comp,...best}:null}).filter(Boolean);
+}
+leaguePredictionV20=function(uid,f){return v18Prediction(uid,f.id,false)};window.leaguePredictionV20=leaguePredictionV20;
+leaguePointsV20=function(uid,f){return scorePredictionForLeagueV1096(uid,f,v18LeagueId()).total};window.leaguePointsV20=leaguePointsV20;
+
+window.openLeagueInsights=function(){
+  const lid=v18LeagueId(),league=leagueById(lid),ids=visibleIdsV1096(lid),weeks=insightWeeksV1096(lid),current=currentSnapshotV1096(lid),records=recordsV1096(lid),knowledge=prodKnowledgeV1096(lid),spec=specialistsV1096(lid);leagueTriviaIndexV20=0;
+  const tiles=rows=>`<div class="record-grid-v21">${rows.map(r=>`<div class="record-tile-v21"><span>${r[0]}</span><strong>${r[1]}</strong></div>`).join('')}</div>`;
+  const formRows=ids.map(uid=>`<tr><td>${escapeHTML(userName(uid))}${uid===state.currentUser?` <small>(${L('You','أنت')})</small>`:''}</td>${weeks.map(w=>`<td>${weekPointsLeagueV1096(uid,w,lid)}</td>`).join('')}</tr>`).join('');
+  const scopeNote=publicLeagueV1096(lid)?`<div class="public-scope-note-v1096">${L(`Member-by-member sections show the Public League Top 10${ids.length>10?' plus your position':''}. Aggregate pick percentages still represent the full Public League.`,`الأقسام الفردية بتعرض أفضل 10 في الدوري العام${ids.length>10?' بالإضافة لمركزك':''}. نسب التوقعات المجمعة بتمثل الدوري العام كله.`)}</div>`:'';
+  $('#modalRoot').innerHTML=`<div class="player-drawer" onclick="if(event.target===this)closeModal()"><div class="strategy-sheet-v20 league-insights-v22"><div class="drawer-handle"></div><div class="panel-head"><div><h3>${L('League Insights','تحليلات الدوري')}</h3><div class="stat-context">${leagueName(league)}</div></div><button class="icon-button" onclick="closeModal()">×</button></div>${scopeNote}
+    <section class="insight-section-v21"><div class="insight-kicker-v20">${L(`Gameweek ${state.week}`,`الجولة ${state.week}`)}</div><h4>${L('Current Gameweek','الجولة الحالية')}</h4>${tiles(current)}</section>
+    <section class="insight-section-v21"><div class="insight-kicker-v20">${L('League Records','أرقام الدوري')}</div><h4>${L('Production Records','أرقام النسخة الحية')}</h4>${tiles(records)}</section>
+    <section class="insight-section-v21"><div class="insight-kicker-v20">${L('Recent Form','الفورمة الأخيرة')}</div><h4>${L('Last 5 Gameweeks','آخر 5 جولات')}</h4><div class="table-wrap" style="border:0;background:transparent"><table class="form-table"><thead><tr><th>${L('Player','اللاعب')}</th>${weeks.map(w=>`<th>${L('GW','ج')}${w}</th>`).join('')}</tr></thead><tbody>${formRows}</tbody></table></div></section>
+    <section class="insight-section-v21"><div class="insight-kicker-v20">${L('Gameweek Review','مراجعة الجولة')}</div><h4>${L('What Did We Know?','إحنا كنا شايفين إيه؟')}</h4><ul class="knowledge-summary">${knowledge.map(x=>`<li>${x}</li>`).join('')}</ul></section>
+    <section class="insight-section-v21"><div class="insight-kicker-v20">${L('Competition Specialists','متخصصين البطولات')}</div><h4>${L('Competition Specialists','متخصصين البطولات')}</h4><div class="record-list">${spec.map(s=>`<div class="record-row"><span>${localizedCompetitionV21(s.comp)}</span><strong>${escapeHTML(userName(s.uid))} · ${Math.round(s.avg)} ${L('pts/match','نقطة/ماتش')}</strong></div>`).join('')||`<div class="insight-caption-v20">${L('More finalized Production fixtures are needed.','محتاجين ماتشات مكتملة أكتر في النسخة الحية.')}</div>`}</div></section>
+    <section class="insight-section-v21"><div class="insight-kicker-v20">${L('League Trivia','معلومات الدوري')}</div><h4>${L('League Trivia','معلومات الدوري')}</h4>${leagueTriviaHTMLV20(lid)}</section>
+  </div></div>`;
+};
+
+// Public standings are server-backed and stay limited to Top 10 + the current user.
+const baseLeagueStandingsV1096=window.leagueStandings||leagueStandings;
+leagueStandings=function(lid,mode=state.selectedRankMode){
+  if(lid!=='mastaba-public'||!P?.ready)return baseLeagueStandingsV1096(lid,mode);
+  const ids=visibleIdsV1096(lid),w=Number(state.selectedRankWeek||state.week);
+  return ids.map(uid=>{const auth=uidAuthV1096(uid),prof=P.profiles?.[auth]||{},points=mode==='gameweek'?weekPointsLeagueV1096(uid,w,lid):Number(P.publicStandings?.[auth]?.total_points||0);return{id:uid,authUserId:auth,name:prof.display_name||userName(uid),nickname:prof.display_name||userName(uid),gender:'male',theme:prof.theme_key||'mastaba',club:prof.theme_key||'mastaba',active:true,points}}).sort((a,b)=>b.points-a.points||a.name.localeCompare(b.name));
+};window.leagueStandings=leagueStandings;
+
+function storyNameV1096(auth){return P?.profiles?.[auth]?.display_name||L('Mastaba member','عضو المصطبة')}
+function privateStoryHTMLV1096(){
+  if(!isRoundLocked()||!P?.story?.privateAuth?.length)return'';const cards=[];
+  const rivals=Object.fromEntries((P.story.rivalries||[]).map(r=>[r.user_id,[r.club_1,r.club_2].filter(Boolean)]));
+  (state.fixtures||[]).forEach(f=>{const home=String(f.home||''),away=String(f.away||''),homeOwners=P.story.privateAuth.filter(a=>(rivals[a]||[]).includes(home)),awayOwners=P.story.privateAuth.filter(a=>(rivals[a]||[]).includes(away));homeOwners.forEach(h=>awayOwners.forEach(a=>{if(h!==a)cards.push(`<div class="mastaba-storyline-card-v1096"><small>RIVALRY · ${escapeHTML(displayTeamNameV22(home))} vs ${escapeHTML(displayTeamNameV22(away))}</small><strong>${escapeHTML(storyNameV1096(h))} ⚔ ${escapeHTML(storyNameV1096(a))} · x1.5 ${L('inside private Mastaba only','داخل المصطبة الخاصة فقط')}</strong></div>`)}))});
+  (P.story.chips||[]).forEach(c=>{const actor=escapeHTML(storyNameV1096(c.user_id));if(c.chip_type==='steal'){const target=escapeHTML(storyNameV1096(c.payload?.target_user_id));cards.push(`<div class="mastaba-storyline-card-v1096"><small>STEAL · ${String(c.status).toUpperCase()}</small><strong>${actor} → ${target} · ${L('private Mastaba points only','نقاط المصطبة الخاصة فقط')}</strong></div>`)}else if(c.chip_type==='surge')cards.push(`<div class="mastaba-storyline-card-v1096"><small>SURGE · ${String(c.status).toUpperCase()}</small><strong>${actor} · x1.5 ${L('private Gameweek only','على الجولة الخاصة فقط')}</strong></div>`);else if(c.chip_type==='redemption')cards.push(`<div class="mastaba-storyline-card-v1096"><small>REDEMPTION · ${String(c.status).toUpperCase()}</small><strong>${actor} · ${L('private Mastaba season only','موسم المصطبة الخاص فقط')}</strong></div>`)});
+  if(!cards.length)return'';return`<section class="wc-arena-v1043"><div class="section-title wc-showdown-title-v1047">${L('Mastaba Storylines','حكايات المصطبة')}</div><div class="mastaba-storyline-note-v1096">${L('Visible to the platform for the story. Rivalry and Power Card modifiers never change Public League points.','ظاهرة للمنصة عشان الحكاية. تأثيرات Rivalry وكروت القوة لا تغيّر نقاط الدوري العام.')}</div><div class="mastaba-storyline-grid-v1096">${cards.join('')}</div></section>`;
+}
+currentPublicEventsHTMLV1043=privateStoryHTMLV1096;window.currentPublicEventsHTMLV1043=currentPublicEventsHTMLV1043;
+
+// When a new fixture moves from Upcoming to Live, its previously-hidden Production picks become readable once; refresh the compact league dataset.
+let phaseSigV1096='';setInterval(()=>{const s=(state.fixtures||[]).map(f=>`${f.id}:${f.phase}`).join('|');if(s!==phaseSigV1096){const had=phaseSigV1096;phaseSigV1096=s;if(had&&window.prodCtxV1073?.supa)window.loadProdLeagueV1096(window.prodCtxV1073.supa,true).then(()=>{syncPublicLeagueV1096();if(state.view==='predict')renderPredict();if(state.view==='rankings')renderRankings()})}},2500);
+})();
+</script>
+
+<script id="mastaba-v1096-production-only-guard">
+/* V10.96.3 — Production-only guard: no fake picks, simulated results, sandbox resets, or demo league discovery. */
+(function(){
+'use strict';
+window.MASTABA_PRODUCTION_ONLY_V1096=true;
+try{if(Array.isArray(discoverableLeagues))discoverableLeagues.splice(0,discoverableLeagues.length)}catch(e){}
+const blocked=()=>toast(L('This action is disabled on the live Production site.','الإجراء ده مقفول على النسخة الحية.'),'warn');
+window.generatePicks=blocked;window.simulateDeadline=blocked;window.demoResults=blocked;window.resetSandbox=blocked;
+// Production league search is sourced only from state.leagues hydrated from Supabase.
+window.renderLeagueResults=function(){
+  const wrap=document.querySelector('#leagueResultList');if(!wrap)return;const q=normalizeSearchText(leagueDiscoveryUI.q||''),uid=state.currentUser;
+  const rows=(state.leagues||[]).filter(l=>leagueVisibility(l)==='public'&&(!q||normalizeSearchText(`${leagueName(l)} ${l.description||''}`).includes(q)));
+  wrap.innerHTML=rows.length?rows.map(l=>{const joined=(l.members||[]).includes(uid),locked=!!l.lockedMembership;return`<div class="league-result-row"><div><strong>${escapeHTML(leagueName(l))}</strong><small>${l.id==='mastaba-public'?L('Global Production ranking · every account joins automatically','ترتيب الإنتاج العالمي · كل حساب بينضم تلقائيًا'):L('Production public league','دوري عام على النسخة الحية')}</small></div><div class="league-result-actions-v1029">${locked?`<button class="btn btn-secondary" disabled>${L('Global · Automatic','عالمي · تلقائي')}</button>`:joined?`<button class="btn btn-secondary" disabled>${L('Joined','منضم')}</button>`:`<button class="btn btn-primary" onclick="joinPublicLeague('${l.id}')">${L('Join League','انضم للدوري')}</button>`}</div></div>`}).join(''):`<div class="league-empty-state"><strong>${L('No Production public leagues found.','مفيش دوريات عامة على النسخة الحية بالبحث ده.')}</strong></div>`;
+};
+})();
+</script>
+
+<style id="mastaba-v1096-ui-only-fixes">
+/* V10.96.4 — intentionally UI-only; do not broaden these selectors. */
+/* League Trivia pagination must stay visible on every theme, including light cards. */
+.league-trivia-v20 .trivia-dots-v20 span{
+  background:#fff!important;
+  opacity:.58!important;
+  box-shadow:0 0 0 1px rgba(10,20,40,.55)!important;
+}
+.league-trivia-v20 .trivia-dots-v20 span.active{
+  background:#fff!important;
+  opacity:1!important;
+  box-shadow:0 0 0 2px rgba(10,20,40,.82),0 0 0 3px rgba(255,255,255,.5)!important;
+}
+/* Barcelona This Week: remove the one-off countdown outline only. */
+html[data-theme="barcelona"] body #app #view-home .countdown-panel .count-card:not(.deadline-card){
+  border-color:transparent!important;
+  box-shadow:none!important;
+}
+/* Barcelona This Week: Overall Rank matches the adjacent maroon Overall Points card. */
+html[data-theme="barcelona"] body #app #view-home .league-rank-card{
+  background:linear-gradient(135deg,#ad3a61,#8f2148)!important;
+  border-color:transparent!important;
+  color:#fff!important;
+}
+html[data-theme="barcelona"] body #app #view-home .league-rank-card :is(.rank-heading-line,.rank-inline-name,.stat-value,.stat-label,.select-control){color:#fff!important}
+</style>
+
+<script id="mastaba-v1096-production-rules-story-placement">
+/* V10.96.5 — final Production scoring copy + public visibility of private Mastaba storylines. */
+(function(){
+'use strict';
+function syncProductionRulesV1096(){
+  const grid=document.querySelector('#view-rules .rules-grid');if(!grid)return;
+  [...grid.querySelectorAll('.rule-card')].forEach(card=>{
+    const h=card.querySelector('h3')?.textContent?.trim()||'';
+    if(h===L('Match Scoring','نقاط الماتش')){
+      const p=card.querySelector('p');if(p)p.textContent=L('The standard scoreline route is the same for wins and draws: Correct Outcome +5, Correct Goal Difference +3, correct Home Goals +1, correct Away Goals +1 and Exact Score +5. A non-exact correct draw therefore earns 8 naturally. First Team (+2) and First Goalscorer (+3) are separate goal-event points and only exist when a goal is actually scored.','مسار نقاط النتيجة واحد للفوز والتعادل: النتيجة الصحيحة +5، فارق الأهداف +3، أهداف صاحب الأرض +1، أهداف الضيف +1، والسكور بالظبط +5. لذلك التعادل الصحيح غير المطابق ياخد 8 طبيعيًا. أول فريق يسجل (+2) وأول هداف (+3) نقاط أحداث منفصلة ولا تُمنح إلا لو حصل هدف فعلًا.');
+    }
+    if(h===L('Risky Prediction Bonus','بونص التوقع المجازف')){
+      const p=card.querySelector('p');if(p)p.textContent=L('Risky is calculated independently for each league. In the private 7-person Mastaba League, the established minority rule applies: a lone outcome is Risky, and when 5+ choose the majority, an outcome chosen by 2 or fewer is Risky. In Mastaba Public League, your outcome is Risky only when it represents strictly less than 20% of that league’s submitted picks. A correct Risky outcome earns +10 in that league only. The same prediction can therefore be Risky privately but not publicly, or vice versa.','المجازفة بتتحسب بشكل مستقل لكل دوري. في دوري المصطبة الخاص المكوّن من 7، قاعدة الأقلية المعروفة بتطبق: الاختيار المنفرد مجازفة، ولو 5 أو أكتر اختاروا الأغلبية فالاختيار اللي عليه 2 أو أقل يبقى مجازفة. في دوري المصطبة العام، اختيارك يبقى مجازفة فقط لو نسبته أقل من 20% بشكل صارم من توقعات الدوري المرسلة. لو المجازفة طلعت صح تاخد +10 في نفس الدوري فقط. لذلك نفس التوقع ممكن يكون مجازفة في الخاص ومش في العام، أو العكس.');
+    }
+    if(h===L('Goalscorer Rules','قواعد أول هداف')){
+      const p=card.querySelector('p');if(p)p.textContent=L('For a 0–0 prediction, No Team to Score and No Goalscorer are selected automatically, but no First Team / First Goalscorer points are awarded because no goal occurred. Own goals do not count as First Goalscorer. If you predict only one team to score, the scorer list is restricted to that team.','لو توقعت 0–0، لا يوجد فريق يسجل ولا يوجد هداف بيتحددوا تلقائيًا، لكن مفيش نقاط لأول فريق أو أول هداف لأن مفيش هدف حصل. الأهداف العكسية لا تُحسب كأول هداف. ولو توقعت فريق واحد بس يسجل، قائمة الهدافين بتبقى من الفريق ده بس.');
+    }
+    if(h===L('Rivalry Clubs','أندية Rivalry')){
+      const rows=window.prodLeagueV1096?.story?.rivalries||[];
+      if(rows.length){const p=card.querySelector('p');if(p)p.textContent=rows.map(r=>`${window.prodLeagueV1096.profiles?.[r.user_id]?.display_name||L('Mastaba member','عضو المصطبة')}: ${[r.club_1,r.club_2].filter(Boolean).join(' + ')}`).join(' · ')}
+    }
+  });
+}
+const renderRulesBaseV1096=window.renderRules||renderRules;
+window.renderRules=renderRules=function(){const out=renderRulesBaseV1096();syncProductionRulesV1096();return out};
+
+// The storyline is public narrative, while its modifiers stay private-only in Supabase.
+const renderHomeStoryBaseV1096=window.renderHome||renderHome;
+window.renderHome=renderHome=function(){const out=renderHomeStoryBaseV1096();if(isRoundLocked()&&!document.querySelector('#view-home .mastaba-storyline-grid-v1096')){const html=currentPublicEventsHTMLV1043();if(html){const ats=document.querySelector('#view-home .ats-section-v25');if(ats)ats.insertAdjacentHTML('afterend',html);else document.querySelector('#view-home')?.insertAdjacentHTML('beforeend',html)}}return out};
+const renderRankStoryBaseV1096=window.renderRankings||renderRankings;
+window.renderRankings=renderRankings=function(){const out=renderRankStoryBaseV1096();if(state.selectedLeagueId==='mastaba-public'&&state.rankSectionV21!=='cup'&&state.rankSectionV21!=='h2h'&&isRoundLocked()&&!document.querySelector('#view-rankings .mastaba-storyline-grid-v1096')){const html=currentPublicEventsHTMLV1043();const controls=document.querySelector('#view-rankings .rank-controls');if(html&&controls)controls.insertAdjacentHTML('afterend',html)}return out};
+})();
+</script>
+
+
+<script id="mastaba-v1096-final-league-score-bridge">
+/* V10.96.6 — every final-match UI surface uses the authoritative score for the league being viewed. */
+(function(){
+'use strict';
+function scoreLeagueContextV1096(){
+  const selected=(typeof v18LeagueId==='function'?v18LeagueId():null)||state.homeLeagueId||state.selectedLeagueId;
+  if(selected==='mastaba'||selected==='mastaba-public')return selected;
+  const auth=typeof uidAuthV1096==='function'?uidAuthV1096(state.currentUser):null;
+  const privateAuth=window.prodLeagueV1096?.story?.privateAuth||[];
+  return auth&&privateAuth.includes(auth)?'mastaba':'mastaba-public';
+}
+window.scoreLeagueContextV1096=scoreLeagueContextV1096;
+
+// Generic scoring remains private for private Mastaba members, Public for Public-only members.
+scorePrediction=function(uid,f){
+  const auth=typeof uidAuthV1096==='function'?uidAuthV1096(uid):null;
+  const privateAuth=window.prodLeagueV1096?.story?.privateAuth||[];
+  const lid=auth&&privateAuth.includes(auth)?'mastaba':'mastaba-public';
+  return scorePredictionForLeagueV1096(uid,f,lid);
+};
+window.scorePrediction=scorePrediction;
+
+// As Things Stand final points follow the Home league selector.
+finalPointsForFixtureV20=function(f){
+  const hist=(state.history?.fixtures||[]).some(x=>x.id===f.id);
+  if(hist)return Number(state.history?.predictions?.[state.currentUser]?.[f.id]?.points||0);
+  const lid=(state.homeLeagueId==='mastaba-public'||state.homeLeagueId==='mastaba')?state.homeLeagueId:scoreLeagueContextV1096();
+  return scorePredictionForLeagueV1096(state.currentUser,f,lid).total;
+};
+window.finalPointsForFixtureV20=finalPointsForFixtureV20;
+
+// Match breakdown follows the currently selected league and keeps Top 10 + You member visibility from V10.96.2.
+detailsForMatch=function(f,past){
+  if(!past&&!matchStarted(f))return'';
+  const other=otherPredictionsRows(f,past);let bd='';
+  if(past){
+    const p=state.history?.predictions?.[state.currentUser]?.[f.id]||{points:0};
+    bd=`<div class="point-breakdown"><span>${L('Match Points','نقاط الماتش')}</span><b class="positive">+${Number(p.points||0)}</b></div>`;
+  }else if(f.phase==='final'){
+    const lid=typeof v18LeagueId==='function'?v18LeagueId():scoreLeagueContextV1096();
+    const s=scorePredictionForLeagueV1096(state.currentUser,f,lid);
+    bd=s.parts.map(([n,v])=>`<div class="point-breakdown"><span>${n}</span><b class="positive">+${v}</b></div>`).join('')
+      ||`<div class="point-breakdown"><span>${L('No points earned','مفيش نقاط')}</span><b>0</b></div>`;
+  }
+  return `${bd?`<details class="match-details"><summary>${L('Point Breakdown','تفاصيل النقاط')}</summary><div class="detail-inner">${bd}</div></details>`:''}<details class="match-details"><summary>${L('Other League Member Predictions','توقعات باقي أعضاء الدوري')}</summary><div class="detail-inner">${other}</div></details>`;
+};
+window.detailsForMatch=detailsForMatch;
+})();
+</script>
+
+
+<style id="mastaba-v1097-rules-auth-polish">
+/* V10.97 — league-aware rules and equal OAuth icon geometry. */
+.auth-oauth-btn-v1064{align-items:center!important}
+.auth-oauth-btn-v1064 svg{
+  display:block!important;
+  width:24px!important;
+  height:24px!important;
+  flex:0 0 24px!important;
+  transform:none!important;
+  transform-origin:center!important;
+}
+.rules-scope-v1097{display:flex;gap:7px;margin:0 0 14px;padding:5px;border:1px solid var(--theme-border);background:var(--theme-surface);border-radius:var(--mastaba-button-radius,8px);width:min(100%,620px)}
+.rules-scope-v1097 button{flex:1;min-height:42px;border:0;border-radius:calc(var(--mastaba-button-radius,8px) - 2px);background:transparent;color:var(--theme-muted);font:inherit;font-size:.76rem;font-weight:1000}
+.rules-scope-v1097 button.active{background:var(--theme-action);color:var(--theme-action-text);box-shadow:0 8px 20px color-mix(in srgb,var(--theme-action) 22%,transparent)}
+.rules-context-v1097{display:flex;align-items:center;gap:9px;margin:0 0 12px;padding:10px 12px;border:1px solid var(--theme-border);background:var(--theme-surface-2);border-radius:var(--mastaba-box-radius,12px);font-size:.74rem;color:var(--theme-muted)}
+.rules-context-v1097 strong{color:var(--theme-text)}
+@media(max-width:560px){.rules-scope-v1097{width:100%}.rules-scope-v1097 button{font-size:.69rem;padding-inline:7px}}
+</style>
+
+<script id="mastaba-v1097-zero-zero-rules-chips-oauth">
+/* V10.97 — 0-0 goal-event bonuses, league-specific rules, private chip gate and social onboarding. */
+(function(){
+'use strict';
+const PRIVATE_V1097='mastaba';
+const PUBLIC_V1097='mastaba-public';
+
+function hasPrivateMastabaAccessV1097(){
+  const uid=state?.currentUser;
+  const auth=currentUser?.()?.authUserId||state?.authProfileV1064?.id||null;
+  const league=(state?.leagues||[]).find(l=>l.id===PRIVATE_V1097);
+  const localMember=!!uid&&!!league&&(league.members||[]).includes(uid);
+  const prod=window.prodLeagueV1096;
+  if(prod?.ready&&auth)return localMember&&(prod.story?.privateAuth||[]).includes(auth);
+  return localMember;
+}
+window.hasPrivateMastabaAccessV1097=hasPrivateMastabaAccessV1097;
+
+function rulesRowsV1097(){
+  return[
+    [L('Correct Outcome','النتيجة الصحيحة'),'5'],
+    [L('Correct Goal Difference','فارق الأهداف الصحيح'),'3'],
+    [L('Correct Home Team Goals','أهداف صاحب الأرض الصحيحة'),'1'],
+    [L('Correct Away Team Goals','أهداف الضيف الصحيحة'),'1'],
+    [L('Exact Score Bonus','بونص النتيجة بالظبط'),'5'],
+    [L('First Team to Score · or No Team in a correct 0–0','أول فريق يسجل · أو لا يوجد فريق في 0–0 صحيحة'),'2'],
+    [L('First Goalscorer · or No Goalscorer in a correct 0–0','أول هداف · أو لا يوجد هداف في 0–0 صحيحة'),'3']
+  ];
+}
+function scoringCardV1097(){
+  const rows=rulesRowsV1097();
+  return`<div class="rule-card"><h3>${L('Match Scoring','نقاط الماتش')}</h3><table class="scoring-table"><thead><tr><th>${L('Rule','القاعدة')}</th><th>${L('Points','النقاط')}</th></tr></thead><tbody>${rows.map(r=>`<tr><td>${r[0]}</td><td><span class="points-pill">+${r[1]}</span></td></tr>`).join('')}</tbody></table><p style="margin-top:12px">${L('A correct 0–0 earns the No Team (+2) and No Goalscorer (+3) bonuses, so a perfect 0–0 is worth the same 20 base points as every other perfect prediction.','توقع 0–0 الصحيح بياخد بونص لا يوجد فريق (+2) ولا يوجد هداف (+3)، وبكده 0–0 الكاملة تساوي نفس 20 نقطة أساسية لأي توقع كامل.')}</p></div>`;
+}
+function commonRuleCardsV1097(scope){
+  const risky=scope===PRIVATE_V1097
+    ?L('Risky is calculated only from the seven private Mastaba members. A lone outcome is Risky; if 5 or more choose the majority, an outcome chosen by 2 or fewer is also Risky. A correct Risky outcome earns +10 in the private league only.','المجازفة بتتحسب من أعضاء المصطبة السبعة فقط. الاختيار المنفرد مجازفة، ولو 5 أو أكتر اختاروا الأغلبية فالاختيار اللي عليه 2 أو أقل يبقى مجازفة. المجازفة الصحيحة تاخد +10 داخل الدوري الخاص فقط.')
+    :L('Risky is calculated from submitted Mastaba Public League predictions. Your outcome is Risky only when it represents strictly less than 20% of submitted public picks. A correct Risky outcome earns +10 in the Public League only.','المجازفة بتتحسب من توقعات دوري المصطبة العام المرسلة. اختيارك يبقى مجازفة فقط لو نسبته أقل من 20% بشكل صارم من توقعات العام. المجازفة الصحيحة تاخد +10 في الدوري العام فقط.');
+  return`
+    <div class="rule-card"><h3>${L('Double Points','دبل بوينتس')}</h3><p>${L('You may activate Double Points on one match per Gameweek. It doubles the complete match score, including a Risky bonus.','تقدر تفعّل الدبل بوينتس على ماتش واحد في كل جولة. بيضاعف نقاط الماتش كاملة، بما فيها بونص المجازفة.')}</p></div>
+    <div class="rule-card"><h3>${L('Risky Prediction Bonus','بونص التوقع المجازف')}</h3><p>${risky}</p></div>
+    <div class="rule-card"><h3>${L('Perfect Gameweek','الجولة الكاملة')}</h3><p>${L('Get every match outcome in the Gameweek correct and receive +15. Exact scores are not required.','لو جبت نتيجة كل الماتشات في الجولة صح، تاخد +15. مش لازم السكور يكون بالظبط.')}</p></div>
+    <div class="rule-card"><h3>${L('Goalscorer Rules','قواعد أول هداف')}</h3><p>${L('For a 0–0 prediction, No Team and No Goalscorer are selected automatically. If the match finishes 0–0, they earn +2 and +3. Own goals do not count as First Goalscorer. If only one team is predicted to score, the scorer list is restricted to that team.','لو توقعت 0–0، لا يوجد فريق ولا يوجد هداف بيتحددوا تلقائيًا. لو الماتش خلص 0–0، ياخدوا +2 و+3. الأهداف العكسية لا تُحسب كأول هداف. ولو توقعت فريق واحد بس يسجل، قائمة الهدافين بتبقى من الفريق ده بس.')}</p></div>
+    <div class="rule-card"><h3>${L('Deadline & Privacy','الموعد والخصوصية')}</h3><p>${L('The Gameweek locks one minute before the first selected match. A saved Draft becomes official at the deadline. Other users’ predictions stay hidden until each match kicks off.','الجولة بتتقفل قبل بداية أول ماتش مختار بدقيقة. الـ Draft المحفوظ بيتحول لتوقع رسمي عند الموعد. توقعات باقي الناس بتفضل مخفية لحد بداية كل ماتش.')}</p></div>`;
+}
+function privateRuleCardsV1097(){
+  return`
+    <div class="rule-card wc-rule-card-v1043"><h3>${L('Mastaba Power Chips','كروت المصطبة')}</h3><p>${L('Available only to the seven private Mastaba members. One Power Chip may be active in a Gameweek. Steal has one use in each half of the season; Surge and Redemption each have one use per season. These modifiers never change Public League points.','متاحة فقط لأعضاء المصطبة السبعة. كارت واحد بس يقدر يكون شغال في الجولة. Steal له استخدام في كل نصف موسم، وSurge وRedemption لكل واحد استخدام واحد في الموسم. الكروت دي لا تغيّر نقاط الدوري العام.')}</p></div>
+    <div class="rule-card wc-rule-card-v1043"><h3>STEAL</h3><p>${L('Choose one private Mastaba opponent. Once confirmed, the Steal cannot be cancelled or switched. The higher private Gameweek score takes both players’ points and the loser gets 0.','اختار خصم من المصطبة الخاصة. بعد التأكيد مينفعش الـ Steal يتلغي أو يتغير. الأعلى في نقاط الجولة الخاصة ياخد نقاط الاتنين والخاسر ياخد 0.')}</p></div>
+    <div class="rule-card wc-rule-card-v1043"><h3>SURGE · x1.5</h3><p>${L('Surge multiplies your whole private Mastaba Gameweek by x1.5. You cannot use Double Points or be targeted by Steal while Surge is selected. It never stacks with Rivalry.','Surge بيضرب جولة المصطبة الخاصة كلها x1.5. مينفعش تستخدم الدبل أو حد يعمل عليك Steal وهو مختار، ومش بيتراكم مع Rivalry.')}</p></div>
+    <div class="rule-card wc-rule-card-v1043"><h3>${L('Rivalry Match · x1.5','ماتش Rivalry · x1.5')}</h3><p>${L('Rivalry is automatic, not a Power Chip. When supported clubs owned by private Mastaba members meet, only those owners receive x1.5 on that fixture in the private league.','Rivalry تلقائي ومش كارت. لما أندية أعضاء المصطبة الخاصة تلعب ضد بعض، أصحاب الأندية دول فقط بياخدوا x1.5 على الماتش في الدوري الخاص.')}</p></div>
+    <div class="rule-card wc-rule-card-v1043"><h3>REDEMPTION</h3><p>${L('Only 6th and 7th place can activate Redemption. If the Redemption Gameweek beats your lowest completed score, that lowest Gameweek is replaced.','فقط المركز السادس والسابع يقدروا يفعلوا Redemption. لو جولة Redemption تعدّت أقل جولة مكتملة، أقل جولة بتتبدل.')}</p></div>`;
+}
+function publicRuleCardsV1097(){
+  return`<div class="rule-card"><h3>${L('Public League Scope','نظام الدوري العام')}</h3><p>${L('Every account joins the Mastaba Public League automatically. Public scoring begins from the admin activation Gameweek. Power Chips and Rivalry modifiers are not available and never affect Public League points.','كل حساب بينضم لدوري المصطبة العام تلقائيًا. نقاط العام بتبدأ من الجولة اللي الأدمن فعّل منها الدوري. كروت المصطبة وRivalry مش متاحين ومش بيأثروا أبدًا على نقاط الدوري العام.')}</p></div>`;
+}
+function renderLeagueRulesV1097(){
+  const root=document.querySelector('#view-rules');if(!root)return;
+  const privateMember=hasPrivateMastabaAccessV1097();
+  if(!privateMember)state.rulesScopeV1097=PUBLIC_V1097;
+  else if(![PRIVATE_V1097,PUBLIC_V1097].includes(state.rulesScopeV1097))state.rulesScopeV1097=PRIVATE_V1097;
+  const scope=state.rulesScopeV1097;
+  const privateMode=scope===PRIVATE_V1097;
+  const selector=privateMember?`<div class="rules-scope-v1097" role="tablist" aria-label="${L('Rules league','دوري القواعد')}"><button type="button" class="${privateMode?'active':''}" onclick="setRulesScopeV1097('mastaba')">${L('Private Mastaba · 7','المصطبة الخاصة · 7')}</button><button type="button" class="${!privateMode?'active':''}" onclick="setRulesScopeV1097('mastaba-public')">${L('Public League','الدوري العام')}</button></div>`:'';
+  const title=privateMode?L('Private Mastaba League Rules','قواعد دوري المصطبة الخاص'):L('Mastaba Public League Rules','قواعد دوري المصطبة العام');
+  const note=privateMode?L('These rules and modifiers apply to the seven-person private league.','القواعد والتعديلات دي بتطبق على دوري السبعة الخاص.'):L('These are the only rules that affect Public League points.','دي القواعد الوحيدة اللي بتأثر على نقاط الدوري العام.');
+  root.innerHTML=`<h1 class="page-title">${title}</h1><p class="page-sub">${note}</p>${selector}<div class="rules-context-v1097"><strong>${privateMode?L('Private scoring','نقاط الخاص'):L('Public scoring','نقاط العام')}</strong><span>${privateMode?L('7-member Risky + private Power Chips and Rivalry','مجازفة السبعة + كروت المصطبة وRivalry'):L('Public Risky threshold · no private modifiers','حد المجازفة العام · بدون تعديلات الخاص')}</span></div><div class="rules-grid">${scoringCardV1097()}${commonRuleCardsV1097(scope)}${privateMode?privateRuleCardsV1097():publicRuleCardsV1097()}</div>`;
+}
+window.setRulesScopeV1097=function(scope){
+  if(scope===PRIVATE_V1097&&!hasPrivateMastabaAccessV1097())return;
+  state.rulesScopeV1097=scope===PRIVATE_V1097?PRIVATE_V1097:PUBLIC_V1097;
+  try{save()}catch{}
+  renderLeagueRulesV1097();
+};
+window.renderRules=renderRules=renderLeagueRulesV1097;
+
+const renderPredictBaseV1097=window.renderPredict||renderPredict;
+window.renderPredict=renderPredict=function(){
+  const out=renderPredictBaseV1097();
+  if(!hasPrivateMastabaAccessV1097()){
+    state.powerChipPanelOpenV1048=false;
+    document.querySelectorAll('#view-predict .power-chip-shell-v1048,#view-predict .mastaba-wildcards-v1043,#view-predict .wc-personal-alert-v1043').forEach(el=>el.remove());
+  }
+  return out;
+};
+
+for(const name of ['requestWildcardV1048','togglePowerChipPanelV1048','openPowerChipMenuV1047']){
+  const original=window[name];
+  if(typeof original==='function')window[name]=function(...args){
+    if(!hasPrivateMastabaAccessV1097())return;
+    return original.apply(this,args);
+  };
+}
+
+function predictionForZeroZeroV1097(uid,f){
+  const auth=typeof window.uidAuthV1096==='function'?window.uidAuthV1096(uid):null;
+  return (auth&&window.prodLeagueV1096?.picks?.[`${auth}|${f?.id}`])||getOfficial(uid,f?.id);
+}
+function normalizeZeroZeroScoreV1097(uid,f,scored){
+  const p=predictionForZeroZeroV1097(uid,f),r=f?.result;
+  if(!p||!r||f?.phase!=='final'||Number(p.home)!==0||Number(p.away)!==0||Number(r.home)!==0||Number(r.away)!==0)return scored;
+  const b=scored?.breakdown||{};
+  const teamAlready=Number(b.first_team_points||0)||Number((scored?.parts||[]).find(x=>x[0]===L('No Team to Score','لا يوجد فريق يسجل'))?.[1]||0);
+  const scorerAlready=Number(b.first_scorer_points||0)||Number((scored?.parts||[]).find(x=>x[0]===L('No Goalscorer','لا يوجد هداف'))?.[1]||0);
+  const addTeam=Math.max(0,2-teamAlready),addScorer=Math.max(0,3-scorerAlready),delta=addTeam+addScorer;
+  const parts=(scored?.parts||[]).filter(x=>![L('First Team to Score','أول فريق يسجل'),L('First Goalscorer','أول لاعب يسجل'),L('No Team to Score','لا يوجد فريق يسجل'),L('No Goalscorer','لا يوجد هداف')].includes(x[0]));
+  parts.push([L('No Team to Score','لا يوجد فريق يسجل'),2],[L('No Goalscorer','لا يوجد هداف'),3]);
+  return{...scored,base:Number(scored?.base||0)+delta,total:Number(scored?.total||0)+delta*(scored?.double?2:1),parts,breakdown:{...b,first_team_points:2,first_scorer_points:3,correct_first_team:true,correct_first_scorer:true,zero_zero_no_team_bonus:true,zero_zero_no_scorer_bonus:true}};
+}
+const scoreForLeagueBaseV1097=window.scorePredictionForLeagueV1096;
+if(typeof scoreForLeagueBaseV1097==='function'){
+  window.scorePredictionForLeagueV1096=function(uid,f,lid='mastaba'){
+    return normalizeZeroZeroScoreV1097(uid,f,scoreForLeagueBaseV1097(uid,f,lid));
+  };
+  window.scorePrediction=function(uid,f){
+    const auth=typeof window.uidAuthV1096==='function'?window.uidAuthV1096(uid):null;
+    const privateAuth=window.prodLeagueV1096?.story?.privateAuth||[];
+    return window.scorePredictionForLeagueV1096(uid,f,auth&&privateAuth.includes(auth)?PRIVATE_V1097:PUBLIC_V1097);
+  };
+  scorePrediction=window.scorePrediction;
+}
+
+if(state?.view==='rules')renderLeagueRulesV1097();
+if(state?.view==='predict')renderPredict();
 })();
 </script>
 
