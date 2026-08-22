@@ -13196,7 +13196,7 @@ renderRankings=function(){
 })();
 </script>
 
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.112.3"></script>
 
 
 <!-- Mastaba production build v10.75 -->
@@ -13331,7 +13331,7 @@ const AUTH_TEAMS_V1064=[
  {key:'other',en:'Other / not listed',ar:'فريق آخر / مش موجود',aliases:['other','not listed']}
 ];
 let authLangV1064=localStorage.getItem('mastaba_auth_lang_v1064')||((typeof state!=='undefined'&&state.lang==='ar')?'ar':'en');
-let authModeV1064='login',mastabaSandboxV1064=null,activeAuthUserV1064=null,profileHookInstalledV1064=false,authSubscriptionV1064=null,rememberChoiceV1064=true;
+let authModeV1064='login',mastabaSandboxV1064=null,activeAuthUserV1064=null,profileHookInstalledV1064=false,authSubscriptionV1064=null,rememberChoiceV1064=true,authEntryPromiseV1103=null,authEntryUserV1103=null;
 const qV1064=(s)=>document.querySelector(s);
 function copyV1064(k){return AUTH_COPY_V1064[authLangV1064]?.[k]||AUTH_COPY_V1064.en[k]||k}
 function authMessageV1064(text,type='info'){const el=qV1064('#authMessageV1064');if(!el)return;el.textContent=text||'';el.className=`auth-message-v1064 ${text?'show ':''}${type}`}
@@ -13353,7 +13353,7 @@ function detectRememberChoiceV1064(){if(window.localStorage.getItem(AUTH_STORAGE
 function syncRememberInputsV1064(){['#authRememberLoginV1064','#authRememberSignupV1064'].forEach(sel=>{const el=qV1064(sel);if(el)el.checked=!!rememberChoiceV1064})}
 function currentRememberChoiceV1064(mode){const el=qV1064(mode==='signup'?'#authRememberSignupV1064':'#authRememberLoginV1064');return el?!!el.checked:!!rememberChoiceV1064}
 function authRedirectUrlV1064(){const url=new URL(window.location.href);url.hash='';url.search='';return url.toString()}
-async function buildSupabaseClientV1064(remember){rememberChoiceV1064=!!remember;localStorage.setItem(AUTH_REMEMBER_KEY_V1064,rememberChoiceV1064?'1':'0');const storage=createStorageAdapterV1064(rememberChoiceV1064?'local':'session');mastabaSandboxV1064=window.supabase.createClient(MASTABA_SANDBOX_URL,MASTABA_SANDBOX_PUBLISHABLE_KEY,{auth:{persistSession:true,autoRefreshToken:true,detectSessionInUrl:true,storage,storageKey:AUTH_STORAGE_KEY_V1064}});window.mastabaSandboxV1064=mastabaSandboxV1064;if(authSubscriptionV1064?.subscription?.unsubscribe)authSubscriptionV1064.subscription.unsubscribe();authSubscriptionV1064=mastabaSandboxV1064.auth.onAuthStateChange((event,session)=>{if(event==='SIGNED_OUT'||!session){window.localStorage.removeItem(AUTH_STORAGE_KEY_V1064);window.sessionStorage.removeItem(AUTH_STORAGE_KEY_V1064);return showAuthV1064()}if(event==='TOKEN_REFRESHED'&&activeAuthUserV1064===session?.user?.id&&document.body.classList.contains('auth-ready-v1064'))return;if(['SIGNED_IN','USER_UPDATED','INITIAL_SESSION','PASSWORD_RECOVERY'].includes(event))setTimeout(()=>enterAppV1064(session),0)});return mastabaSandboxV1064}
+async function buildSupabaseClientV1064(remember){rememberChoiceV1064=!!remember;localStorage.setItem(AUTH_REMEMBER_KEY_V1064,rememberChoiceV1064?'1':'0');const storage=createStorageAdapterV1064(rememberChoiceV1064?'local':'session');mastabaSandboxV1064=window.supabase.createClient(MASTABA_SANDBOX_URL,MASTABA_SANDBOX_PUBLISHABLE_KEY,{db:{retry:false},auth:{persistSession:true,autoRefreshToken:true,detectSessionInUrl:true,storage,storageKey:AUTH_STORAGE_KEY_V1064}});window.mastabaSandboxV1064=mastabaSandboxV1064;if(authSubscriptionV1064?.subscription?.unsubscribe)authSubscriptionV1064.subscription.unsubscribe();authSubscriptionV1064=mastabaSandboxV1064.auth.onAuthStateChange((event,session)=>{if(event==='SIGNED_OUT'||!session){window.localStorage.removeItem(AUTH_STORAGE_KEY_V1064);window.sessionStorage.removeItem(AUTH_STORAGE_KEY_V1064);return showAuthV1064()}if(event==='TOKEN_REFRESHED'&&activeAuthUserV1064===session?.user?.id&&document.body.classList.contains('auth-ready-v1064'))return;if(['SIGNED_IN','USER_UPDATED','INITIAL_SESSION','PASSWORD_RECOVERY'].includes(event))setTimeout(()=>enterAppV1064(session),0)});return mastabaSandboxV1064}
 function slugFromTextV1064(text){return (text||'').toLowerCase().replace(/[^a-z0-9]+/g,'_').replace(/^_+|_+$/g,'').slice(0,18)||'user'}
 function makeHiddenUsernameV1064(displayName,email){const base=slugFromTextV1064(displayName)||slugFromTextV1064((email||'').split('@')[0]);const suffix=Math.random().toString(36).slice(2,6);return `${base}_${suffix}`.slice(0,24)}
 function normalizeTextV1064(text){return (text||'').trim().toLowerCase().replace(/\s+/g,' ')}
@@ -13364,7 +13364,21 @@ function bridgeProfileToReviewerV1064(profile,user){if(typeof state==='undefined
 function installProfileAccountPanelV1064(){if(profileHookInstalledV1064||typeof renderProfile!=='function')return;profileHookInstalledV1064=true;const base=renderProfile;renderProfile=function(){base();const root=qV1064('#view-profile');if(!root||root.querySelector('.auth-account-panel-v1064')||!state?.authProfileV1064)return;const a=state.authProfileV1064;root.insertAdjacentHTML('afterbegin',`<div class="panel auth-account-panel-v1064"><div class="auth-account-copy-v1064"><small>${copyV1064('signedInAs')}</small><strong>${escapeHTML(a.email||a.displayName||'')}</strong></div><button class="btn btn-secondary auth-signout-v1064" type="button" onclick="mastabaSignOutV1064()">${copyV1064('signOut')}</button></div>`)}}
 function pendingOAuthV1097(){try{const raw=sessionStorage.getItem(OAUTH_PENDING_KEY_V1097);if(!raw)return null;const value=JSON.parse(raw);if(!value?.createdAt||Date.now()-Number(value.createdAt)>20*60*1000){sessionStorage.removeItem(OAUTH_PENDING_KEY_V1097);return null}return value}catch{sessionStorage.removeItem(OAUTH_PENDING_KEY_V1097);return null}}
 async function applyPendingOAuthV1097(session){const pending=pendingOAuthV1097();if(!pending||!session?.user)return;try{const {data:profile,error:readError}=await mastabaSandboxV1064.from('mastaba_profiles').select('display_name,primary_team_key,theme_key,language').eq('id',session.user.id).maybeSingle();if(readError)throw readError;const patch={updated_at:new Date().toISOString()};if(!profile?.display_name||profile.display_name==='Mastaba Player')patch.display_name=pending.displayName;if(!profile?.primary_team_key){patch.primary_team_key=pending.team;patch.theme_key=typeof themeForSupportedTeamV1054==='function'?themeForSupportedTeamV1054(pending.team):'mastaba'}if(!profile?.language)patch.language=pending.language==='ar'?'ar':'en';if(Object.keys(patch).length>1){const {error:updateError}=await mastabaSandboxV1064.from('mastaba_profiles').update(patch).eq('id',session.user.id);if(updateError)throw updateError;await mastabaSandboxV1064.auth.updateUser({data:{display_name:pending.displayName,primary_team_key:pending.team,language:pending.language}})}sessionStorage.removeItem(OAUTH_PENDING_KEY_V1097)}catch(e){console.error('Mastaba social profile onboarding failed',e)}}
-async function enterAppV1064(session){if(!session?.user)return showAuthV1064();if(activeAuthUserV1064===session.user.id&&document.body.classList.contains('auth-ready-v1064'))return;await applyPendingOAuthV1097(session);activeAuthUserV1064=session.user.id;const profile=await loadProfileV1064(session.user);if(!profile){activeAuthUserV1064=null;return showAuthV1064(copyV1064('profileError'),'error')}authLangV1064=profile.language==='ar'?'ar':'en';localStorage.setItem('mastaba_auth_lang_v1064',authLangV1064);try{await window.hydrateProductionV1073(profile,session.user,mastabaSandboxV1064)}catch(e){console.error('Production hydrate failed',e);activeAuthUserV1064=null;return showAuthV1064(e?.message||copyV1064('connectionError'),'error')}installProfileAccountPanelV1064();showAppV1064();try{render()}catch{}}
+async function enterAppV1064(session){
+  if(!session?.user)return showAuthV1064();
+  const uid=String(session.user.id||'');
+  if(activeAuthUserV1064===uid&&document.body.classList.contains('auth-ready-v1064'))return;
+  if(authEntryPromiseV1103&&authEntryUserV1103===uid)return authEntryPromiseV1103;
+  authEntryUserV1103=uid;
+  authEntryPromiseV1103=(async()=>{
+    await applyPendingOAuthV1097(session);activeAuthUserV1064=uid;
+    const profile=await loadProfileV1064(session.user);if(!profile){activeAuthUserV1064=null;return showAuthV1064(copyV1064('profileError'),'error')}
+    authLangV1064=profile.language==='ar'?'ar':'en';localStorage.setItem('mastaba_auth_lang_v1064',authLangV1064);
+    try{await window.hydrateProductionV1073(profile,session.user,mastabaSandboxV1064)}catch(e){console.error('Production hydrate failed',e);activeAuthUserV1064=null;return showAuthV1064(e?.message||copyV1064('connectionError'),'error')}
+    installProfileAccountPanelV1064();showAppV1064();try{render()}catch{}
+  })();
+  try{return await authEntryPromiseV1103}finally{if(authEntryUserV1103===uid){authEntryPromiseV1103=null;authEntryUserV1103=null}}
+}
 async function handleLoginV1064(ev){ev.preventDefault();authMessageV1064('');const email=qV1064('#authLoginEmailV1064')?.value.trim(),password=qV1064('#authLoginPasswordV1064')?.value||'',remember=currentRememberChoiceV1064('login');setBusyV1064('login',true);try{await buildSupabaseClientV1064(remember);const {data,error}=await mastabaSandboxV1064.auth.signInWithPassword({email,password});if(error)throw error;if(data?.session)await enterAppV1064(data.session)}catch(e){authMessageV1064(e?.message||copyV1064('connectionError'),'error')}finally{setBusyV1064('login',false)}}
 async function handleSignupV1064(ev){ev.preventDefault();authMessageV1064('');const displayName=qV1064('#authDisplayNameV1064')?.value.trim(),email=qV1064('#authSignupEmailV1064')?.value.trim(),password=qV1064('#authSignupPasswordV1064')?.value||'',confirm=qV1064('#authSignupPasswordConfirmV1064')?.value||'',teamInput=qV1064('#authTeamSearchV1064')?.value||'',team=qV1064('#authTeamKeyV1074')?.value||resolveTeamKeyV1064(teamInput),remember=currentRememberChoiceV1064('signup');if(password.length<8)return authMessageV1064(copyV1064('badPassword'),'error');if(password!==confirm)return authMessageV1064(copyV1064('passwordMismatch'),'error');if(!team)return authMessageV1064(copyV1064('missingTeam'),'error');setBusyV1064('signup',true);try{await buildSupabaseClientV1064(remember);const {data,error}=await mastabaSandboxV1064.auth.signUp({email,password,options:{emailRedirectTo:authRedirectUrlV1064(),data:{display_name:displayName,primary_team_key:team,language:authLangV1064}}});if(error)throw error;if(data?.session){await enterAppV1064(data.session)}else{qV1064('#authLoginEmailV1064').value=email||'';setAuthModeV1064('login');authMessageV1064(copyV1064('confirmEmail'),'good')}}catch(e){authMessageV1064(e?.message||copyV1064('connectionError'),'error')}finally{setBusyV1064('signup',false)}}
 async function handleForgotPasswordV1064(){const btn=qV1064('#authForgotPasswordV1064');const email=qV1064('#authLoginEmailV1064')?.value.trim()||qV1064('#authSignupEmailV1064')?.value.trim()||'';if(!email)return authMessageV1064(copyV1064('enterEmailReset'),'error');const original=copyV1064('forgotPassword');if(btn){btn.disabled=true;btn.textContent=copyV1064('resetting')}try{const remember=currentRememberChoiceV1064(authModeV1064);await buildSupabaseClientV1064(remember);const {error}=await mastabaSandboxV1064.auth.resetPasswordForEmail(email,{redirectTo:authRedirectUrlV1064()});if(error)throw error;authMessageV1064(copyV1064('resetSent'),'good')}catch(e){authMessageV1064(e?.message||copyV1064('connectionError'),'error')}finally{if(btn){btn.disabled=false;btn.textContent=original}}}
@@ -17115,13 +17129,18 @@ html #view-admin .admin-workspace-v1100 .admin-empty-v1100{padding:18px;text-ali
 <script id="mastaba-v1100-admin-repair">
 (function mastabaV1100(){
 'use strict';
-window.MASTABA_BUILD_VERSION='11.02';
+window.MASTABA_BUILD_VERSION='11.03';
 
 const SCHEDULE_SYNC_V1101='https://bnwjtrtlwnlbldfhaggg.supabase.co/functions/v1/mastaba-schedule-sync';
 const scheduleV1100=window.adminScheduleV1100=window.adminScheduleV1100||{
   loading:false,loaded:false,error:null,partialErrors:[],completed:0,total:0,
   fixtures:0,competitions:0,firstDate:null,lastDate:null,lastLoaded:0,
   lastCentralSync:null,nextCentralSync:null,syncRequested:false,syncResult:null,pageProviderCalls:0
+};
+let scheduleLoadAbortV1103=null;
+window.abortAdminLoadsV1103=function(){
+  if(scheduleLoadAbortV1103){try{scheduleLoadAbortV1103.abort()}catch{}scheduleLoadAbortV1103=null}
+  scheduleV1100.loading=false;
 };
 const healthV1100=window.adminHealthV1100=window.adminHealthV1100||{
   loading:false,loaded:false,error:null,data:null,lastLoaded:0
@@ -17175,6 +17194,7 @@ function refreshScheduleStatusV1100(){
 async function loadFullScheduleV1100(force=false){
   if(!fullAdminV1100()||scheduleV1100.loading)return;
   if(!force&&scheduleV1100.loaded&&Date.now()-scheduleV1100.lastLoaded<5*60*1000)return;
+  const controller=new AbortController();scheduleLoadAbortV1103=controller;
   scheduleV1100.loading=true;scheduleV1100.loaded=false;scheduleV1100.error=null;scheduleV1100.partialErrors=[];
   scheduleV1100.completed=0;scheduleV1100.total=0;refreshScheduleStatusV1100();
   try{
@@ -17183,10 +17203,10 @@ async function loadFullScheduleV1100(force=false){
     const [catalogR,sourcesR]=await Promise.all([
       ctx.supa.from('mastaba_schedule_catalog')
         .select('api_fixture_id,api_league_id,season,competition_name,competition_country,canonical_name,home_team_id,home_team_name,home_team_logo,away_team_id,away_team_name,away_team_logo,kickoff_at,venue_name,fixture_status,source_refreshed_at')
-        .gte('kickoff_at',cutoff).order('kickoff_at',{ascending:true}).limit(2000),
+        .gte('kickoff_at',cutoff).order('kickoff_at',{ascending:true}).limit(2000).abortSignal(controller.signal),
       ctx.supa.from('mastaba_schedule_sources')
         .select('api_league_id,season,canonical_name,schedule_kind,fixture_count,last_success_at,next_refresh_at,last_error,consecutive_failures')
-        .eq('active',true).eq('provider_current',true).order('next_refresh_at',{ascending:true})
+        .eq('active',true).eq('provider_current',true).order('next_refresh_at',{ascending:true}).abortSignal(controller.signal)
     ]);
     if(catalogR.error)throw catalogR.error;if(sourcesR.error)throw sourcesR.error;
     const sourceRows=sourcesR.data||[],catalogRows=catalogR.data||[];
@@ -17211,10 +17231,12 @@ async function loadFullScheduleV1100(force=false){
     scheduleV1100.pageProviderCalls=0;scheduleV1100.loaded=true;scheduleV1100.lastLoaded=Date.now();
     save();
   }catch(e){
-    console.error('Central Admin schedule failed',e);scheduleV1100.error=String(e?.message||e);
+    if(!controller.signal.aborted){console.error('Central Admin schedule failed',e);scheduleV1100.error=String(e?.message||e)}
   }finally{
-    scheduleV1100.loading=false;refreshScheduleStatusV1100();
-    if(state.view==='admin'&&adminTabV1100()==='game')refreshGameSetupV1100();
+    if(scheduleLoadAbortV1103===controller){
+      scheduleLoadAbortV1103=null;scheduleV1100.loading=false;refreshScheduleStatusV1100();
+      if(state.view==='admin'&&adminTabV1100()==='game')refreshGameSetupV1100();
+    }
   }
 }
 window.ensureAdminPoolV1077=loadFullScheduleV1100;
@@ -17552,12 +17574,12 @@ if(state?.view==='admin')setTimeout(renderAdminV1100,0);
 })();
 </script>
 
-<script id="mastaba-v1102-navigation-performance">
-/* V11.02 — restore instant page/subpage navigation while keeping the full
+<script id="mastaba-v1103-navigation-performance">
+/* V11.03 — restore instant page/subpage navigation while keeping the full
    Supabase schedule available exclusively inside Admin > Game Setup. */
 (function(){
 'use strict';
-window.MASTABA_BUILD_VERSION='11.02';
+window.MASTABA_BUILD_VERSION='11.03';
 
 const fixtureKeyV1102=f=>Number(f?.apiFixtureId)?`api:${Number(f.apiFixtureId)}`:`id:${String(f?.id||'')}`;
 function pinnedPoolV1102(){
@@ -17575,7 +17597,7 @@ function captureAndPrunePoolV1102(){
 const saveBaseV1102=window.save||save;
 window.save=save=function(){captureAndPrunePoolV1102();return saveBaseV1102()};
 captureAndPrunePoolV1102();
-try{saveBaseV1102()}catch(e){console.warn('V11.02 state cleanup deferred',e)}
+try{saveBaseV1102()}catch(e){console.warn('V11.03 state cleanup deferred',e)}
 
 function schedulePoolV1102(){
   const full=Array.isArray(window.adminSchedulePoolV1102)?window.adminSchedulePoolV1102:[],rows=full.length?[...full,...pinnedPoolV1102()]:(state.fixturePool||sandboxFixturePool());
@@ -17595,29 +17617,58 @@ window.adminFixtureDateLabel=adminFixtureDateLabel=function(key){
   try{return new Intl.DateTimeFormat(state.lang==='ar'?'ar-EG':'en-US',{weekday:'short',month:'short',day:'numeric',timeZone:userTZ()}).format(new Date(sample.kickoff))}catch{return key}
 };
 
-window.adminFixtureSelector=adminFixtureSelector=function(target){
+let adminFixtureMountTokenV1103=0;
+function fullScheduleReadyV1103(){
+  return !!window.adminScheduleV1100?.loaded||(Array.isArray(window.adminSchedulePoolV1102)&&window.adminSchedulePoolV1102.length>0);
+}
+function fixturePlaceholderV1103(target){
+  const failed=window.adminScheduleV1100?.error;
+  const label=failed?L('The cached schedule could not be loaded. Use Reload Data above to retry.','تعذر تحميل الجدول المحفوظ. استخدم إعادة تحميل البيانات للمحاولة مرة أخرى.'):fullScheduleReadyV1103()?L('Preparing fixture browser…','جاري تجهيز متصفح الماتشات…'):L('Loading the full Supabase schedule…','جاري تحميل جدول Supabase الكامل…');
+  return`<div class="fixture-browser fixture-browser-loading-v1103" data-admin-fixture-slot-v1103="${target}"><div class="fixture-empty">${label}</div></div>`;
+}
+function buildAdminFixtureSelectorV1103(target){
   const selected=target==='current'?state.fixtures:(state.nextFixtures||[]),ui=ensureAdminBrowser(target),pool=schedulePoolV1102();
-  const dates=[...new Set(pool.map(f=>adminFixtureDateKey(f.kickoff)))].sort();
+  const sampleByDate=new Map(),dates=[];pool.forEach(f=>{const key=adminFixtureDateKey(f.kickoff);if(!sampleByDate.has(key)){sampleByDate.set(key,f);dates.push(key)}});dates.sort();
   if(!ui.date||!dates.includes(ui.date)){
     const selectedDate=selected.length?adminFixtureDateKey(selected.slice().sort((a,b)=>new Date(a.kickoff)-new Date(b.kickoff))[0].kickoff):null;
     ui.date=selectedDate&&dates.includes(selectedDate)?selectedDate:(dates[0]||null);
   }
+  ui.limit=Math.max(24,Math.min(96,Number(ui.limit)||24));
   const leagues=[...new Set(pool.map(competitionV1102))].sort(fixtureCompetitionSort),query=String(ui.q||'').trim();
   const matches=pool.filter(f=>{const league=competitionV1102(f);return(ui.league==='all'||league===ui.league)&&(query?searchMatchV1102(query,f):adminFixtureDateKey(f.kickoff)===ui.date)}).sort((a,b)=>new Date(a.kickoff)-new Date(b.kickoff));
-  const maxRows=96,visible=matches.slice(0,maxRows),groups={};visible.forEach(f=>{const league=competitionV1102(f);(groups[league]??=[]).push(f)});
+  const visible=matches.slice(0,ui.limit),groups={};visible.forEach(f=>{const league=competitionV1102(f);(groups[league]??=[]).push(f)});
   const status=query?`${L('Searching across all available dates','البحث في كل الأيام المتاحة')} · “${escapeHTML(query)}” · ${matches.length} ${L('matches','ماتش')}`:`${matches.length} ${L('matches on this day','ماتش في اليوم ده')}`;
-  const limited=matches.length>visible.length?` · ${L(`showing first ${visible.length}`,`عرض أول ${visible.length}`)}`:'';
+  const limited=matches.length>visible.length?` · ${L(`showing ${visible.length} of ${matches.length}`,`عرض ${visible.length} من ${matches.length}`)}`:'';
   const rows=Object.keys(groups).length?Object.entries(groups).sort((a,b)=>fixtureCompetitionSort(a[0],b[0])).map(([league,fixtures])=>`<div class="fixture-league-group" data-league-group-v1080="${escapeHTML(league)}"><div class="fixture-league-title"><strong>${escapeHTML(league)}</strong><span data-group-count-v1080>${fixtures.length} ${L('fixtures','ماتش')}</span></div>${fixtures.map(f=>{const picked=selected.find(x=>(Number(x?.apiFixtureId)>0&&Number(x.apiFixtureId)===Number(f.apiFixtureId))||String(x?.id)===String(f.id)),checked=!!picked,disabled=target==='current'&&isRoundLocked(),actionId=picked?.id||f.id,h=teamV1102(f,'home'),a=teamV1102(f,'away');return`<label class="fixture-choice fixture-choice-livescore ${checked?'selected':''} ${disabled?'disabled':''}" data-fixture-row-v1080 data-fixture-date-v1080="${adminFixtureDateKey(f.kickoff)}" data-fixture-league-v1080="${escapeHTML(league)}" data-fixture-search-v1080="${escapeHTML(searchTextV1102(f))}"><span class="fixture-kickoff">${formatFixtureClock(f.kickoff)}</span><span class="fixture-team-stack"><span class="fixture-team-line"><span class="fixture-team-logo"><img loading="lazy" decoding="async" src="${escapeHTML(h.logo)}" alt="${escapeHTML(h.name)}"></span><b>${escapeHTML(h.name)}</b></span><span class="fixture-team-line"><span class="fixture-team-logo"><img loading="lazy" decoding="async" src="${escapeHTML(a.logo)}" alt="${escapeHTML(a.name)}"></span><b>${escapeHTML(a.name)}</b></span><small class="fixture-stadium">${escapeHTML(f.stadium||L('Venue TBC','الملعب لم يحدد'))}</small></span><span class="fixture-checkbox-wrap"><input type="checkbox" ${checked?'checked':''} ${disabled?'disabled':''} onchange="toggleAdminFixture('${actionId}','${target}',this.checked)"><span class="fixture-check-label">${checked?L('Selected','مختار'):L('Add','إضافة')}</span></span></label>`}).join('')}</div>`).join(''):`<div class="fixture-empty">${L('No fixtures match these filters.','مفيش ماتشات مطابقة للبحث ده.')}</div>`;
-  return`<div class="fixture-browser" data-admin-target-v1080="${target}"><div class="fixture-browser-search"><input class="fixture-search-box" value="${escapeHTML(ui.q||'')}" placeholder="${L('Search team, alias, league or stadium…','ابحث باسم فريق أو اختصار أو بطولة أو ملعب…')}" autocomplete="off" spellcheck="false" oninput="setAdminFixtureQueryV1080('${target}',this.value)"><select class="fixture-league-filter" onchange="setAdminFixtureLeague('${target}',this.value)"><option value="all">${L('All Leagues','كل البطولات')}</option>${leagues.map(x=>`<option value="${escapeHTML(x)}" ${ui.league===x?'selected':''}>${escapeHTML(x)}</option>`).join('')}</select></div><div class="fixture-day-strip">${dates.map(d=>`<button class="fixture-day ${ui.date===d&&!query?'active':''}" onclick="setAdminFixtureDay('${target}','${d}')"><small>${adminFixtureDateLabel(d).split(' ')[0]}</small><b>${adminFixtureDateLabel(d).replace(/^\S+\s*/,'')}</b></button>`).join('')}</div><div class="fixture-search-mode-v1080" data-search-status-v1080>${status}${limited}</div><div class="fixture-selector grouped">${rows}</div></div>`;
-};
+  const more=matches.length>visible.length&&visible.length<96?`<button type="button" class="btn btn-secondary fixture-more-v1103" onclick="showMoreAdminFixturesV1103('${target}')">${L('Show 24 more matches','عرض 24 ماتش إضافي')}</button>`:matches.length>visible.length?`<div class="fixture-search-mode-v1080">${L('Refine the search to see the remaining matches.','حدد البحث أكثر لرؤية باقي الماتشات.')}</div>`:'';
+  function dateLabel(key){
+    const sample=sampleByDate.get(key);if(!sample)return adminFixtureDateLabel(key);
+    try{return new Intl.DateTimeFormat(state.lang==='ar'?'ar-EG':'en-US',{weekday:'short',month:'short',day:'numeric',timeZone:userTZ()}).format(new Date(sample.kickoff))}catch{return key}
+  }
+  return`<div class="fixture-browser" data-admin-target-v1080="${target}"><div class="fixture-browser-search"><input class="fixture-search-box" value="${escapeHTML(ui.q||'')}" placeholder="${L('Search team, alias, league or stadium…','ابحث باسم فريق أو اختصار أو بطولة أو ملعب…')}" autocomplete="off" spellcheck="false" oninput="setAdminFixtureQueryV1080('${target}',this.value)"><select class="fixture-league-filter" onchange="setAdminFixtureLeague('${target}',this.value)"><option value="all">${L('All Leagues','كل البطولات')}</option>${leagues.map(x=>`<option value="${escapeHTML(x)}" ${ui.league===x?'selected':''}>${escapeHTML(x)}</option>`).join('')}</select></div><div class="fixture-day-strip">${dates.map(d=>{const label=dateLabel(d);return`<button class="fixture-day ${ui.date===d&&!query?'active':''}" onclick="setAdminFixtureDay('${target}','${d}')"><small>${label.split(' ')[0]}</small><b>${label.replace(/^\S+\s*/,'')}</b></button>`}).join('')}</div><div class="fixture-search-mode-v1080" data-search-status-v1080>${status}${limited}</div><div class="fixture-selector grouped">${rows}</div>${more}</div>`;
+}
+function mountAdminFixtureSelectorV1103(target,token){
+  if(token!==adminFixtureMountTokenV1103||state.view!=='admin'||String(state.adminWorkspaceTabV1095||'game')!=='game')return;
+  const slot=document.querySelector(`#view-admin [data-admin-fixture-slot-v1103="${target}"]`);if(!slot||(!fullScheduleReadyV1103()&&!window.adminScheduleV1100?.error))return;
+  slot.outerHTML=buildAdminFixtureSelectorV1103(target);
+}
+function queueAdminFixtureMountV1103(target){
+  const token=++adminFixtureMountTokenV1103;
+  requestAnimationFrame(()=>requestAnimationFrame(()=>mountAdminFixtureSelectorV1103(target,token)));
+}
+window.adminFixtureSelector=adminFixtureSelector=function(target){queueAdminFixtureMountV1103(target);return fixturePlaceholderV1103(target)};
 
 function refreshSearchV1102(target){
-  if(state.view!=='admin')return;const y=window.scrollY;window.refreshAdminGameSetupV1095?.();
-  requestAnimationFrame(()=>{window.scrollTo({top:y,left:0,behavior:'auto'});const input=document.querySelector('#view-admin .fixture-search-box');if(input){try{input.focus({preventScroll:true})}catch{input.focus()}try{input.setSelectionRange(input.value.length,input.value.length)}catch{}}});
+  if(state.view!=='admin')return;
+  const old=document.querySelector(`#view-admin .fixture-browser[data-admin-target-v1080="${target}"]`);if(!old){queueAdminFixtureMountV1103(target);return}
+  const y=window.scrollY,active=document.activeElement,restoreFocus=!!active&&active===old.querySelector('.fixture-search-box'),start=restoreFocus?active.selectionStart:null,end=restoreFocus?active.selectionEnd:null;
+  old.outerHTML=buildAdminFixtureSelectorV1103(target);
+  requestAnimationFrame(()=>{window.scrollTo({top:y,left:0,behavior:'auto'});if(!restoreFocus)return;const input=document.querySelector(`#view-admin .fixture-browser[data-admin-target-v1080="${target}"] .fixture-search-box`);if(input){try{input.focus({preventScroll:true})}catch{input.focus()}try{input.setSelectionRange(start??input.value.length,end??input.value.length)}catch{}}});
 }
-window.setAdminFixtureQueryV1080=window.setAdminFixtureQuery=function(target,value){adminBrowserState[target].q=value;clearTimeout(window.__adminFixtureSearchTimerV1102);window.__adminFixtureSearchTimerV1102=setTimeout(()=>refreshSearchV1102(target),120)};
-window.setAdminFixtureLeague=function(target,value){adminBrowserState[target].league=value;refreshSearchV1102(target)};
-window.setAdminFixtureDay=function(target,value){adminBrowserState[target].date=value;adminBrowserState[target].q='';refreshSearchV1102(target)};
+window.setAdminFixtureQueryV1080=window.setAdminFixtureQuery=function(target,value){const ui=ensureAdminBrowser(target);ui.q=value;ui.limit=24;clearTimeout(window.__adminFixtureSearchTimerV1102);window.__adminFixtureSearchTimerV1102=setTimeout(()=>refreshSearchV1102(target),120)};
+window.setAdminFixtureLeague=function(target,value){const ui=ensureAdminBrowser(target);ui.league=value;ui.limit=24;refreshSearchV1102(target)};
+window.setAdminFixtureDay=function(target,value){const ui=ensureAdminBrowser(target);ui.date=value;ui.q='';ui.limit=24;refreshSearchV1102(target)};
+window.showMoreAdminFixturesV1103=function(target){const ui=ensureAdminBrowser(target);ui.limit=Math.min(96,(Number(ui.limit)||24)+24);refreshSearchV1102(target)};
 
 const toggleFixtureBaseV1102=window.toggleAdminFixture;
 window.toggleAdminFixture=async function(mid,target,checked){
@@ -17642,13 +17693,16 @@ function renderRouteV1102(view){
 }
 let routeSaveHandleV1102=null;
 function persistRouteV1102(){
-  const commit=()=>{routeSaveHandleV1102=null;try{save()}catch(e){console.warn('V11.02 route persistence deferred',e)}};
+  const commit=()=>{routeSaveHandleV1102=null;try{save()}catch(e){console.warn('V11.03 route persistence deferred',e)}};
   if(routeSaveHandleV1102!=null){try{cancelIdleCallback(routeSaveHandleV1102)}catch{clearTimeout(routeSaveHandleV1102)}}
   routeSaveHandleV1102=typeof requestIdleCallback==='function'?requestIdleCallback(commit,{timeout:600}):setTimeout(commit,0);
 }
 window.go=function(view){
   if(!document.getElementById(`view-${view}`)||state.view===view)return;
+  const leavingAdmin=state.view==='admin'&&view!=='admin';
+  if(leavingAdmin){window.abortAdminLoadsV1103?.();adminFixtureMountTokenV1103++}
   state.view=view;paintRouteV1102(view);const token=++routeTokenV1102;
+  if(leavingAdmin)requestAnimationFrame(()=>requestAnimationFrame(()=>{if(state.view!=='admin')document.getElementById('view-admin')?.replaceChildren()}));
   requestAnimationFrame(()=>requestAnimationFrame(()=>{if(token!==routeTokenV1102)return;renderRouteV1102(view);persistRouteV1102()}));
 };
 
