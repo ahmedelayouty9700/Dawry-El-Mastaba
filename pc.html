@@ -15991,7 +15991,7 @@ window.setAdminFixtureDay=function(target,value){adminBrowserState[target].date=
    This is the final guardrail against scroll jumps / flashing from old async code paths. */
 const renderBaseV1095=window.render||render;
 window.render=render=function(){
-  const mounted=state.view==='admin'&&document.querySelector('#view-admin .admin-workspace-v1095');
+  const mounted=state.view==='admin'&&document.querySelector('#view-admin.active .admin-workspace-v1095');
   const langSame=document.documentElement.lang===state.lang;
   if(mounted&&langSame){
     refreshAdminDataPanelsV1095();
@@ -16751,6 +16751,188 @@ window.renderRankings=renderRankings=function(){const out=renderRankingsBaseV109
 
 restoreAdminAuthorityV1098();
 if(state?.view==='rankings')mountGameweekTriviaV1098();
+})();
+</script>
+
+<style id="mastaba-v1099-feedback-style">
+/* V10.99 — final alignment, Barcelona, League Insights, and placement fixes. */
+.auth-oauth-btn-v1064{
+  position:relative!important;
+  display:grid!important;
+  grid-template-columns:26px minmax(0,1fr) 26px!important;
+  align-items:center!important;
+  column-gap:10px!important;
+  min-height:54px!important;
+  padding:0 16px!important;
+  box-sizing:border-box!important;
+  text-align:center!important;
+}
+.auth-oauth-btn-v1064::after{
+  content:"";
+  display:block;
+  grid-column:3;
+  width:26px;
+  height:1px;
+}
+.auth-oauth-btn-v1064 svg{
+  position:static!important;
+  inset:auto!important;
+  top:auto!important;
+  grid-column:1!important;
+  justify-self:center!important;
+  align-self:center!important;
+  display:block!important;
+  width:24px!important;
+  height:24px!important;
+  min-width:24px!important;
+  margin:0!important;
+  transform-origin:center!important;
+}
+.auth-oauth-btn-v1064[id*="Google"] svg{transform:scale(.96)!important}
+.auth-oauth-btn-v1064[id*="Apple"] svg{transform:scale(1.24)!important}
+.auth-oauth-btn-v1064 span{
+  grid-column:2!important;
+  justify-self:center!important;
+  width:100%!important;
+  min-width:0!important;
+  text-align:center!important;
+  line-height:1.2!important;
+}
+
+/* These two cards now share one literal surface definition, including the
+   full border shorthand and shadow, so no older theme rule can split them. */
+html[data-theme="barcelona"] body #app #view-home :is(.home-gameweek-card,.league-rank-card){
+  background:linear-gradient(135deg,#172e77 0%,#12295a 100%)!important;
+  border:1px solid rgba(255,255,255,.24)!important;
+  border-radius:var(--mastaba-box-radius,var(--radius,14px))!important;
+  box-shadow:none!important;
+  background-clip:padding-box!important;
+  box-sizing:border-box!important;
+  color:#fff!important;
+}
+html[data-theme="barcelona"] body #app #view-home :is(.home-gameweek-card,.league-rank-card) :is(.stat-label,.stat-value,.rank-heading-line,.rank-inline-name,.rank-inline-select,.home-week-select){color:#fff!important}
+
+/* Barça secondary actions keep their blue fill and gain the requested yellow outline. */
+html[data-theme="barcelona"] body #app .home-command.home-submit-status .home-command-actions .btn:nth-child(2),
+html[data-theme="barcelona"] body #app .home-command.home-submit-status .home-command-actions .btn:nth-child(3){
+  background:#1c14bf!important;
+  color:#fff!important;
+  border:2px solid #d9b82e!important;
+  box-shadow:0 0 0 1px rgba(217,184,46,.16)!important;
+}
+
+/* Gameweek trivia belongs in League Insights, never below Gameweek standings. */
+.gameweek-trivia-section-v1098{display:none!important}
+.league-insights-v1099 .league-insights-section-v1099{padding-block:22px!important}
+.league-insights-v1099 .league-insights-heading-v1099{
+  margin:0 0 14px!important;
+  color:var(--theme-text)!important;
+  font-size:clamp(1.18rem,2vw,1.38rem)!important;
+  line-height:1.15!important;
+  font-weight:1000!important;
+  letter-spacing:-.025em!important;
+}
+.league-insights-v1099 .league-insights-subheading-v1099,
+.league-insights-v1099 .fun-facts-subheading-v1099{
+  display:block;
+  margin:0 0 10px;
+  color:var(--theme-muted);
+  font-size:.78rem;
+  line-height:1.25;
+  font-weight:950;
+  letter-spacing:.055em;
+  text-transform:uppercase;
+}
+.league-insights-v1099 .fun-facts-block-v1099{margin-top:4px}
+.league-insights-v1099 .fun-facts-block-v1099+.fun-facts-block-v1099{
+  margin-top:20px;
+  padding-top:18px;
+  border-top:1px solid var(--theme-border);
+}
+.league-insights-v1099 .gameweek-trivia-v1099{margin:0!important}
+.league-insights-v1099 .gameweek-trivia-empty-v1099{
+  display:grid;
+  min-height:112px;
+  align-content:center;
+  gap:5px;
+}
+.league-insights-v1099 .gameweek-trivia-empty-v1099 strong{font-size:.92rem}
+.league-insights-v1099 .gameweek-trivia-empty-v1099 span{color:var(--theme-muted);font-size:.74rem;line-height:1.5}
+@media(max-width:560px){
+  .auth-oauth-btn-v1064{grid-template-columns:26px minmax(0,1fr) 26px!important;padding:0 14px!important}
+  .league-insights-v1099 .league-insights-section-v1099{padding-block:18px!important}
+  .league-insights-v1099 .league-insights-heading-v1099{font-size:1.16rem!important}
+}
+</style>
+
+<script id="mastaba-v1099-feedback-fixes">
+(function(){
+'use strict';
+const triviaIndexV1099={};
+let activeTriviaV1099={lid:'mastaba',week:Number(state?.week||1)};
+
+function gameweekFactsV1099(lid,week){
+  return typeof window.gameweekLeagueTriviaFactsV1098==='function'
+    ?window.gameweekLeagueTriviaFactsV1098(lid,week)
+    :[];
+}
+function safeTriviaTextV1099(value){return escapeHTML(String(value??''))}
+function gameweekTriviaInsightsHTMLV1099(lid,week){
+  activeTriviaV1099={lid,week:Number(week)};
+  const facts=gameweekFactsV1099(lid,week),key=`${lid}|${week}`;
+  if(!facts.length){
+    return `<div class="league-trivia-v20 gameweek-trivia-v1099 gameweek-trivia-empty-v1099" id="gameweekTriviaInsideInsightsV1099"><strong>${L('Gameweek facts are ready to unlock','معلومات الجولة جاهزة تظهر')}</strong><span>${L('The first facts appear after a match in this Gameweek is finalized.','أول معلومات هتظهر بعد ما أول ماتش في الجولة يخلص رسميًا.')}</span></div>`;
+  }
+  const i=(Number(triviaIndexV1099[key]||0)+facts.length)%facts.length,f=facts[i];
+  triviaIndexV1099[key]=i;
+  return `<div class="league-trivia-v20 gameweek-trivia-v1099" id="gameweekTriviaInsideInsightsV1099"><div class="trivia-index-v20">${L('Gameweek Fact','معلومة الجولة')} ${i+1}/${facts.length}</div><h5>${safeTriviaTextV1099(f.title)}</h5><div class="trivia-value-v20">${safeTriviaTextV1099(f.value)}</div><p>${safeTriviaTextV1099(f.detail)}</p><div class="trivia-controls-v20"><div class="trivia-dots-v20">${facts.map((_,n)=>`<span class="${n===i?'active':''}"></span>`).join('')}</div><div class="trivia-arrows-v20"><button type="button" aria-label="${L('Previous Gameweek fact','المعلومة السابقة للجولة')}" onclick="changeGameweekTriviaInsightsV1099(-1)">‹</button><button type="button" aria-label="${L('Next Gameweek fact','المعلومة التالية للجولة')}" onclick="changeGameweekTriviaInsightsV1099(1)">›</button></div></div></div>`;
+}
+window.changeGameweekTriviaInsightsV1099=function(delta){
+  const {lid,week}=activeTriviaV1099,facts=gameweekFactsV1099(lid,week);if(!facts.length)return;
+  const key=`${lid}|${week}`;triviaIndexV1099[key]=(Number(triviaIndexV1099[key]||0)+Number(delta||0)+facts.length)%facts.length;
+  const card=document.querySelector('#gameweekTriviaInsideInsightsV1099');if(card)card.outerHTML=gameweekTriviaInsightsHTMLV1099(lid,week);
+};
+
+const openLeagueInsightsBaseV1099=window.openLeagueInsights;
+if(typeof openLeagueInsightsBaseV1099==='function')window.openLeagueInsights=function(){
+  openLeagueInsightsBaseV1099();
+  const root=document.querySelector('#modalRoot .league-insights-v22');if(!root)return;
+  root.classList.add('league-insights-v1099');
+  const sections=[...root.querySelectorAll(':scope > .insight-section-v21')];if(sections.length<6)return;
+  const headings=[
+    L('Current Gameweek Stats','إحصائيات الجولة الحالية'),
+    L('League Records','أرقام الدوري'),
+    L('Recent Form','الفورمة الأخيرة'),
+    L('Gameweek Review','مراجعة الجولة'),
+    L('Competition Specialists','متخصصين البطولات'),
+    L('Fun Facts','معلومات خفيفة')
+  ];
+  sections.slice(0,6).forEach((section,i)=>{
+    section.classList.add('league-insights-section-v1099');
+    section.querySelector(':scope > .insight-kicker-v20')?.remove();
+    const h=section.querySelector(':scope > h4');if(h){h.textContent=headings[i];h.classList.add('league-insights-heading-v1099')}
+  });
+  const recentTable=sections[2].querySelector(':scope > .table-wrap');
+  if(recentTable&&!sections[2].querySelector('.league-insights-subheading-v1099'))recentTable.insertAdjacentHTML('beforebegin',`<div class="league-insights-subheading-v1099">${L('Last 5 Gameweeks','آخر 5 جولات')}</div>`);
+  const specialistsEmpty=sections[4].querySelector('.insight-caption-v20');
+  if(specialistsEmpty)specialistsEmpty.textContent=L('More finalized fixtures are needed.','محتاجين ماتشات مكتملة أكتر.');
+
+  const factsSection=sections[5],leagueCard=factsSection.querySelector('#leagueTriviaCardV20');
+  if(leagueCard){
+    const leagueHTML=leagueCard.outerHTML,lid=state.selectedLeagueId||state.homeLeagueId||'mastaba',week=Number(state.week||1);
+    factsSection.innerHTML=`<h4 class="league-insights-heading-v1099">${L('Fun Facts','معلومات خفيفة')}</h4><div class="fun-facts-block-v1099"><h5 class="fun-facts-subheading-v1099">${L('League','الدوري')}</h5>${leagueHTML}</div><div class="fun-facts-block-v1099"><h5 class="fun-facts-subheading-v1099">${L('Gameweek','الجولة')}</h5>${gameweekTriviaInsightsHTMLV1099(lid,week)}</div>`;
+  }
+};
+
+/* V10.98 mounted Gameweek trivia after standings; keep its fact engine, but
+   remove that obsolete presentation every time Rankings renders. */
+const renderRankingsBaseV1099=window.renderRankings||renderRankings;
+window.renderRankings=renderRankings=function(){
+  const out=renderRankingsBaseV1099();
+  document.querySelector('#view-rankings .gameweek-trivia-section-v1098')?.remove();
+  return out;
+};
+document.querySelector('#view-rankings .gameweek-trivia-section-v1098')?.remove();
 })();
 </script>
 
