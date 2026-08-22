@@ -13468,7 +13468,12 @@ async function hydrateProductionV1073(profile,user,supa){
  if(!abbrR.error)for(const r of abbrR.data||[])if(r?.abbreviation)TEAM_ABBR_V1083[Number(r.team_id)]=String(r.abbreviation).toUpperCase();
  const profiles=profilesR.data||[];const slotByAuth={};profiles.forEach((p,i)=>slotByAuth[p.id]=`p${i+1}`);
  if(!slotByAuth[user.id]){slotByAuth[user.id]=`p${profiles.length+1}`;profiles.push(profile)}
- const isAdmin=roleR.data?.role==='admin';
+ // The server role remains authoritative. The owner/member fallbacks keep the
+ // Admin route available if the optional role lookup is delayed or blocked,
+ // without trusting editable profile/user metadata.
+ const isAdmin=roleR.data?.role==='admin'
+  ||ownMemberships.some(m=>m.user_id===user.id&&m.member_role==='admin'&&leagueById[m.league_id]?.slug==='mastaba')
+  ||leagueRows.some(l=>l.owner_id===user.id&&l.slug==='mastaba');
  state.users=profiles.map(p=>({id:slotByAuth[p.id],authUserId:p.id,name:p.display_name||'Mastaba Player',nickname:p.display_name||'Mastaba Player',gender:'male',avatar:null,admin:p.id===user.id&&isAdmin,timeZone:'auto',club:clubFromThemeV1073(p.theme_key),theme:p.theme_key||'mastaba',active:true}));
  state.currentUser=slotByAuth[user.id];
  state.authProfileV1064={id:user.id,email:user.email||'',displayName:profile.display_name||'',team:profile.primary_team_key||'',theme:profile.theme_key||'mastaba'};
@@ -15293,18 +15298,20 @@ window.addEventListener('focus',resumeLatestLiveV1090);
   }
   window.nativeClockV1091=nativeClockV1091;
 
-  let liveSetV1091='';
+  let phaseSetV1091='__initial__';
   function syncATSStateV1091(){
     try{
       const fs=homeStoryFixturesV21();
       const live=fs.filter(f=>f.phase==='live');
-      const sig=live.map(f=>f.id).join('|');
-      // Select the first chronological live match only when the live set changes.
-      // This keeps the live game as the default without fighting manual arrow navigation.
-      if(sig!==liveSetV1091){
-        liveSetV1091=sig;
-        if(live.length){
-          const idx=fs.findIndex(f=>f.id===live[0].id);
+      const sig=fs.map(f=>`${f.id}:${f.phase}`).join('|');
+      // On first render and whenever a match phase changes: Live first,
+      // otherwise the next chronological Upcoming match, otherwise the last Final.
+      // Manual arrow navigation remains untouched until the phase set changes.
+      if(sig!==phaseSetV1091){
+        phaseSetV1091=sig;
+        const preferred=live[0]||fs.find(f=>f.phase==='upcoming')||[...fs].reverse().find(f=>f.phase==='final')||fs[0];
+        if(preferred){
+          const idx=fs.findIndex(f=>f.id===preferred.id);
           const key=String(state.selectedHomeWeek??'overall');
           state.homeStoryIndexV21=state.homeStoryIndexV21||{};
           state.homeStoryIndexV21[key]=idx;
@@ -16758,6 +16765,205 @@ if(state?.view==='rules')renderLeagueRulesV1097();
 if(state?.view==='predict')renderPredict();
 })();
 </script>
+
+<style id="mastaba-v1098-regression-fixes-style">
+/* V10.98 — requested regression fixes, kept intentionally narrow. */
+html[data-theme="barcelona"] body #app #view-home .league-rank-card{
+  background:linear-gradient(135deg,#172e77,#12295a)!important;
+  border-color:rgba(255,255,255,.24)!important;
+  color:#fff!important;
+}
+html[data-theme="barcelona"] body #app #view-home .league-rank-card :is(.rank-heading-line,.rank-inline-name,.stat-value,.stat-label,.select-control){color:#fff!important}
+
+/* Fixed icon column + equal 24px geometry keeps both providers aligned while
+   preserving the small optical correction each brand mark needs. */
+.auth-oauth-btn-v1064{
+  position:relative!important;
+  justify-content:center!important;
+  padding-inline:52px 18px!important;
+  text-align:center!important;
+}
+.auth-oauth-btn-v1064 svg{
+  position:absolute!important;
+  inset-inline-start:18px!important;
+  top:50%!important;
+  display:block!important;
+  width:24px!important;
+  height:24px!important;
+  flex:0 0 24px!important;
+  margin:0!important;
+  transform-origin:center!important;
+}
+.auth-oauth-btn-v1064[id*="Google"] svg{transform:translateY(-50%) scale(.96)!important}
+.auth-oauth-btn-v1064[id*="Apple"] svg{transform:translateY(-50%) scale(1.12)!important}
+.auth-oauth-btn-v1064 span{display:block;min-width:0;text-align:center}
+
+.gameweek-trivia-section-v1098{width:min(980px,100%);margin:18px auto 0}
+.gameweek-trivia-heading-v1098{display:flex;align-items:end;justify-content:space-between;gap:12px;margin-bottom:9px}
+.gameweek-trivia-heading-v1098 h3{margin:0;font-size:1rem}
+.gameweek-trivia-heading-v1098 span{color:var(--theme-muted);font-size:.66rem;font-weight:900}
+.gameweek-trivia-v1098{border:1px solid var(--theme-border);background:linear-gradient(145deg,var(--theme-surface),var(--theme-surface-2));color:var(--theme-text);box-shadow:var(--theme-shadow);border-radius:var(--mastaba-box-radius,14px);padding:16px}
+.gameweek-trivia-v1098 .trivia-index-v20,.gameweek-trivia-v1098 p{color:var(--theme-muted)}
+.gameweek-trivia-v1098 .trivia-arrows-v20 button{color:var(--theme-text);border-color:var(--theme-border);background:var(--theme-surface)}
+.gameweek-trivia-empty-v1098{display:grid;gap:4px;min-height:96px;align-content:center}
+.gameweek-trivia-empty-v1098 strong{font-size:.9rem}
+.gameweek-trivia-empty-v1098 span{color:var(--theme-muted);font-size:.73rem;line-height:1.5}
+@media(max-width:560px){
+  .auth-oauth-btn-v1064{padding-inline:50px 14px!important}
+  .auth-oauth-btn-v1064 svg{inset-inline-start:16px!important}
+  .gameweek-trivia-section-v1098{margin-top:14px}
+  .gameweek-trivia-heading-v1098{align-items:start;flex-direction:column;gap:3px}
+}
+</style>
+
+<script id="mastaba-v1098-regression-fixes">
+/* V10.98 — Admin authority recovery, Top 10 + You match insights, and visible Gameweek Trivia. */
+(function(){
+'use strict';
+const PRIVATE_V1098='mastaba',PUBLIC_V1098='mastaba-public';
+const uniqueV1098=ids=>[...new Set((ids||[]).filter(Boolean))];
+
+function restoreAdminAuthorityV1098(){
+  try{
+    const u=currentUser(),privateLeague=(state.leagues||[]).find(l=>l.id===PRIVATE_V1098);
+    if(u&&privateLeague?.adminId===state.currentUser)u.admin=true;
+    const nav=document.querySelector('#adminNav');
+    if(nav&&typeof window.hasMastabaToolsAccessV1095==='function')nav.style.display=window.hasMastabaToolsAccessV1095()?'flex':'none';
+  }catch(e){}
+}
+window.restoreAdminAuthorityV1098=restoreAdminAuthorityV1098;
+const hydrateBaseV1098=window.hydrateProductionV1073;
+if(typeof hydrateBaseV1098==='function')window.hydrateProductionV1073=async function(profile,user,supa){
+  const ok=await hydrateBaseV1098(profile,user,supa);restoreAdminAuthorityV1098();return ok;
+};
+
+function topTenPlusYouV1098(lid){
+  const me=state.currentUser,league=leagueById(lid),prod=window.prodLeagueV1096;
+  if(lid===PRIVATE_V1098){
+    const productionSeven=prod?.ready&&prod.story?.privateAuth?.length
+      ?prod.story.privateAuth.map(a=>uidSlotV1096(a))
+      :(league?.members||[]);
+    return uniqueV1098(productionSeven);
+  }
+  if(lid===PUBLIC_V1098&&prod?.ready){
+    const top=(prod.publicTopAuth||[]).slice(0,10).map(a=>uidSlotV1096(a));
+    const mine=me&&!top.includes(me)?[me]:[];
+    return uniqueV1098([...top,...mine]);
+  }
+  const members=uniqueV1098(league?.members||[]);
+  if(members.length<=10)return members;
+  let ranked=[];
+  try{ranked=(leagueStandings(lid,'overall')||[]).map(x=>x.id).filter(id=>members.includes(id))}catch(e){}
+  const top=uniqueV1098(ranked.length?ranked:members).slice(0,10);
+  if(me&&members.includes(me)&&!top.includes(me))top.push(me);
+  return top;
+}
+window.matchInsightVisibleIdsV1098=topTenPlusYouV1098;
+window.visibleIdsV1096=topTenPlusYouV1098;
+
+function insightScopeNoteV1098(lid,ids){
+  const total=(leagueById(lid)?.members||[]).length;
+  if(lid!==PUBLIC_V1098&&total<=10)return'';
+  const extra=ids.includes(state.currentUser)&&ids.indexOf(state.currentUser)>=10;
+  return`<div class="public-scope-note-v1096">${L(`Showing Top 10${extra?' + You':''}.`,`عرض أفضل 10${extra?' + إنت':''}.`)}</div>`;
+}
+window.otherPredictionsRows=function(f,past){
+  const lid=v18LeagueId(),ids=topTenPlusYouV1098(lid),note=insightScopeNoteV1098(lid,ids);
+  const rows=ids.map(uid=>{
+    const p=v18Prediction(uid,f.id,past),r=!past&&p&&riskyForLeagueV1096(uid,f,lid);
+    return`<div class="pick-row"><span>${escapeHTML(userName(uid))}${uid===state.currentUser?` <small>(${L('You','أنت')})</small>`:''}</span><span>${p?`${p.home}–${p.away}${p.double?' · X2':''}`:'—'}${r?`<b class="risky-tag">${L('RISKY','مجازفة')}</b>`:''}</span></div>`;
+  }).join('');
+  return`${rows}${note}`;
+};
+otherPredictionsRows=window.otherPredictionsRows;
+
+window.liveSwingHTMLV1020=function(f,mid,past){
+  const lid=v18LeagueId(),ids=topTenPlusYouV1098(lid);
+  const rows=ids.map(uid=>({uid,pts:projectedPointsNowV20(uid,f,past)})).sort((a,b)=>b.pts-a.pts||userName(a.uid).localeCompare(userName(b.uid)));
+  return`<section class="insight-section-v20"><div class="insight-kicker-v20">${f.phase==='live'?L('Live Points Swing','حركة النقاط لايف'):L('Match Points','نقاط الماتش')}</div><h4>${f.phase==='live'?L('If the match ended right now','لو الماتش خلص دلوقتي'):L('How this match scored for the league','الماتش ده جاب كام للدوري')}</h4><div class="swing-list-v20">${rows.map(r=>`<div class="swing-row-v20"><div class="swing-person-v20"><strong>${escapeHTML(userName(r.uid))}</strong>${r.uid===state.currentUser?`<span class="you-chip-v20">${L('You','أنت')}</span>`:''}</div><span class="swing-points-v20">${r.pts} ${L('pts','نقطة')}</span></div>`).join('')}</div>${insightScopeNoteV1098(lid,ids)}</section>`;
+};
+liveSwingHTMLV1020=window.liveSwingHTMLV1020;
+
+const gameweekTriviaIndexV1098={};
+function gameweekSourceV1098(week){
+  const w=Number(week),current=Number(state.week);
+  if(w===current)return{fixtures:(state.fixtures||[]).filter(f=>f.phase==='final'&&f.result),past:false};
+  if(Number(state.history?.week)===w)return{fixtures:(state.history?.fixtures||[]).filter(f=>f.result),past:true};
+  return{fixtures:[],past:true};
+}
+function gameweekPredictionV1098(uid,f,past){
+  const p=past?state.history?.predictions?.[uid]?.[f.id]:v18Prediction(uid,f.id,false);
+  if(!p||p.home===''||p.away===''||p.home==null||p.away==null)return null;
+  return p;
+}
+function gameweekPointsV1098(uid,f,past,lid,p){
+  if(past)return Number(p?.points||0);
+  return Number(scorePredictionForLeagueV1096(uid,f,lid)?.total||0);
+}
+function gameweekLeagueTriviaFactsV1098(lid,week){
+  const src=gameweekSourceV1098(week),ids=topTenPlusYouV1098(lid),byCompetition={},scorers={},teamGoals={},teamWins={};
+  src.fixtures.forEach(f=>{
+    const comp=f.competition||L('Other','أخرى');
+    const c=byCompetition[comp]??={picks:0,correct:0,points:0};
+    ids.forEach(uid=>{
+      const p=gameweekPredictionV1098(uid,f,src.past);if(!p)return;
+      const predicted=outcome(Number(p.home),Number(p.away)),actual=outcome(Number(f.result.home),Number(f.result.away));
+      c.picks++;if(predicted===actual)c.correct++;
+      c.points+=gameweekPointsV1098(uid,f,src.past,lid,p);
+      if(p.firstScorer&&p.firstScorer!=='none')scorers[p.firstScorer]=(scorers[p.firstScorer]||0)+1;
+      teamGoals[f.home]=(teamGoals[f.home]||0)+Number(p.home||0);
+      teamGoals[f.away]=(teamGoals[f.away]||0)+Number(p.away||0);
+      if(predicted!=='D'){
+        const team=predicted==='H'?f.home:f.away,rec=teamWins[team]??={picked:0,delivered:0};
+        rec.picked++;if(predicted===actual)rec.delivered++;
+      }
+    });
+  });
+  const comps=Object.entries(byCompetition).map(([name,v])=>({name,accuracy:v.picks?Math.round(v.correct*100/v.picks):0,points:v.points,picks:v.picks}));
+  const mostAccurate=[...comps].sort((a,b)=>b.accuracy-a.accuracy||b.picks-a.picks)[0];
+  const leastAccurate=[...comps].sort((a,b)=>a.accuracy-b.accuracy||b.picks-a.picks)[0];
+  const mostPoints=[...comps].sort((a,b)=>b.points-a.points||b.picks-a.picks)[0];
+  const topScorer=Object.entries(scorers).sort((a,b)=>b[1]-a[1])[0];
+  const topGoals=Object.entries(teamGoals).sort((a,b)=>b[1]-a[1])[0];
+  const reliable=Object.entries(teamWins).map(([team,v])=>({team,...v,rate:v.picked?Math.round(v.delivered*100/v.picked):0})).sort((a,b)=>b.rate-a.rate||b.picked-a.picked)[0];
+  const facts=[];
+  if(mostAccurate)facts.push({title:L('Most Accurate Competition','أدق بطولة'),value:`${localizedCompetitionV21(mostAccurate.name)} · ${mostAccurate.accuracy}%`,detail:L('The competition this league read best in this Gameweek.','البطولة اللي الدوري قرأ نتايجها أفضل في الجولة دي.')});
+  if(leastAccurate)facts.push({title:L('Least Accurate Competition','أقل بطولة دقة'),value:`${localizedCompetitionV21(leastAccurate.name)} · ${leastAccurate.accuracy}%`,detail:L('The competition that fooled the league most in this Gameweek.','البطولة اللي لخبطت الدوري أكتر في الجولة دي.')});
+  if(mostPoints)facts.push({title:L('Competition That Earned the Most Points','البطولة اللي جابت أكبر عدد نقاط'),value:`${localizedCompetitionV21(mostPoints.name)} · ${mostPoints.points} ${L('pts','نقطة')}`,detail:L('Includes Double Points and Risky bonuses actually earned.','شامل الدبل وبونص المجازفة اللي اتكسبوا فعليًا.')});
+  if(topScorer){const player=playerById(String(topScorer[0]));if(player)facts.push({title:L('Most Picked First Goalscorer','أكتر لاعب اتختار أول هداف'),value:`${player.name} · ${topScorer[1]}`,detail:L('The league’s most common First Goalscorer pick this Gameweek.','أكتر اختيار متكرر لأول هداف في الجولة دي.')})}
+  if(topGoals&&TEAM[topGoals[0]])facts.push({title:L('Team With Highest Predicted Goals','الفريق صاحب أعلى أهداف متوقعة'),value:`${TEAM[topGoals[0]].name} · ${topGoals[1]}`,detail:L('Total goals collectively predicted for this team this Gameweek.','إجمالي الأهداف اللي الدوري توقعها للفريق ده في الجولة دي.')});
+  if(reliable&&TEAM[reliable.team])facts.push({title:L('Never Let Us Down','الفريق اللي ما خذلناش'),value:`${TEAM[reliable.team].name} · ${reliable.rate}%`,detail:L(`${reliable.delivered} of ${reliable.picked} league win-picks were delivered.`,`${reliable.delivered} من ${reliable.picked} توقع فوز للدوري اتحققوا.`)});
+  return facts;
+}
+window.gameweekLeagueTriviaFactsV1098=gameweekLeagueTriviaFactsV1098;
+function gameweekTriviaCardV1098(lid,week){
+  const facts=gameweekLeagueTriviaFactsV1098(lid,week),key=`${lid}|${week}`;
+  if(!facts.length)return`<div class="gameweek-trivia-v1098 gameweek-trivia-empty-v1098" id="gameweekLeagueTriviaCardV1098"><strong>${L('Gameweek Trivia is ready to unlock','معلومات الجولة جاهزة تظهر')}</strong><span>${L('The first facts appear after a match in this Gameweek is finalized.','أول معلومات هتظهر بعد ما أول ماتش في الجولة يخلص رسميًا.')}</span></div>`;
+  const i=Math.max(0,Math.min(facts.length-1,Number(gameweekTriviaIndexV1098[key]||0))),f=facts[i];gameweekTriviaIndexV1098[key]=i;
+  return`<div class="league-trivia-v20 gameweek-trivia-v1098" id="gameweekLeagueTriviaCardV1098"><div class="trivia-index-v20">${L('Gameweek Fact','معلومة الجولة')} ${i+1}/${facts.length}</div><h5>${f.title}</h5><div class="trivia-value-v20">${f.value}</div><p>${f.detail}</p><div class="trivia-controls-v20"><div class="trivia-dots-v20">${facts.map((_,n)=>`<span class="${n===i?'active':''}"></span>`).join('')}</div><div class="trivia-arrows-v20"><button type="button" aria-label="${L('Previous fact','المعلومة السابقة')}" onclick="changeGameweekLeagueTriviaV1098(-1)">‹</button><button type="button" aria-label="${L('Next fact','المعلومة التالية')}" onclick="changeGameweekLeagueTriviaV1098(1)">›</button></div></div></div>`;
+}
+window.changeGameweekLeagueTriviaV1098=function(delta){
+  const lid=state.selectedLeagueId,week=Number(state.selectedRankWeek||state.week),facts=gameweekLeagueTriviaFactsV1098(lid,week);if(!facts.length)return;
+  const key=`${lid}|${week}`;gameweekTriviaIndexV1098[key]=(Number(gameweekTriviaIndexV1098[key]||0)+Number(delta||0)+facts.length)%facts.length;
+  const el=document.querySelector('#gameweekLeagueTriviaCardV1098');if(el)el.outerHTML=gameweekTriviaCardV1098(lid,week);
+};
+function mountGameweekTriviaV1098(){
+  const view=document.querySelector('#view-rankings');if(!view)return;
+  view.querySelector('.gameweek-trivia-section-v1098')?.remove();
+  if(state.rankSectionV21==='cup'||state.rankSectionV21==='h2h'||state.selectedRankMode!=='gameweek')return;
+  const lid=state.selectedLeagueId,week=Number(state.selectedRankWeek||state.week),scope=topTenPlusYouV1098(lid);
+  const scopeLabel=(lid===PUBLIC_V1098||(leagueById(lid)?.members||[]).length>10)?L(`Top 10${scope.indexOf(state.currentUser)>=10?' + You':''}`,`أفضل 10${scope.indexOf(state.currentUser)>=10?' + إنت':''}`):L(`${scope.length} league members`,`${scope.length} أعضاء الدوري`);
+  view.insertAdjacentHTML('beforeend',`<section class="gameweek-trivia-section-v1098"><div class="gameweek-trivia-heading-v1098"><h3>${L(`Gameweek ${week} League Trivia`,`معلومات الدوري · الجولة ${week}`)}</h3><span>${scopeLabel}</span></div>${gameweekTriviaCardV1098(lid,week)}</section>`);
+}
+window.mountGameweekTriviaV1098=mountGameweekTriviaV1098;
+const renderRankingsBaseV1098=window.renderRankings||renderRankings;
+window.renderRankings=renderRankings=function(){const out=renderRankingsBaseV1098();mountGameweekTriviaV1098();return out};
+
+restoreAdminAuthorityV1098();
+if(state?.view==='rankings')mountGameweekTriviaV1098();
+})();
+</script>
+
 
 </body>
 </html>
