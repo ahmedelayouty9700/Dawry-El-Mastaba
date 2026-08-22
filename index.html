@@ -17146,7 +17146,7 @@ html #view-admin .admin-workspace-v1100 .admin-empty-v1100{padding:18px;text-ali
 <script id="mastaba-v1100-admin-repair">
 (function mastabaV1100(){
 'use strict';
-window.MASTABA_BUILD_VERSION='11.05';
+window.MASTABA_BUILD_VERSION='11.06';
 
 const SCHEDULE_SYNC_V1101='https://bnwjtrtlwnlbldfhaggg.supabase.co/functions/v1/mastaba-schedule-sync';
 const scheduleV1100=window.adminScheduleV1100=window.adminScheduleV1100||{
@@ -17163,6 +17163,32 @@ const healthV1100=window.adminHealthV1100=window.adminHealthV1100||{
   loading:false,loaded:false,error:null,data:null,lastLoaded:0
 };
 function escV1100(v){return typeof escapeHTML==='function'?escapeHTML(String(v??'')):String(v??'')}
+/* Build the rolling Admin window from calendar keys in the user's selected
+   timezone. V11.05 mixed browser-local midnights with profile-timezone keys,
+   which could make later date buttons point at a different calendar day. */
+function addAdminCalendarDaysV1106(key,days){
+  const [year,month,day]=String(key||'').split('-').map(Number);
+  if(!year||!month||!day)return String(key||'');
+  const value=new Date(Date.UTC(year,month-1,day+Number(days||0),12));
+  return `${value.getUTCFullYear()}-${String(value.getUTCMonth()+1).padStart(2,'0')}-${String(value.getUTCDate()).padStart(2,'0')}`;
+}
+function adminSevenDayKeysV1106(now=new Date()){
+  const first=adminFixtureDateKey(now.toISOString());
+  return Array.from({length:7},(_,index)=>addAdminCalendarDaysV1106(first,index));
+}
+function adminCatalogBoundsV1106(keys){
+  const list=Array.isArray(keys)&&keys.length?keys:adminSevenDayKeysV1106();
+  const start=new Date(`${list[0]}T00:00:00.000Z`);
+  const afterLast=new Date(`${addAdminCalendarDaysV1106(list[list.length-1],1)}T00:00:00.000Z`);
+  /* Widen only the Supabase timestamp bounds so every IANA timezone is safe;
+     the returned rows are then reduced to the exact seven calendar keys. */
+  start.setUTCHours(start.getUTCHours()-15);
+  afterLast.setUTCHours(afterLast.getUTCHours()+15);
+  return{start:start.toISOString(),end:afterLast.toISOString()};
+}
+window.addAdminCalendarDaysV1106=addAdminCalendarDaysV1106;
+window.adminSevenDayKeysV1106=adminSevenDayKeysV1106;
+window.adminCatalogBoundsV1106=adminCatalogBoundsV1106;
 function fullAdminV1100(){return !!currentUser()?.admin}
 function toolsAccessV1100(){
   if(fullAdminV1100())return true;
@@ -17219,19 +17245,20 @@ async function loadFullScheduleV1100(force=false){
     // Game Setup deliberately reads a small rolling window from Supabase. The
     // scheduled Edge Function owns provider refreshes; opening this page must
     // never download the season or call the football provider.
-    const now=new Date(),windowStart=new Date(now.getFullYear(),now.getMonth(),now.getDate());
-    const windowEnd=new Date(windowStart);windowEnd.setDate(windowEnd.getDate()+7);
+    const dateKeys=adminSevenDayKeysV1106();
+    const catalogBounds=adminCatalogBoundsV1106(dateKeys);
     const [catalogR,sourcesR]=await Promise.all([
       ctx.supa.from('mastaba_schedule_catalog')
         .select('api_fixture_id,api_league_id,season,competition_name,competition_country,canonical_name,home_team_id,home_team_name,home_team_logo,away_team_id,away_team_name,away_team_logo,kickoff_at,venue_name,fixture_status,source_refreshed_at')
-        .gte('kickoff_at',windowStart.toISOString()).lt('kickoff_at',windowEnd.toISOString())
+        .gte('kickoff_at',catalogBounds.start).lt('kickoff_at',catalogBounds.end)
         .order('kickoff_at',{ascending:true}).limit(500).abortSignal(controller.signal),
       ctx.supa.from('mastaba_schedule_sources')
         .select('api_league_id,season,canonical_name,schedule_kind,fixture_count,last_success_at,next_refresh_at,last_error,consecutive_failures')
         .eq('active',true).eq('provider_current',true).order('next_refresh_at',{ascending:true}).abortSignal(controller.signal)
     ]);
     if(catalogR.error)throw catalogR.error;if(sourcesR.error)throw sourcesR.error;
-    const sourceRows=sourcesR.data||[],catalogRows=catalogR.data||[];
+    const sourceRows=sourcesR.data||[],dateKeySet=new Set(dateKeys);
+    const catalogRows=(catalogR.data||[]).filter(row=>dateKeySet.has(adminFixtureDateKey(row.kickoff_at)));
     scheduleV1100.total=sourceRows.length;
     scheduleV1100.completed=sourceRows.filter(row=>row.last_success_at).length;
     scheduleV1100.partialErrors=sourceRows.filter(row=>row.last_error).map(row=>`${row.canonical_name}: ${row.last_error}`);
@@ -17607,7 +17634,7 @@ if(state?.view==='admin')setTimeout(renderAdminV1100,0);
    Supabase schedule available exclusively inside Admin > Game Setup. */
 (function(){
 'use strict';
-window.MASTABA_BUILD_VERSION='11.05';
+window.MASTABA_BUILD_VERSION='11.06';
 
 const fixtureKeyV1102=f=>Number(f?.apiFixtureId)?`api:${Number(f.apiFixtureId)}`:`id:${String(f?.id||'')}`;
 function pinnedPoolV1102(){
@@ -17656,10 +17683,9 @@ function fixturePlaceholderV1103(target){
 }
 function buildAdminFixtureSelectorV1103(target){
   const selected=target==='current'?state.fixtures:(state.nextFixtures||[]),ui=ensureAdminBrowser(target);
-  const today=new Date(),start=new Date(today.getFullYear(),today.getMonth(),today.getDate()),end=new Date(start);end.setDate(end.getDate()+7);
-  const pool=schedulePoolV1102().filter(f=>{const t=new Date(f.kickoff).getTime();return t>=start.getTime()&&t<end.getTime()});
+  const dates=window.adminSevenDayKeysV1106(),dateKeySet=new Set(dates);
+  const pool=schedulePoolV1102().filter(f=>dateKeySet.has(adminFixtureDateKey(f.kickoff)));
   const sampleByDate=new Map();pool.forEach(f=>{const key=adminFixtureDateKey(f.kickoff);if(!sampleByDate.has(key))sampleByDate.set(key,f)});
-  const dates=Array.from({length:7},(_,i)=>{const d=new Date(start);d.setDate(d.getDate()+i);return adminFixtureDateKey(d.toISOString())});
   if(!ui.date||!dates.includes(ui.date)){
     const selectedDate=selected.length?adminFixtureDateKey(selected.slice().sort((a,b)=>new Date(a.kickoff)-new Date(b.kickoff))[0].kickoff):null;
     ui.date=selectedDate&&dates.includes(selectedDate)?selectedDate:(dates[0]||null);
@@ -17672,11 +17698,17 @@ function buildAdminFixtureSelectorV1103(target){
   const limited=matches.length>visible.length?` · ${L(`showing ${visible.length} of ${matches.length}`,`عرض ${visible.length} من ${matches.length}`)}`:'';
   const rows=Object.keys(groups).length?Object.entries(groups).sort((a,b)=>fixtureCompetitionSort(a[0],b[0])).map(([league,fixtures])=>`<div class="fixture-league-group" data-league-group-v1080="${escapeHTML(league)}"><div class="fixture-league-title"><strong>${escapeHTML(league)}</strong><span data-group-count-v1080>${fixtures.length} ${L('fixtures','ماتش')}</span></div>${fixtures.map(f=>{const picked=selected.find(x=>(Number(x?.apiFixtureId)>0&&Number(x.apiFixtureId)===Number(f.apiFixtureId))||String(x?.id)===String(f.id)),checked=!!picked,disabled=target==='current'&&isRoundLocked(),actionId=picked?.id||f.id,h=teamV1102(f,'home'),a=teamV1102(f,'away');return`<label class="fixture-choice fixture-choice-livescore ${checked?'selected':''} ${disabled?'disabled':''}" data-fixture-row-v1080 data-fixture-date-v1080="${adminFixtureDateKey(f.kickoff)}" data-fixture-league-v1080="${escapeHTML(league)}" data-fixture-search-v1080="${escapeHTML(searchTextV1102(f))}"><span class="fixture-kickoff">${formatFixtureClock(f.kickoff)}</span><span class="fixture-team-stack"><span class="fixture-team-line"><span class="fixture-team-logo"><img loading="lazy" decoding="async" src="${escapeHTML(h.logo)}" alt="${escapeHTML(h.name)}"></span><b>${escapeHTML(h.name)}</b></span><span class="fixture-team-line"><span class="fixture-team-logo"><img loading="lazy" decoding="async" src="${escapeHTML(a.logo)}" alt="${escapeHTML(a.name)}"></span><b>${escapeHTML(a.name)}</b></span><small class="fixture-stadium">${escapeHTML(f.stadium||L('Venue TBC','الملعب لم يحدد'))}</small></span><span class="fixture-checkbox-wrap"><input type="checkbox" ${checked?'checked':''} ${disabled?'disabled':''} onchange="toggleAdminFixture('${actionId}','${target}',this.checked)"><span class="fixture-check-label">${checked?L('Selected','مختار'):L('Add','إضافة')}</span></span></label>`}).join('')}</div>`).join(''):`<div class="fixture-empty">${L('No fixtures match these filters.','مفيش ماتشات مطابقة للبحث ده.')}</div>`;
   const more='';
-  function dateLabel(key){
-    const sample=sampleByDate.get(key);if(!sample)return adminFixtureDateLabel(key);
-    try{return new Intl.DateTimeFormat(state.lang==='ar'?'ar-EG':'en-US',{weekday:'short',month:'short',day:'numeric',timeZone:userTZ()}).format(new Date(sample.kickoff))}catch{return key}
+  function dateParts(key){
+    try{
+      const value=new Date(`${key}T12:00:00.000Z`),locale=state.lang==='ar'?'ar-EG':'en-US';
+      return{
+        weekday:new Intl.DateTimeFormat(locale,{weekday:'short',timeZone:'UTC'}).format(value),
+        date:new Intl.DateTimeFormat(locale,{month:'short',day:'numeric',timeZone:'UTC'}).format(value),
+        year:new Intl.DateTimeFormat(locale,{year:'numeric',timeZone:'UTC'}).format(value)
+      };
+    }catch{return{weekday:key,date:'',year:''}}
   }
-  return`<div class="fixture-browser" data-admin-target-v1080="${target}"><div class="fixture-browser-search"><input class="fixture-search-box" value="${escapeHTML(ui.q||'')}" placeholder="${L('Search team, alias, league or stadium…','ابحث باسم فريق أو اختصار أو بطولة أو ملعب…')}" autocomplete="off" spellcheck="false" oninput="setAdminFixtureQueryV1080('${target}',this.value)"><select class="fixture-league-filter" onchange="setAdminFixtureLeague('${target}',this.value)"><option value="all">${L('All Leagues','كل البطولات')}</option>${leagues.map(x=>`<option value="${escapeHTML(x)}" ${ui.league===x?'selected':''}>${escapeHTML(x)}</option>`).join('')}</select></div><div class="fixture-day-strip">${dates.map(d=>{const label=dateLabel(d);return`<button class="fixture-day ${ui.date===d&&!query?'active':''}" onclick="setAdminFixtureDay('${target}','${d}')"><small>${label.split(' ')[0]}</small><b>${label.replace(/^\S+\s*/,'')}</b></button>`}).join('')}</div><div class="fixture-search-mode-v1080" data-search-status-v1080>${status}${limited}</div><div class="fixture-selector grouped">${rows}</div>${more}</div>`;
+  return`<div class="fixture-browser" data-admin-target-v1080="${target}"><div class="fixture-browser-search"><input class="fixture-search-box" value="${escapeHTML(ui.q||'')}" placeholder="${L('Search team, alias, league or stadium…','ابحث باسم فريق أو اختصار أو بطولة أو ملعب…')}" autocomplete="off" spellcheck="false" oninput="setAdminFixtureQueryV1080('${target}',this.value)"><select class="fixture-league-filter" onchange="setAdminFixtureLeague('${target}',this.value)"><option value="all">${L('All Leagues','كل البطولات')}</option>${leagues.map(x=>`<option value="${escapeHTML(x)}" ${ui.league===x?'selected':''}>${escapeHTML(x)}</option>`).join('')}</select></div><div class="fixture-day-strip">${dates.map(d=>{const label=dateParts(d);return`<button class="fixture-day ${ui.date===d&&!query?'active':''}" onclick="setAdminFixtureDay('${target}','${d}')"><small class="fixture-day-weekday">${escapeHTML(label.weekday)}</small><b class="fixture-day-date">${escapeHTML(label.date)}</b><em class="fixture-day-year">${escapeHTML(label.year)}</em></button>`}).join('')}</div><div class="fixture-search-mode-v1080" data-search-status-v1080>${status}${limited}</div><div class="fixture-selector grouped">${rows}</div>${more}</div>`;
 }
 function mountAdminFixtureSelectorV1103(target,token){
   if(token!==adminFixtureMountTokenV1103||state.view!=='admin'||String(state.adminWorkspaceTabV1095||'game')!=='game')return;
@@ -18084,6 +18116,136 @@ html[data-theme] body #app #view-admin .admin-publish-btn{width:100%!important;m
   html[data-theme] body #app #view-admin .fixture-day small{font-size:.48rem!important}
   html[data-theme] body #app #view-admin .fixture-day b{font-size:.52rem!important}
   html[data-theme] body #app #view-admin .admin-v1094-details{grid-template-columns:1fr!important}
+}
+</style>
+<style id="mastaba-v1106-schedule-and-theme-finish">
+/* V11.06 — one theme-native accent completes the ATS two-surface Admin system. */
+html[data-theme] body #app #view-admin{
+  --admin-accent:var(--theme-accent,#d7cc35);
+  --admin-accent-text:var(--home-btn3-text,var(--admin-outer-text));
+}
+html[data-theme="barcelona"] body #app #view-admin{--admin-accent:#e0c12d;--admin-accent-text:#172e77}
+html:is([data-theme="realmadrid"],[data-theme="real-madrid"]) body #app #view-admin{--admin-accent:#edc130;--admin-accent-text:#274793}
+html:is([data-theme="acmilan"],[data-theme="ac-milan"]) body #app #view-admin{--admin-accent:#bf1b2d;--admin-accent-text:#fff}
+html[data-theme="arsenal"] body #app #view-admin{--admin-accent:#1b3272;--admin-accent-text:#fff}
+html[data-theme="liverpool"] body #app #view-admin{--admin-accent:#f3f4f2;--admin-accent-text:#af181d}
+html[data-theme="manunited"] body #app #view-admin{--admin-accent:#fcff40;--admin-accent-text:#9f160b}
+
+/* Match the unboxed Profile navigation: readable labels and one accent line. */
+html[data-theme] body #app #view-admin .admin-tabs-v1100{
+  width:min(760px,100%)!important;max-width:760px!important;
+  margin:4px auto 16px!important;padding:0!important;gap:0!important;
+  border-bottom:1px solid color-mix(in srgb,var(--theme-accent) 25%,transparent)!important;
+  background:transparent!important;border-radius:0!important;box-shadow:none!important;
+}
+html[data-theme] body #app #view-admin .admin-tab-v1100{
+  min-height:0!important;padding:12px 8px!important;
+  background:transparent!important;color:var(--theme-muted)!important;
+  border:0!important;border-radius:0!important;box-shadow:none!important;
+  font-size:.82rem!important;line-height:1.2!important;
+}
+html[dir="rtl"][data-theme] body #app #view-admin .admin-tab-v1100{border-radius:0!important}
+html[data-theme] body #app #view-admin .admin-tab-v1100.active{
+  background:transparent!important;color:var(--theme-text)!important;
+  border:0!important;box-shadow:none!important;
+}
+html[data-theme] body #app #view-admin .admin-tab-line-v1100{
+  bottom:-2px!important;height:4px!important;border-radius:99px!important;
+  background:var(--admin-accent)!important;opacity:1!important;
+}
+html[data-theme] body #app #view-admin .admin-block-title-v1100{
+  border-bottom:2px solid var(--admin-accent)!important;
+}
+
+/* The seven buttons are calendar keys, not device-local timestamps. The third
+   line makes the year explicit without increasing the strip width. */
+html[data-theme] body #app #view-admin .fixture-day{
+  min-height:66px!important;padding:6px 2px!important;
+  display:flex!important;flex-direction:column!important;align-items:center!important;justify-content:center!important;
+}
+html[data-theme] body #app #view-admin .fixture-day :is(.fixture-day-weekday,.fixture-day-date,.fixture-day-year){
+  display:block!important;width:100%!important;margin:0!important;overflow:hidden!important;
+  color:inherit!important;white-space:nowrap!important;text-overflow:ellipsis!important;text-align:center!important;
+}
+html[data-theme] body #app #view-admin .fixture-day-weekday{font-size:.6rem!important;line-height:1!important;font-weight:900!important}
+html[data-theme] body #app #view-admin .fixture-day-date{margin-top:3px!important;font-size:.68rem!important;line-height:1.05!important;font-weight:1000!important}
+html[data-theme] body #app #view-admin .fixture-day-year{margin-top:3px!important;font-size:.54rem!important;line-height:1!important;font-style:normal!important;font-weight:850!important;opacity:.78!important}
+
+/* League separators use the third theme color and read as true section heads. */
+html[data-theme] body #app #view-admin .fixture-league-group{margin-top:13px!important}
+html[data-theme] body #app #view-admin .fixture-league-title{
+  min-height:48px!important;padding:12px 14px!important;
+  background:var(--admin-accent)!important;color:var(--admin-accent-text)!important;
+  border:1px solid color-mix(in srgb,var(--admin-accent-text) 32%,transparent)!important;
+  border-radius:4px 14px 0 0!important;font-size:1rem!important;line-height:1.18!important;
+}
+html[dir="rtl"][data-theme] body #app #view-admin .fixture-league-title{border-radius:14px 4px 0 0!important}
+html[data-theme] body #app #view-admin .fixture-league-title strong{font-size:1.02rem!important;font-weight:1000!important;color:inherit!important}
+html[data-theme] body #app #view-admin .fixture-league-title [data-group-count-v1080]{
+  padding:4px 7px!important;border-radius:999px!important;color:inherit!important;
+  background:color-mix(in srgb,var(--admin-accent-text) 11%,transparent)!important;
+  border:1px solid color-mix(in srgb,var(--admin-accent-text) 24%,transparent)!important;
+  font-size:.66rem!important;font-weight:950!important;
+}
+
+/* Remove the remaining fixed-white pills and tables. */
+html[data-theme] body #app #view-admin .admin-zero-calls-v1101{
+  background:var(--admin-outer-surface)!important;color:var(--admin-outer-text)!important;
+  border:1px solid var(--admin-outer-line)!important;-webkit-text-fill-color:var(--admin-outer-text)!important;
+}
+html[data-theme] body #app #view-admin .admin-analytics-body-v1095 .admin-v1094-panel{background:transparent!important}
+
+/* Submission Tracker: blue table rows with theme-native, high-contrast state chips. */
+html[data-theme] body #app #view-admin :is(.admin-tracker-chip-v1095,.admin-tracker-row-v1095,.league-admin-tracker-row-v1104){
+  background:var(--admin-outer-surface)!important;color:var(--admin-outer-text)!important;
+  border:1px solid var(--admin-outer-line)!important;box-shadow:none!important;
+}
+html[data-theme] body #app #view-admin :is(.admin-tracker-chip-v1095,.admin-tracker-row-v1095,.league-admin-tracker-row-v1104) :is(strong,span,.name,.sub){
+  color:inherit!important;-webkit-text-fill-color:currentColor!important;
+}
+html[data-theme] body #app #view-admin .admin-tracker-chip-v1095 span,
+html[data-theme] body #app #view-admin .admin-tracker-row-v1095 .sub{opacity:.78!important}
+html[data-theme] body #app #view-admin .admin-status-v1095.submitted,
+html[data-theme] body #app #view-admin .league-admin-tracker-v1104 .admin-v1094-pill.good{
+  background:var(--admin-accent)!important;color:var(--admin-accent-text)!important;
+  border-color:color-mix(in srgb,var(--admin-accent-text) 32%,transparent)!important;
+  -webkit-text-fill-color:var(--admin-accent-text)!important;
+}
+html[data-theme] body #app #view-admin .admin-status-v1095.draft,
+html[data-theme] body #app #view-admin .league-admin-tracker-v1104 .admin-v1094-pill.warn{
+  background:var(--admin-inner)!important;color:var(--admin-inner-text)!important;
+  border-color:var(--admin-inner-line)!important;-webkit-text-fill-color:var(--admin-inner-text)!important;
+}
+html[data-theme] body #app #view-admin .admin-status-v1095.missing{
+  background:color-mix(in srgb,var(--admin-outer) 72%,#000 28%)!important;
+  color:var(--admin-outer-text)!important;border-color:var(--admin-outer-line)!important;
+  -webkit-text-fill-color:var(--admin-outer-text)!important;
+}
+
+/* Audience Mix and analytics chips now use the same blue table surface. */
+html[data-theme] body #app #view-admin .admin-v1094-chip{
+  background:var(--admin-outer-surface)!important;color:var(--admin-outer-text)!important;
+  border:1px solid var(--admin-outer-line)!important;-webkit-text-fill-color:var(--admin-outer-text)!important;
+}
+html[data-theme] body #app #view-admin .admin-v1094-privacy{color:var(--admin-inner-text)!important;opacity:.8!important}
+html[data-theme] body #app #view-admin .admin-v1094-team-row{color:var(--admin-inner-text)!important}
+html[data-theme] body #app #view-admin .admin-v1094-bar{background:color-mix(in srgb,var(--admin-inner-text) 20%,transparent)!important}
+html[data-theme] body #app #view-admin .admin-v1094-bar>span{background:var(--admin-accent)!important;color:var(--admin-accent)!important}
+
+@media(max-width:720px){
+  html[data-theme] body #app #view-admin .admin-tabs-v1100{margin-bottom:10px!important}
+  html[data-theme] body #app #view-admin .admin-tab-v1100{min-height:0!important;padding:11px 3px!important;font-size:.7rem!important}
+  html[data-theme] body #app #view-admin .fixture-day-strip{gap:3px!important}
+  html[data-theme] body #app #view-admin .fixture-day{min-height:63px!important;padding-inline:1px!important}
+  html[data-theme] body #app #view-admin .fixture-day-weekday{font-size:.48rem!important}
+  html[data-theme] body #app #view-admin .fixture-day-date{font-size:.53rem!important}
+  html[data-theme] body #app #view-admin .fixture-day-year{font-size:.46rem!important}
+  html[data-theme] body #app #view-admin .fixture-league-title{min-height:44px!important;padding:10px!important}
+  html[data-theme] body #app #view-admin .fixture-league-title strong{font-size:.88rem!important}
+}
+@media(max-width:390px){
+  html[data-theme] body #app #view-admin .fixture-day-date{font-size:.49rem!important}
+  html[data-theme] body #app #view-admin .fixture-day-year{font-size:.43rem!important}
 }
 </style>
 <script id="mastaba-v1104-runtime-fixes">
