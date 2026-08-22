@@ -15477,21 +15477,28 @@ async function adminFetchV1094(path='',options={}){
   }
   return j;
 }
-async function loadAdminAccountsV1094(force=false){
+async function loadAdminAccountsV1094(force=false,includeAnalytics=false){
   const managesLeague=typeof administeredLeaguesV19==='function'&&(administeredLeaguesV19()||[]).length>0;
   if(!(currentUser()?.admin||window.hasMastabaToolsAccessV1095?.()||managesLeague)||adminAccountsV1094.loading)return;
-  if(!force&&adminAccountsV1094.data&&Date.now()-adminAccountsV1094.lastLoaded<15000){enhanceAdminV1094();return}
+  const wantsAnalytics=!!includeAnalytics||(state.view==='admin'&&String(state.adminWorkspaceTabV1095||'')==='analytics');
+  const hasFullAnalytics=!!adminAccountsV1094.data?.analytics_complete;
+  if(!force&&adminAccountsV1094.data&&Date.now()-adminAccountsV1094.lastLoaded<15000&&(!wantsAnalytics||hasFullAnalytics)){enhanceAdminV1094();return}
   adminAccountsV1094.loading=true;adminAccountsV1094.error=null;enhanceAdminV1094();
   try{
     const qs=new URLSearchParams({page:String(adminAccountsV1094.page),per_page:String(adminAccountsV1094.perPage)});
     if(adminAccountsV1094.search.trim())qs.set('search',adminAccountsV1094.search.trim());
+    if(wantsAnalytics)qs.set('analytics','1');
     adminAccountsV1094.data=await adminFetchV1094(`?${qs}`);
     adminAccountsV1094.lastLoaded=Date.now();
   }catch(e){console.error('Admin account directory failed',e);adminAccountsV1094.error=e?.message||String(e)}
-  finally{adminAccountsV1094.loading=false;if(!currentUser()?.admin&&managesLeague)renderAdmin();else if(window.__adminWorkspaceV1095)window.refreshAdminDataPanelsV1095?.();else enhanceAdminV1094()}
+  finally{
+    adminAccountsV1094.loading=false;
+    if(!currentUser()?.admin&&managesLeague)renderAdmin();else if(window.__adminWorkspaceV1095)window.refreshAdminDataPanelsV1095?.();else enhanceAdminV1094();
+    if(!adminAccountsV1094.error&&currentUser()?.admin&&state.view==='admin'&&String(state.adminWorkspaceTabV1095||'')==='analytics'&&!adminAccountsV1094.data?.analytics_complete)setTimeout(()=>loadAdminAccountsV1094(true,true),0);
+  }
 }
 window.loadAdminAccountsV1094=loadAdminAccountsV1094;
-window.refreshAdminAccountsV1094=()=>loadAdminAccountsV1094(true);
+window.refreshAdminAccountsV1094=()=>loadAdminAccountsV1094(true,state.view==='admin'&&String(state.adminWorkspaceTabV1095||'')==='analytics');
 window.setAdminAccountSearchV1094=function(v){
   adminAccountsV1094.search=String(v||'');adminAccountsV1094.page=1;
   clearTimeout(adminAccountsV1094.searchTimer);
@@ -15530,6 +15537,7 @@ function audienceAnalyticsV1094(){
   const d=adminAccountsV1094.data,s=d?.stats;
   if(adminAccountsV1094.loading&&!d)return`<div class="panel admin-v1094-panel admin-analytics-v1094"><div class="admin-v1094-loading">${L('Loading audience analytics…','جاري تحميل إحصائيات الجمهور…')}</div></div>`;
   if(adminAccountsV1094.error&&!d)return`<div class="panel admin-v1094-panel admin-analytics-v1094"><div class="admin-v1094-error">${escV1094(adminAccountsV1094.error)}</div></div>`;
+  if(currentUser()?.admin&&state.view==='admin'&&String(state.adminWorkspaceTabV1095||'')==='analytics'&&!d?.analytics_complete)return`<div class="panel admin-v1094-panel admin-analytics-v1094"><div class="admin-v1094-loading">${L('Loading the full audience analytics…','جاري تحميل إحصائيات الجمهور الكاملة…')}</div></div>`;
   if(!s)return`<div class="panel admin-v1094-panel admin-analytics-v1094"><div class="admin-v1094-loading">${L('Audience analytics will load when Admin opens.','إحصائيات الجمهور هتظهر عند فتح صفحة الأدمن.')}</div></div>`;
   const teams=(s.supported_teams||[]).filter(x=>x.team&&x.team!=='unknown');
   const langs=s.languages||[],providers=s.providers||[];
@@ -17138,7 +17146,7 @@ html #view-admin .admin-workspace-v1100 .admin-empty-v1100{padding:18px;text-ali
 <script id="mastaba-v1100-admin-repair">
 (function mastabaV1100(){
 'use strict';
-window.MASTABA_BUILD_VERSION='11.04';
+window.MASTABA_BUILD_VERSION='11.05';
 
 const SCHEDULE_SYNC_V1101='https://bnwjtrtlwnlbldfhaggg.supabase.co/functions/v1/mastaba-schedule-sync';
 const scheduleV1100=window.adminScheduleV1100=window.adminScheduleV1100||{
@@ -17566,6 +17574,7 @@ function renderAdminV1100(){
   </div>`;
   requestAnimationFrame(positionTabV1100);
   if(active==='production'&&typeof window.loadAdminAccountsV1094==='function')setTimeout(()=>window.loadAdminAccountsV1094(false),0);
+  if(active==='analytics'&&typeof window.loadAdminAccountsV1094==='function')setTimeout(()=>window.loadAdminAccountsV1094(false,true),0);
   if(active==='production'&&full&&typeof window.loadAdminOpsV1085==='function')setTimeout(()=>window.loadAdminOpsV1085(false),0);
   if(active==='production'&&full)setTimeout(()=>loadHealthV1100(false),0);
   if(active==='game'&&full)setTimeout(()=>loadFullScheduleV1100(false),0);
@@ -17598,7 +17607,7 @@ if(state?.view==='admin')setTimeout(renderAdminV1100,0);
    Supabase schedule available exclusively inside Admin > Game Setup. */
 (function(){
 'use strict';
-window.MASTABA_BUILD_VERSION='11.04';
+window.MASTABA_BUILD_VERSION='11.05';
 
 const fixtureKeyV1102=f=>Number(f?.apiFixtureId)?`api:${Number(f.apiFixtureId)}`:`id:${String(f?.id||'')}`;
 function pinnedPoolV1102(){
@@ -17755,7 +17764,7 @@ function switchAdminTabV1102(tab){
   document.querySelectorAll('#view-admin [data-admin-pane-v1100]').forEach(p=>p.classList.toggle('active',p.dataset.adminPaneV1100===tab));
   document.querySelectorAll('#view-admin [data-admin-pane-v1095]').forEach(p=>p.classList.toggle('active',p.dataset.adminPaneV1095===tab));
   positionAdminLineV1102();const token=++adminTabTokenV1102;
-  requestAnimationFrame(()=>requestAnimationFrame(()=>{if(token!==adminTabTokenV1102)return;save();if(tab==='game'){window.refreshAdminGameSetupV1095?.();window.ensureAdminPoolV1077?.()}else if(tab==='production'){window.refreshAdminProductionV1095?.();window.loadAdminAccountsV1094?.(false);window.loadAdminOpsV1085?.(false);window.loadAdminHealthV1100?.(false)}else window.refreshAdminAnalyticsV1095?.()}));
+  requestAnimationFrame(()=>requestAnimationFrame(()=>{if(token!==adminTabTokenV1102)return;save();if(tab==='game'){window.refreshAdminGameSetupV1095?.();window.ensureAdminPoolV1077?.()}else if(tab==='production'){window.refreshAdminProductionV1095?.();window.loadAdminAccountsV1094?.(false);window.loadAdminOpsV1085?.(false);window.loadAdminHealthV1100?.(false)}else{window.refreshAdminAnalyticsV1095?.();window.loadAdminAccountsV1094?.(true,true)}}));
 }
 window.switchAdminTabV1100=switchAdminTabV1102;
 window.switchAdminWorkspaceTabV1095=switchAdminTabV1102;
@@ -17763,42 +17772,318 @@ window.addEventListener('resize',()=>requestAnimationFrame(()=>{try{syncBottomNa
 })();
 </script>
 
-<style id="mastaba-v1104-admin-fixes">
-/* V11.04 — the Admin workspace uses the same two-surface language as ATS. */
-#view-admin{--adm-outer:#171147;--adm-outer-text:#fff;--adm-inner:#25164f;--adm-inner-text:#fff;--adm-line:#d7cc35;overflow-x:hidden!important}
-html[data-theme="barcelona"] #view-admin{--adm-outer:#1c14bf;--adm-outer-text:#fff;--adm-inner:#9d2545;--adm-inner-text:#fff;--adm-line:#eddd26}
-html[data-theme="real-madrid"] #view-admin{--adm-outer:#f7f7f7;--adm-outer-text:#274793;--adm-inner:#274793;--adm-inner-text:#fff;--adm-line:#d5b45b}
-html[data-theme="ac-milan"] #view-admin{--adm-outer:#12171f;--adm-outer-text:#fff;--adm-inner:#bf1b2d;--adm-inner-text:#fff;--adm-line:#e4c65b}
-#view-admin .admin-workspace-v1100,#view-admin .admin-section-v1100{background:var(--adm-outer)!important;color:var(--adm-outer-text)!important;border-color:var(--adm-line)!important}
-#view-admin .panel,#view-admin .admin-live-note,#view-admin .admin-schedule-status-v1100,#view-admin .admin-match-v1100,#view-admin .admin-v1094-user,#view-admin .fixture-browser,#view-admin .selected-fixtures-summary{background:var(--adm-inner)!important;color:var(--adm-inner-text)!important;border:1px solid color-mix(in srgb,var(--adm-line) 76%,transparent)!important}
-html[data-theme] #view-admin :is(.panel,.admin-live-note,.admin-schedule-status-v1100,.admin-match-v1100,.admin-v1094-user,.fixture-browser,.selected-fixtures-summary,.fixture-choice,.fixture-league-group){background:var(--adm-inner)!important;color:var(--adm-inner-text)!important;border-color:color-mix(in srgb,var(--adm-line) 76%,transparent)!important}
-#view-admin :is(h2,h3,h4,strong,.admin-block-title-v1100,.fixture-league-title,.fixture-team-line b,.admin-v1094-user-name){color:inherit!important}
-#view-admin :is(.muted,small,.admin-match-meta-v1100,.fixture-stadium,.admin-v1094-detail){color:color-mix(in srgb,currentColor 72%,transparent)!important}
-#view-admin .admin-round-tabs{display:grid!important;grid-template-columns:repeat(2,minmax(0,1fr))!important;width:100%!important;gap:8px!important}
-#view-admin .admin-round-tab{min-width:0!important;white-space:normal!important}
-#view-admin :is(.admin-workspace-v1100,.admin-pane-v1100,.admin-game-body-v1100,.admin-section-v1100,.admin-focus-panel,.admin-round-panel,.selected-fixtures-summary,.fixture-browser,.fixture-selector,.fixture-league-group,.fixture-choice,.admin-match-grid-v1100,.admin-match-v1100,.admin-v1094-list,.admin-v1094-user){box-sizing:border-box!important;width:100%!important;max-width:100%!important;min-width:0!important}
-#view-admin .selected-fixture-chips{display:flex!important;flex-wrap:nowrap!important;max-width:100%!important;overflow-x:auto!important;overscroll-behavior-inline:contain;padding-bottom:5px}
-#view-admin .selected-fixture-chip{flex:0 0 auto!important}
-#view-admin .fixture-day-strip{display:grid!important;grid-template-columns:repeat(7,minmax(82px,1fr))!important;max-width:100%!important;overflow-x:auto!important}
-#view-admin .fixture-selector{overflow:visible!important;max-height:none!important}
-#view-admin .admin-v1094-user{padding:10px 12px!important;gap:7px!important}
-#view-admin .admin-v1094-list{display:grid!important;grid-template-columns:repeat(2,minmax(0,1fr))!important;gap:8px!important}
-#view-admin .admin-v1094-details{display:grid!important;grid-template-columns:repeat(3,minmax(0,1fr))!important;gap:6px!important}
-#view-admin .admin-v1094-detail{padding:5px 7px!important;font-size:.76rem!important}
-#view-admin .admin-v1094-meta{gap:4px!important}.admin-v1094-pill{font-size:.7rem!important;padding:3px 7px!important}
+<style id="mastaba-v1105-admin-theme-and-layout">
+/* V11.05 — Admin now uses the final, rendered As Things Stand palette and
+   two-surface hierarchy in every theme. */
+html[data-theme] body #app #view-admin{
+  --admin-outer:#171147;
+  --admin-outer-text:#fff;
+  --admin-inner:#25164f;
+  --admin-inner-text:#fff;
+  --admin-outer-surface:var(--admin-outer);
+  --admin-inner-surface:var(--admin-inner);
+  --admin-outer-line:color-mix(in srgb,var(--admin-outer-text) 18%,transparent);
+  --admin-inner-line:color-mix(in srgb,var(--admin-inner-text) 19%,transparent);
+  --admin-action-primary:var(--admin-outer);
+  --admin-action-secondary:color-mix(in srgb,var(--admin-outer) 82%,var(--admin-inner) 18%);
+  --admin-action-ghost:color-mix(in srgb,var(--admin-outer) 86%,#fff 14%);
+  --admin-action-danger:var(--admin-inner);
+  overflow-x:hidden!important;
+  padding-bottom:calc(126px + env(safe-area-inset-bottom))!important;
+}
+html[data-theme="barcelona"] body #app #view-admin{
+  --admin-outer:#172e77;--admin-outer-text:#fff;--admin-inner:#9d2545;--admin-inner-text:#fff;
+  --admin-outer-surface:linear-gradient(135deg,#172e77,#12295a);
+  --admin-outer-line:rgba(255,255,255,.27);--admin-inner-line:rgba(255,255,255,.19);
+}
+html:is([data-theme="realmadrid"],[data-theme="real-madrid"]) body #app #view-admin{
+  --admin-outer:#f7f7f7;--admin-outer-text:#274793;--admin-inner:#274793;--admin-inner-text:#fff;
+  --admin-outer-line:rgba(39,71,147,.18);--admin-inner-line:rgba(255,255,255,.19);
+}
+html:is([data-theme="acmilan"],[data-theme="ac-milan"]) body #app #view-admin{
+  --admin-outer:#fff;--admin-outer-text:#12171f;--admin-inner:#bf1b2d;--admin-inner-text:#fff;
+  --admin-outer-line:#12171f;--admin-inner-line:rgba(255,255,255,.22);
+}
+html[data-theme="arsenal"] body #app #view-admin{
+  --admin-outer:#cf1f15;--admin-outer-text:#fff;--admin-inner:#fff;--admin-inner-text:#1b3272;
+}
+html[data-theme="liverpool"] body #app #view-admin{
+  --admin-outer:#af181d;--admin-outer-text:#fff;--admin-inner:#8f1318;--admin-inner-text:#fff;
+  --admin-outer-line:#fff;--admin-inner-line:#fff;
+}
+html[data-theme="manunited"] body #app #view-admin{
+  --admin-outer:#fff;--admin-outer-text:#9f160b;--admin-inner:#9f160b;--admin-inner-text:#fff;
+  --admin-outer-line:#9f160b;--admin-inner-line:#fff;
+}
+html:is([data-theme="midnight"],[data-theme="emerald"],[data-theme="desert"],[data-theme="violet"],[data-theme="alahly"],[data-theme="zamalek"],[data-theme="bayern"],[data-theme="psg"],[data-theme="inter"],[data-theme="juventus"],[data-theme="roma"],[data-theme="mancity"],[data-theme="chelsea"],[data-theme="alhilal"],[data-theme="alnassr"],[data-theme="alittihad"],[data-theme="alahlisaudi"]) body #app #view-admin{
+  --admin-outer:var(--club-outer);--admin-outer-text:var(--club-outer-text);
+  --admin-inner:var(--club-inner);--admin-inner-text:var(--club-inner-text);
+  --admin-outer-line:color-mix(in srgb,var(--club-outline) 48%,transparent);
+  --admin-inner-line:color-mix(in srgb,var(--club-outline) 38%,transparent);
+}
+
+/* There is no extra blue/white table mat behind the workspace. Each module is
+   its own ATS outer shell and each content card is its ATS inner surface. */
+html[data-theme] body #app #view-admin .admin-workspace-v1100{
+  width:min(1180px,100%)!important;max-width:100%!important;min-width:0!important;
+  margin-inline:auto!important;padding:0!important;display:grid!important;gap:14px!important;
+  background:transparent!important;color:inherit!important;border:0!important;border-radius:0!important;
+  box-shadow:none!important;
+}
+html[data-theme] body #app #view-admin .admin-workspace-head-v1100,
+html[data-theme] body #app #view-admin .admin-section-v1100{
+  min-width:0!important;background:var(--admin-outer-surface)!important;color:var(--admin-outer-text)!important;
+  border:1px solid var(--admin-outer-line)!important;border-radius:4px 18px 4px 18px!important;
+  box-shadow:0 14px 34px rgba(0,0,0,.12)!important;
+}
+html[dir="rtl"][data-theme] body #app #view-admin :is(.admin-workspace-head-v1100,.admin-section-v1100){border-radius:18px 4px 18px 4px!important}
+html[data-theme] body #app #view-admin .admin-workspace-head-v1100{
+  padding:20px!important;overflow:hidden!important;background:var(--admin-outer-surface)!important;
+}
+html[data-theme] body #app #view-admin .admin-workspace-head-v1100:after{display:none!important}
+html[data-theme] body #app #view-admin .admin-workspace-head-v1100 h1{margin:0 0 5px!important;font-size:clamp(1.48rem,2.5vw,1.78rem)!important;line-height:1.08!important}
+html[data-theme] body #app #view-admin .admin-workspace-head-v1100 p{margin:0!important;font-size:.8rem!important;line-height:1.5!important}
+html[data-theme] body #app #view-admin .admin-role-badge-v1100{
+  display:inline-flex!important;margin-top:10px!important;padding:7px 10px!important;
+  background:color-mix(in srgb,var(--admin-outer-text) 11%,transparent)!important;
+  color:var(--admin-outer-text)!important;border:1px solid color-mix(in srgb,var(--admin-outer-text) 38%,transparent)!important;
+}
+
+/* Top-level Admin navigation: three equal ATS-blue boxes, with larger labels. */
+html[data-theme] body #app #view-admin .admin-tabs-v1100{
+  position:relative!important;display:grid!important;grid-template-columns:repeat(2,minmax(0,1fr))!important;
+  gap:8px!important;margin:0!important;padding:0 0 5px!important;overflow:visible!important;
+  background:transparent!important;border:0!important;border-radius:0!important;box-shadow:none!important;
+}
+html[data-theme] body #app #view-admin .admin-tabs-v1100:has([data-admin-tab-v1100="game"]){grid-template-columns:repeat(3,minmax(0,1fr))!important}
+html[data-theme] body #app #view-admin .admin-tab-v1100{
+  min-width:0!important;min-height:56px!important;padding:9px 8px!important;white-space:normal!important;
+  background:var(--admin-outer-surface)!important;color:var(--admin-outer-text)!important;
+  border:1px solid var(--admin-outer-line)!important;border-radius:4px 14px 4px 14px!important;
+  font:inherit!important;font-size:.92rem!important;line-height:1.16!important;font-weight:1000!important;
+  box-shadow:none!important;
+}
+html[dir="rtl"][data-theme] body #app #view-admin .admin-tab-v1100{border-radius:14px 4px 14px 4px!important}
+html[data-theme] body #app #view-admin .admin-tab-v1100.active{
+  background:var(--admin-action-secondary)!important;color:var(--admin-outer-text)!important;
+  border-color:color-mix(in srgb,var(--admin-outer-text) 62%,transparent)!important;
+  box-shadow:inset 0 0 0 1px color-mix(in srgb,var(--admin-outer-text) 22%,transparent)!important;
+}
+html[data-theme] body #app #view-admin .admin-tab-line-v1100{
+  bottom:0!important;height:3px!important;background:var(--admin-outer-text)!important;opacity:.9!important;
+}
+html[data-theme] body #app #view-admin .admin-pane-v1100{min-width:0!important}
+html[data-theme] body #app #view-admin .admin-pane-v1100.active{display:grid!important;gap:14px!important}
+html[data-theme] body #app #view-admin .admin-section-v1100{padding:13px!important;overflow:visible!important}
+html[data-theme] body #app #view-admin .admin-block-title-v1100{
+  display:flex!important;align-items:center!important;justify-content:space-between!important;gap:10px!important;
+  margin:0 0 12px!important;padding:3px 3px 11px!important;border-bottom:1px solid var(--admin-outer-line)!important;
+  background:transparent!important;color:var(--admin-outer-text)!important;
+  font-size:clamp(1.1rem,2vw,1.3rem)!important;line-height:1.16!important;font-weight:1000!important;
+}
+html[data-theme] body #app #view-admin .admin-block-title-v1100 small{font-size:.68rem!important;opacity:.82!important}
+
+/* ATS inner cards */
+html[data-theme] body #app #view-admin :is(
+  .panel,.admin-live-note,.admin-schedule-status-v1100,.admin-round-tab,.admin-match-v1100,
+  .admin-v1094-user,.admin-v1094-box,.admin-v1094-metric,.admin-health-card-v1100,
+  .selected-fixtures-summary,.admin-readonly-note-v1100,.admin-empty-v1100
+){
+  background:var(--admin-inner-surface)!important;color:var(--admin-inner-text)!important;
+  border:1px solid var(--admin-inner-line)!important;border-radius:4px 16px 4px 16px!important;
+  box-shadow:0 8px 20px rgba(0,0,0,.08)!important;
+}
+html[dir="rtl"][data-theme] body #app #view-admin :is(
+  .panel,.admin-live-note,.admin-schedule-status-v1100,.admin-round-tab,.admin-match-v1100,
+  .admin-v1094-user,.admin-v1094-box,.admin-v1094-metric,.admin-health-card-v1100,
+  .selected-fixtures-summary,.admin-readonly-note-v1100,.admin-empty-v1100
+){border-radius:16px 4px 16px 4px!important}
+html[data-theme] body #app #view-admin .admin-live-note{display:grid!important;gap:6px!important;padding:14px!important}
+html[data-theme] body #app #view-admin .admin-live-note>strong{font-size:1.02rem!important}
+html[data-theme] body #app #view-admin .admin-live-note>span{font-size:.73rem!important;line-height:1.5!important}
+html[data-theme] body #app #view-admin .admin-schedule-status-v1100{
+  margin-top:5px!important;padding:10px 11px!important;
+  background:color-mix(in srgb,var(--admin-inner) 91%,var(--admin-outer) 9%)!important;
+}
+html[data-theme] body #app #view-admin .admin-round-tabs{
+  display:grid!important;grid-template-columns:repeat(2,minmax(0,1fr))!important;
+  width:100%!important;gap:8px!important;margin:12px 0!important;padding:0!important;border:0!important;
+}
+html[data-theme] body #app #view-admin .admin-round-tab{
+  min-width:0!important;min-height:62px!important;padding:10px 8px!important;white-space:normal!important;
+  font-size:.92rem!important;font-weight:1000!important;
+}
+html[data-theme] body #app #view-admin .admin-round-tab.active{
+  background:color-mix(in srgb,var(--admin-inner) 84%,var(--admin-outer) 16%)!important;
+  color:var(--admin-inner-text)!important;border-color:color-mix(in srgb,var(--admin-inner-text) 55%,transparent)!important;
+}
+html[data-theme] body #app #view-admin .admin-round-tab small{display:block!important;margin-top:4px!important;font-size:.66rem!important}
+html[data-theme] body #app #view-admin .admin-focus-panel{padding:14px!important;box-shadow:0 8px 20px rgba(0,0,0,.08)!important}
+html[data-theme] body #app #view-admin .selected-fixtures-summary{padding:10px!important;background:color-mix(in srgb,var(--admin-inner) 91%,var(--admin-outer) 9%)!important}
+html[data-theme] body #app #view-admin .selected-fixture-chips{
+  display:flex!important;flex-wrap:nowrap!important;max-width:100%!important;overflow-x:auto!important;
+  overscroll-behavior-inline:contain!important;scrollbar-width:thin!important;padding-bottom:5px!important;
+}
+html[data-theme] body #app #view-admin .selected-fixture-chip{
+  flex:0 0 auto!important;background:var(--admin-outer)!important;color:var(--admin-outer-text)!important;
+  border-color:var(--admin-outer-line)!important;
+}
+
+/* Fixture browser: seven equal days always fit inside the Game Setup card. */
+html[data-theme] body #app #view-admin :is(.admin-pane-v1100,.admin-game-body-v1100,.admin-section-v1100,.admin-focus-panel,.admin-round-panel,.fixture-browser,.fixture-selector,.fixture-league-group,.fixture-choice,.admin-match-grid-v1100,.admin-match-v1100,.admin-v1094-list,.admin-v1094-user){
+  box-sizing:border-box!important;width:100%!important;max-width:100%!important;min-width:0!important;
+}
+html[data-theme] body #app #view-admin .fixture-browser{
+  margin-top:11px!important;padding:0!important;background:transparent!important;color:var(--admin-inner-text)!important;
+  border:0!important;border-radius:0!important;box-shadow:none!important;overflow:visible!important;
+}
+html[data-theme] body #app #view-admin .fixture-browser-search{display:grid!important;grid-template-columns:minmax(0,1fr) minmax(180px,260px)!important;gap:8px!important}
+html[data-theme] body #app #view-admin .fixture-day-strip{
+  display:grid!important;grid-template-columns:repeat(7,minmax(0,1fr))!important;
+  width:100%!important;max-width:100%!important;gap:6px!important;margin:10px 0!important;
+  overflow:hidden!important;
+}
+html[data-theme] body #app #view-admin .fixture-day{
+  min-width:0!important;width:100%!important;min-height:53px!important;padding:7px 2px!important;overflow:hidden!important;
+  background:var(--admin-outer-surface)!important;color:var(--admin-outer-text)!important;
+  border:1px solid var(--admin-outer-line)!important;border-radius:4px 12px 4px 12px!important;
+  white-space:normal!important;text-align:center!important;
+}
+html[dir="rtl"][data-theme] body #app #view-admin .fixture-day{border-radius:12px 4px 12px 4px!important}
+html[data-theme] body #app #view-admin .fixture-day.active{
+  background:var(--admin-action-secondary)!important;color:var(--admin-outer-text)!important;
+  border-color:color-mix(in srgb,var(--admin-outer-text) 68%,transparent)!important;
+  box-shadow:inset 0 0 0 1px color-mix(in srgb,var(--admin-outer-text) 24%,transparent)!important;
+}
+html[data-theme] body #app #view-admin .fixture-day small,
+html[data-theme] body #app #view-admin .fixture-day b{
+  display:block!important;width:100%!important;overflow:hidden!important;text-overflow:ellipsis!important;
+  color:var(--admin-outer-text)!important;white-space:nowrap!important;
+}
+html[data-theme] body #app #view-admin .fixture-day small{font-size:.62rem!important;line-height:1.05!important}
+html[data-theme] body #app #view-admin .fixture-day b{margin-top:3px!important;font-size:.69rem!important;line-height:1.1!important}
+html[data-theme] body #app #view-admin .fixture-selector{
+  max-height:none!important;overflow:visible!important;background:transparent!important;border:0!important;border-radius:0!important;
+}
+html[data-theme] body #app #view-admin .fixture-league-group{background:transparent!important;color:var(--admin-inner-text)!important;border:0!important}
+html[data-theme] body #app #view-admin .fixture-league-title{
+  padding:9px 10px!important;background:var(--admin-outer-surface)!important;color:var(--admin-outer-text)!important;
+  border:1px solid var(--admin-outer-line)!important;border-radius:4px 12px 0 0!important;
+}
+html[data-theme] body #app #view-admin .fixture-choice{
+  display:grid!important;grid-template-columns:auto minmax(0,1fr) auto!important;min-width:0!important;
+  background:var(--admin-outer-surface)!important;color:var(--admin-outer-text)!important;
+  border:1px solid var(--admin-outer-line)!important;border-radius:4px 14px 4px 14px!important;
+}
+html[dir="rtl"][data-theme] body #app #view-admin .fixture-choice{border-radius:14px 4px 14px 4px!important}
+html[data-theme] body #app #view-admin .fixture-choice.selected{
+  background:var(--admin-action-secondary)!important;border-color:color-mix(in srgb,var(--admin-outer-text) 62%,transparent)!important;
+}
+html[data-theme] body #app #view-admin .fixture-checkbox-wrap{
+  background:color-mix(in srgb,var(--admin-outer-text) 10%,transparent)!important;
+  border-color:color-mix(in srgb,var(--admin-outer-text) 24%,transparent)!important;
+}
+html[data-theme] body #app #view-admin .fixture-search-mode-v1080{color:var(--admin-inner-text)!important;opacity:.84!important}
+
+/* Inputs keep the same inner family; action buttons use deliberate outer-color
+   shades so their roles remain visually distinct without importing alien colors. */
+html[data-theme] body #app #view-admin :is(input,select,textarea,.fixture-search-box,.fixture-league-filter){
+  background:color-mix(in srgb,var(--admin-inner) 88%,var(--admin-outer) 12%)!important;
+  color:var(--admin-inner-text)!important;-webkit-text-fill-color:var(--admin-inner-text)!important;
+  border:1px solid color-mix(in srgb,var(--admin-inner-text) 28%,transparent)!important;
+}
+html[data-theme] body #app #view-admin :is(input,textarea)::placeholder{
+  color:color-mix(in srgb,var(--admin-inner-text) 64%,transparent)!important;
+  -webkit-text-fill-color:color-mix(in srgb,var(--admin-inner-text) 64%,transparent)!important;
+}
+html[data-theme] body #app #view-admin option{background:var(--admin-inner)!important;color:var(--admin-inner-text)!important}
+html[data-theme] body #app #view-admin .btn-primary,
+html[data-theme] body #app #view-admin .admin-publish-btn{
+  background:var(--admin-action-primary)!important;color:var(--admin-outer-text)!important;
+  border-color:var(--admin-outer-line)!important;
+}
+html[data-theme] body #app #view-admin .btn-secondary{
+  background:var(--admin-action-secondary)!important;color:var(--admin-outer-text)!important;
+  border-color:color-mix(in srgb,var(--admin-outer-text) 34%,transparent)!important;
+}
+html[data-theme] body #app #view-admin .btn-ghost{
+  background:var(--admin-action-ghost)!important;color:var(--admin-outer-text)!important;
+  border-color:color-mix(in srgb,var(--admin-outer-text) 40%,transparent)!important;
+}
+html[data-theme] body #app #view-admin .btn-danger{
+  background:var(--admin-action-danger)!important;color:var(--admin-inner-text)!important;
+  border-color:var(--admin-inner-line)!important;
+}
+html[data-theme] body #app #view-admin .btn:disabled{opacity:.48!important}
+
+/* Production, accounts, analytics and match controls use the same two surfaces. */
+html[data-theme] body #app #view-admin .admin-match-v1100{padding:14px!important}
+html[data-theme] body #app #view-admin .admin-v1094-list{display:grid!important;grid-template-columns:repeat(2,minmax(0,1fr))!important;gap:8px!important}
+html[data-theme] body #app #view-admin .admin-v1094-user{padding:10px 12px!important;gap:7px!important;overflow:hidden!important}
+html[data-theme] body #app #view-admin .admin-v1094-details{display:grid!important;grid-template-columns:repeat(3,minmax(0,1fr))!important;gap:6px!important}
+html[data-theme] body #app #view-admin .admin-v1094-detail,
+html[data-theme] body #app #view-admin .admin-health-card-v1100,
+html[data-theme] body #app #view-admin .admin-v1094-box,
+html[data-theme] body #app #view-admin .admin-v1094-metric{
+  background:color-mix(in srgb,var(--admin-inner) 91%,var(--admin-outer) 9%)!important;
+  color:var(--admin-inner-text)!important;border-color:var(--admin-inner-line)!important;
+}
+html[data-theme] body #app #view-admin .admin-v1094-detail{padding:6px 7px!important;font-size:.72rem!important}
+html[data-theme] body #app #view-admin .admin-v1094-meta{gap:4px!important}
+html[data-theme] body #app #view-admin .admin-v1094-pill{
+  font-size:.66rem!important;padding:3px 7px!important;
+  background:var(--admin-outer)!important;color:var(--admin-outer-text)!important;border-color:var(--admin-outer-line)!important;
+}
+html[data-theme] body #app #view-admin .admin-v1094-pill.good,
+html[data-theme] body #app #view-admin .admin-v1094-pill.warn,
+html[data-theme] body #app #view-admin .admin-v1094-pill.bad{color:var(--admin-outer-text)!important}
+html[data-theme] body #app #view-admin .admin-loading-v1100,
+html[data-theme] body #app #view-admin .admin-v1094-loading{color:var(--admin-inner-text)!important}
+html[data-theme] body #app #view-admin :is(.admin-health-warning-v1100,.admin-v1094-error,.admin-error-v1085,.admin-schedule-status-v1100.error){
+  background:color-mix(in srgb,var(--admin-inner) 82%,#000 18%)!important;
+  color:var(--admin-inner-text)!important;border-color:var(--admin-inner-line)!important;
+}
+
+/* Surface-aware text. This overrides the legacy fixed navy/grey Admin copy. */
+html[data-theme] body #app #view-admin :is(.admin-workspace-head-v1100,.admin-section-v1100,.admin-tab-v1100,.admin-block-title-v1100,.fixture-day,.fixture-league-title,.fixture-choice,.selected-fixture-chip) :is(h1,h2,h3,h4,h5,p,strong,b,span,small,label){color:inherit!important}
+html[data-theme] body #app #view-admin :is(.panel,.admin-live-note,.admin-schedule-status-v1100,.admin-round-tab,.admin-match-v1100,.admin-v1094-user,.admin-v1094-box,.admin-v1094-metric,.admin-health-card-v1100,.selected-fixtures-summary,.admin-readonly-note-v1100,.admin-empty-v1100) :is(h1,h2,h3,h4,h5,p,strong,b,span,small,label,.muted,.admin-match-meta-v1100,.fixture-stadium,.admin-v1094-detail){color:inherit!important}
+html[data-theme] body #app #view-admin :is(.muted,small,.admin-match-meta-v1100,.fixture-stadium){opacity:.78!important}
+html[data-theme] body #app #view-admin .fixture-choice :is(.fixture-team-line b,.fixture-kickoff,.fixture-check-label,.fixture-stadium){color:var(--admin-outer-text)!important}
+html[data-theme] body #app #view-admin .admin-publish-btn{width:100%!important;min-height:48px!important;margin-top:12px!important;font-size:.88rem!important}
+
 .deadline-state-card-v1104{cursor:pointer}.deadline-state-card-v1104:focus-visible{outline:3px solid var(--barca-yellow,#eddd26);outline-offset:3px}
+
 @media(max-width:720px){
- #view-admin{padding-inline:10px!important;padding-bottom:112px!important}
- #view-admin .admin-workspace-v1100{padding:10px!important;border-radius:18px!important}
- #view-admin .admin-section-v1100{padding:10px!important}
- #view-admin .admin-live-note{padding:10px!important}
- #view-admin .admin-schedule-actions-v1101{display:grid!important;grid-template-columns:1fr!important}
- #view-admin .fixture-browser-search{display:grid!important;grid-template-columns:1fr!important}
- #view-admin .fixture-choice{display:grid!important;grid-template-columns:58px minmax(0,1fr) 58px!important;gap:6px!important;padding:9px 7px!important}
- #view-admin .fixture-team-logo{width:28px!important;height:28px!important}.fixture-team-line b{font-size:.86rem!important}
- #view-admin .admin-v1094-list{grid-template-columns:1fr!important}
- #view-admin .admin-v1094-details{grid-template-columns:1fr 1fr!important}
- #view-admin .admin-v1094-actions{display:grid!important;grid-template-columns:1fr!important}
+  html[data-theme] body #app #view-admin{padding-inline:9px!important;padding-bottom:calc(130px + env(safe-area-inset-bottom))!important}
+  html[data-theme] body #app #view-admin .admin-workspace-v1100{gap:10px!important}
+  html[data-theme] body #app #view-admin .admin-workspace-head-v1100{padding:15px!important}
+  html[data-theme] body #app #view-admin .admin-workspace-head-v1100 h1{font-size:1.34rem!important}
+  html[data-theme] body #app #view-admin .admin-tabs-v1100{gap:5px!important}
+  html[data-theme] body #app #view-admin .admin-tab-v1100{min-height:55px!important;padding:7px 3px!important;font-size:.75rem!important}
+  html[data-theme] body #app #view-admin .admin-section-v1100{padding:9px!important}
+  html[data-theme] body #app #view-admin .admin-block-title-v1100{align-items:flex-start!important;flex-direction:column!important;font-size:1.04rem!important}
+  html[data-theme] body #app #view-admin .admin-live-note{padding:10px!important}
+  html[data-theme] body #app #view-admin .admin-round-tab{font-size:.78rem!important;padding-inline:4px!important}
+  html[data-theme] body #app #view-admin .admin-schedule-actions-v1101{display:grid!important;grid-template-columns:1fr!important;width:100%!important}
+  html[data-theme] body #app #view-admin .admin-schedule-actions-v1101 .btn{width:100%!important}
+  html[data-theme] body #app #view-admin .fixture-browser-search{grid-template-columns:1fr!important}
+  html[data-theme] body #app #view-admin .fixture-day-strip{gap:3px!important}
+  html[data-theme] body #app #view-admin .fixture-day{min-height:49px!important;padding:6px 1px!important}
+  html[data-theme] body #app #view-admin .fixture-day small{font-size:.52rem!important}
+  html[data-theme] body #app #view-admin .fixture-day b{font-size:.57rem!important}
+  html[data-theme] body #app #view-admin .fixture-choice{grid-template-columns:50px minmax(0,1fr) 52px!important;gap:5px!important;padding:8px 6px!important}
+  html[data-theme] body #app #view-admin .fixture-team-logo{width:26px!important;height:26px!important}
+  html[data-theme] body #app #view-admin .fixture-team-line b{font-size:.78rem!important;overflow-wrap:anywhere!important}
+  html[data-theme] body #app #view-admin .fixture-kickoff{font-size:.66rem!important}
+  html[data-theme] body #app #view-admin .admin-v1094-list{grid-template-columns:1fr!important}
+  html[data-theme] body #app #view-admin .admin-v1094-details{grid-template-columns:1fr 1fr!important}
+  html[data-theme] body #app #view-admin .admin-v1094-actions{display:grid!important;grid-template-columns:1fr!important}
+}
+@media(max-width:390px){
+  html[data-theme] body #app #view-admin .admin-tab-v1100{font-size:.68rem!important}
+  html[data-theme] body #app #view-admin .fixture-day small{font-size:.48rem!important}
+  html[data-theme] body #app #view-admin .fixture-day b{font-size:.52rem!important}
+  html[data-theme] body #app #view-admin .admin-v1094-details{grid-template-columns:1fr!important}
 }
 </style>
 <script id="mastaba-v1104-runtime-fixes">
