@@ -7536,9 +7536,9 @@ function adminFixtureDateKey(iso){try{
  const p=Object.fromEntries(parts.filter(x=>x.type!=='literal').map(x=>[x.type,x.value]));
  return `${p.year}-${p.month}-${p.day}`
 }catch{return String(iso).slice(0,10)}}
-function adminFixtureDateLabel(key){const sample=(state.fixturePool||sandboxFixturePool()).find(f=>adminFixtureDateKey(f.kickoff)===key);if(!sample)return key;return new Intl.DateTimeFormat(state.lang==='ar'?'ar-EG':'en-US',{weekday:'short',month:'short',day:'numeric',timeZone:userTZ()}).format(new Date(sample.kickoff))}
+function adminFixtureDateLabel(key){const datePool=(Array.isArray(window.adminSchedulePoolV1102)&&window.adminSchedulePoolV1102.length)?window.adminSchedulePoolV1102:(state.fixturePool||sandboxFixturePool());const sample=datePool.find(f=>adminFixtureDateKey(f.kickoff)===key);if(!sample)return key;return new Intl.DateTimeFormat(state.lang==='ar'?'ar-EG':'en-US',{weekday:'short',month:'short',day:'numeric',timeZone:userTZ()}).format(new Date(sample.kickoff))}
 function ensureAdminBrowser(target){
- const ui=adminBrowserState[target],pool=state.fixturePool||sandboxFixturePool(),selected=target==='current'?state.fixtures:(state.nextFixtures||[]);
+ const ui=adminBrowserState[target],pool=(Array.isArray(window.adminSchedulePoolV1102)&&window.adminSchedulePoolV1102.length)?window.adminSchedulePoolV1102:(state.fixturePool||sandboxFixturePool()),selected=target==='current'?state.fixtures:(state.nextFixtures||[]);
  const dates=[...new Set(pool.map(f=>adminFixtureDateKey(f.kickoff)))].sort();
  if(!ui.date||!dates.includes(ui.date)){const selectedDate=selected.length?adminFixtureDateKey(selected.slice().sort((a,b)=>new Date(a.kickoff)-new Date(b.kickoff))[0].kickoff):dates[0];ui.date=selectedDate||dates[0]||null}
  return ui
@@ -8907,7 +8907,7 @@ function effectiveLeagueFixturesV20(lid,target){
 function leagueUsingBaselineV20(lid,target){const sourceLid=lid==='mastaba-public'?'mastaba':lid;const rec=leagueOverrideRecordV20(sourceLid);return rec[target]===null||rec[target]===undefined}
 function leagueAdminBrowserStateV20(lid,target){
   leagueAdminBrowserV20[lid]=leagueAdminBrowserV20[lid]||{current:{date:null,league:'all',q:''},next:{date:null,league:'all',q:''}};
-  const ui=leagueAdminBrowserV20[lid][target],pool=state.fixturePool||sandboxFixturePool(),selected=effectiveLeagueFixturesV20(lid,target);
+  const ui=leagueAdminBrowserV20[lid][target],pool=(Array.isArray(window.adminSchedulePoolV1102)&&window.adminSchedulePoolV1102.length)?window.adminSchedulePoolV1102:(state.fixturePool||sandboxFixturePool()),selected=effectiveLeagueFixturesV20(lid,target);
   const dates=[...new Set(pool.map(f=>adminFixtureDateKey(f.kickoff)))].sort();
   if(!ui.date||!dates.includes(ui.date))ui.date=(selected[0]?adminFixtureDateKey(selected[0].kickoff):dates[0])||null;
   return ui;
@@ -15489,6 +15489,16 @@ async function loadAdminAccountsV1094(force=false,includeAnalytics=false){
     if(adminAccountsV1094.search.trim())qs.set('search',adminAccountsV1094.search.trim());
     if(wantsAnalytics)qs.set('analytics','1');
     adminAccountsV1094.data=await adminFetchV1094(`?${qs}`);
+    if(currentUser()?.admin&&window.prodCtxV1073?.supa){
+      try{
+        const {data:emailRows,error:emailErr}=await window.prodCtxV1073.supa.rpc('mastaba_admin_email_directory');
+        if(!emailErr&&Array.isArray(emailRows)){
+          const emailById=new Map(emailRows.map(r=>[String(r.user_id),String(r.email||'')]));
+          (adminAccountsV1094.data?.users||[]).forEach(u=>{u.email=emailById.get(String(u.user_id))||''});
+          adminAccountsV1094.data.can_view_login_emails=true;
+        }
+      }catch(emailLoadErr){console.warn('Ultimate Admin email directory unavailable',emailLoadErr)}
+    }
     adminAccountsV1094.lastLoaded=Date.now();
   }catch(e){console.error('Admin account directory failed',e);adminAccountsV1094.error=e?.message||String(e)}
   finally{
@@ -17146,7 +17156,7 @@ html #view-admin .admin-workspace-v1100 .admin-empty-v1100{padding:18px;text-ali
 <script id="mastaba-v1100-admin-repair">
 (function mastabaV1100(){
 'use strict';
-window.MASTABA_BUILD_VERSION='11.06';
+window.MASTABA_BUILD_VERSION='11.07';
 
 const SCHEDULE_SYNC_V1101='https://bnwjtrtlwnlbldfhaggg.supabase.co/functions/v1/mastaba-schedule-sync';
 const scheduleV1100=window.adminScheduleV1100=window.adminScheduleV1100||{
@@ -17394,14 +17404,14 @@ function accountDirectoryV1100(){
   const users=d?.users||[],total=Number(d?.stats?.registered_total||0),filtered=Number(d?.total_filtered||0),page=Number(d?.page||1),pages=Number(d?.total_pages||1);
   const me=window.prodCtxV1073?.user?.id;
   return `<div class="panel admin-v1094-panel admin-accounts-v1094">
-    <div class="admin-v1094-head"><div><h3>${L('Website Account Directory','دليل حسابات الموقع')} · ${total.toLocaleString()}</h3><small>${L('Only display names are shown. Login emails stay stored in Auth and are never returned to this Admin page.','الأسماء الظاهرة فقط هي اللي بتظهر. إيميلات الدخول محفوظة في Auth ومش بترجع لصفحة الأدمن دي.')}</small></div><button class="btn btn-ghost" onclick="refreshAdminAccountsV1094()">${L('Refresh','تحديث')}</button></div>
+    <div class="admin-v1094-head"><div><h3>${L('Website Account Directory','دليل حسابات الموقع')} · ${total.toLocaleString()}</h3><small>${L('Login emails are visible only to the authenticated Ultimate Admin; other Mastaba tools remain display-name-only.','إيميلات الدخول بتظهر للأدمن الرئيسي الموثق فقط؛ باقي أدوات المصطبة بتفضل بالأسماء الظاهرة فقط.')}</small></div><button class="btn btn-ghost" onclick="refreshAdminAccountsV1094()">${L('Refresh','تحديث')}</button></div>
     <div class="admin-v1094-searchrow"><input class="admin-v1094-search" value="${escV1100(accountStateV1100?.search||'')}" placeholder="${L('Search display name…','ابحث بالاسم الظاهر…')}" oninput="setAdminAccountSearchV1094(this.value)"><span class="admin-v1094-pill">${filtered.toLocaleString()} ${L('found','نتيجة')}</span></div>
     <div class="admin-v1094-list">${users.map(u=>{
       const isMe=String(u.user_id)===String(me),status=u.active?L('Active','نشط'):L('Deactivated','موقوف');
       const submitted=Number(u.submitted_rows||0),rows=Number(u.prediction_rows||0),gw=rows?`${submitted}/${rows}`:L('No GW activity','لا يوجد نشاط جولة');
       const canAct=fullAdminV1100()&&!isMe&&!u.is_admin;
       return `<div class="admin-v1094-user ${u.active?'':'inactive'}">
-        <div class="admin-v1094-user-top"><div><div class="admin-v1094-user-name">${escV1100(u.display_name||L('Mastaba User','مستخدم المصطبة'))}</div></div><span class="admin-v1094-pill ${u.active?'good':'bad'}">${status}</span></div>
+        <div class="admin-v1094-user-top"><div><div class="admin-v1094-user-name">${escV1100(u.display_name||L('Mastaba User','مستخدم المصطبة'))}</div>${u.email?`<div class="admin-v1094-email">${escV1100(u.email)}</div>`:''}</div><span class="admin-v1094-pill ${u.active?'good':'bad'}">${status}</span></div>
         <div class="admin-v1094-meta">
           <span class="admin-v1094-pill">${escV1100(providerV1100(u.provider))}</span>
           <span class="admin-v1094-pill ${u.email_confirmed?'good':'warn'}">${u.email_confirmed?L('Verified','مؤكد'):L('Unverified','غير مؤكد')}</span>
@@ -17525,7 +17535,7 @@ function productionHTMLV1100(){
   return `${readonly}
     <div class="admin-section-v1100"><div class="admin-block-title-v1100"><span>${L('Gameweek Submission Tracker','متابعة إرسال التوقعات')}</span></div><div class="admin-tracker-slot-v1100">${trackerHTMLV1100()}</div></div>
     ${fullAdminV1100()?`<div class="admin-section-v1100"><div class="admin-block-title-v1100"><span>${L('Production Health','حالة الإنتاج')}</span><small>${L('Independent live check','فحص حي مستقل')}</small></div><div class="admin-health-slot-v1100">${healthHTMLV1100()}</div></div>`:''}
-    <div class="admin-section-v1100"><div class="admin-block-title-v1100"><span>${L('Account Directory','دليل الحسابات')}</span><small>${L('Display names only','الأسماء الظاهرة فقط')}</small></div><div class="admin-accounts-slot-v1100">${accountDirectoryV1100()}</div></div>
+    <div class="admin-section-v1100"><div class="admin-block-title-v1100"><span>${L('Account Directory','دليل الحسابات')}</span><small>${L('Ultimate Admin identity view','عرض الهوية للأدمن الرئيسي')}</small></div><div class="admin-accounts-slot-v1100">${accountDirectoryV1100()}</div></div>
     ${fullAdminV1100()?`<div class="admin-section-v1100"><div class="admin-block-title-v1100"><span>${L('Mastaba League Management','إدارة دوري المصطبة')}</span></div><div class="admin-management-slot-v1100">${managementHTMLV1100()}</div></div>`:''}`;
 }
 function analyticsHTMLV1100(){
@@ -17634,7 +17644,7 @@ if(state?.view==='admin')setTimeout(renderAdminV1100,0);
    Supabase schedule available exclusively inside Admin > Game Setup. */
 (function(){
 'use strict';
-window.MASTABA_BUILD_VERSION='11.06';
+window.MASTABA_BUILD_VERSION='11.07';
 
 const fixtureKeyV1102=f=>Number(f?.apiFixtureId)?`api:${Number(f.apiFixtureId)}`:`id:${String(f?.id||'')}`;
 function pinnedPoolV1102(){
@@ -18260,5 +18270,177 @@ html[data-theme] body #app #view-admin .admin-v1094-bar>span{background:var(--ad
   };
 })();
 </script>
+
+<style id="mastaba-v1107-admin-finish">
+/* V11.07 — Admin schedule-state repair + deliberate three-level theme hierarchy. */
+html[data-theme] body #app #view-admin{
+  --admin-layer-1:var(--admin-outer,#171147);
+  --admin-layer-1-text:var(--admin-outer-text,#fff);
+  --admin-layer-2:var(--admin-inner,#25164f);
+  --admin-layer-2-text:var(--admin-inner-text,#fff);
+  --admin-layer-3:var(--theme-accent,#d8ae43);
+  --admin-layer-3-text:#12171f;
+}
+
+/* Explicit theme hierarchy so a child surface never repeats its direct parent. */
+html[data-theme="barcelona"] body #app #view-admin{
+  --admin-layer-1:#9d2545;--admin-layer-1-text:#fff;
+  --admin-layer-2:#1c14bf;--admin-layer-2-text:#fff;
+  --admin-layer-3:#d9b82e;--admin-layer-3-text:#151922;
+}
+html:is([data-theme="realmadrid"],[data-theme="real-madrid"]) body #app #view-admin{
+  --admin-layer-1:#f7f7f7;--admin-layer-1-text:#274793;
+  --admin-layer-2:#274793;--admin-layer-2-text:#fff;
+  --admin-layer-3:#edc130;--admin-layer-3-text:#151922;
+}
+html[data-theme="acmilan"] body #app #view-admin{
+  --admin-layer-1:#12171f;--admin-layer-1-text:#fff;
+  --admin-layer-2:#bf1b2d;--admin-layer-2-text:#fff;
+  --admin-layer-3:#f7f7f7;--admin-layer-3-text:#12171f;
+}
+html[data-theme="arsenal"] body #app #view-admin{
+  --admin-layer-1:#cf1f15;--admin-layer-1-text:#fff;
+  --admin-layer-2:#fff;--admin-layer-2-text:#1b3272;
+  --admin-layer-3:#1b3272;--admin-layer-3-text:#fff;
+}
+html[data-theme="liverpool"] body #app #view-admin{
+  --admin-layer-1:#af181d;--admin-layer-1-text:#fff;
+  --admin-layer-2:#f3f4f2;--admin-layer-2-text:#341014;
+  --admin-layer-3:#741015;--admin-layer-3-text:#fff;
+}
+html[data-theme="manunited"] body #app #view-admin{
+  --admin-layer-1:#9f160b;--admin-layer-1-text:#fff;
+  --admin-layer-2:#f7fef8;--admin-layer-2-text:#42100c;
+  --admin-layer-3:#fcff40;--admin-layer-3-text:#171717;
+}
+
+/* Current / Upcoming now uses the same flat navigation language as the
+   Game Setup / Production Management / Analytics navigation. */
+html[data-theme] body #app #view-admin .admin-round-tabs{
+  position:relative!important;display:grid!important;grid-template-columns:1fr 1fr!important;
+  gap:0!important;margin:10px 0 17px!important;padding:0!important;
+  background:transparent!important;border:0!important;
+  border-bottom:1px solid color-mix(in srgb,var(--admin-layer-3) 38%,transparent)!important;
+  border-radius:0!important;box-shadow:none!important;
+}
+html[data-theme] body #app #view-admin .admin-round-tabs:after{
+  content:""!important;position:absolute!important;inset-inline-start:0!important;bottom:-2px!important;
+  width:50%!important;height:4px!important;border-radius:999px!important;
+  background:var(--admin-layer-3)!important;
+  box-shadow:0 2px 9px color-mix(in srgb,var(--admin-layer-3) 38%,transparent)!important;
+  transform:translateX(0);transition:transform .22s ease!important;pointer-events:none!important;
+}
+html[dir="ltr"][data-theme] body #app #view-admin .admin-round-tabs:has(.admin-round-tab:nth-child(2).active):after{transform:translateX(100%)}
+html[dir="rtl"][data-theme] body #app #view-admin .admin-round-tabs:has(.admin-round-tab:nth-child(2).active):after{transform:translateX(-100%)}
+html[data-theme] body #app #view-admin .admin-round-tab,
+html[data-theme] body #app #view-admin .admin-round-tab.active{
+  position:relative!important;min-height:56px!important;padding:10px 14px!important;
+  background:transparent!important;border:0!important;border-radius:0!important;box-shadow:none!important;
+  color:color-mix(in srgb,var(--admin-layer-1-text) 72%,transparent)!important;
+}
+html[data-theme] body #app #view-admin .admin-round-tab.active{color:var(--admin-layer-1-text)!important}
+html[data-theme] body #app #view-admin .admin-round-tab.active:after{display:none!important}
+
+/* Give every large Production / Analytics module and directory card real breathing room. */
+html[data-theme] body #app #view-admin :is(.admin-production-body-v1100,.admin-analytics-body-v1100){
+  display:grid!important;gap:16px!important;
+}
+html[data-theme] body #app #view-admin .admin-v1094-list{
+  column-gap:16px!important;row-gap:12px!important;
+}
+
+/* Level 1 — large outer modules. */
+html[data-theme] body #app #view-admin .admin-section-v1100{
+  background:var(--admin-layer-1)!important;color:var(--admin-layer-1-text)!important;
+  border-color:color-mix(in srgb,var(--admin-layer-3) 45%,transparent)!important;
+}
+html[data-theme] body #app #view-admin .admin-block-title-v1100,
+html[data-theme] body #app #view-admin .admin-block-title-v1100 :is(span,small){
+  color:var(--admin-layer-1-text)!important;-webkit-text-fill-color:var(--admin-layer-1-text)!important;
+}
+
+/* Remove the redundant same-colour intermediate panel in Analytics/Accounts. */
+html[data-theme] body #app #view-admin .admin-v1094-panel{
+  background:transparent!important;border:0!important;box-shadow:none!important;color:inherit!important;
+}
+
+/* Level 2 — cards inside a Level-1 module. */
+html[data-theme] body #app #view-admin :is(
+ .admin-v1094-user,.admin-v1094-metric,.admin-v1094-box,.admin-health-card-v1100,
+ .admin-tracker-chip-v1095,.admin-tracker-row-v1095,.league-admin-tracker-row-v1104,
+ .admin-live-note,.admin-focus-panel,.selected-fixtures-summary,.admin-empty-v1100
+){
+  background:var(--admin-layer-2)!important;color:var(--admin-layer-2-text)!important;
+  border-color:color-mix(in srgb,var(--admin-layer-2-text) 25%,transparent)!important;
+}
+html[data-theme] body #app #view-admin :is(
+ .admin-v1094-user,.admin-v1094-metric,.admin-v1094-box,.admin-health-card-v1100,
+ .admin-tracker-chip-v1095,.admin-tracker-row-v1095,.league-admin-tracker-row-v1104,
+ .admin-live-note,.admin-focus-panel,.selected-fixtures-summary,.admin-empty-v1100
+) :is(h1,h2,h3,h4,h5,p,strong,b,span,small,label,.muted){
+  color:inherit!important;-webkit-text-fill-color:currentColor!important;
+}
+
+/* The empty-selection state is the same secondary/table surface, never white. */
+html[data-theme] body #app #view-admin .selected-fixtures-empty{
+  margin:10px 0!important;padding:13px 14px!important;border-radius:12px!important;
+  background:var(--admin-layer-2)!important;color:var(--admin-layer-2-text)!important;
+  border:1px solid color-mix(in srgb,var(--admin-layer-2-text) 25%,transparent)!important;
+}
+
+/* Level 3 — boxes/pills nested inside Level-2 cards. */
+html[data-theme] body #app #view-admin .admin-v1094-detail{
+  background:var(--admin-layer-3)!important;color:var(--admin-layer-3-text)!important;
+  border:1px solid color-mix(in srgb,var(--admin-layer-3-text) 24%,transparent)!important;
+  border-radius:10px!important;padding:8px 9px!important;
+}
+html[data-theme] body #app #view-admin .admin-v1094-detail :is(strong,span,small){
+  color:var(--admin-layer-3-text)!important;-webkit-text-fill-color:var(--admin-layer-3-text)!important;
+}
+html[data-theme] body #app #view-admin .admin-v1094-chip,
+html[data-theme] body #app #view-admin .admin-v1094-user .admin-v1094-pill:not(.good):not(.warn):not(.bad){
+  background:var(--admin-layer-3)!important;color:var(--admin-layer-3-text)!important;
+  border-color:color-mix(in srgb,var(--admin-layer-3-text) 25%,transparent)!important;
+  -webkit-text-fill-color:var(--admin-layer-3-text)!important;
+}
+html[data-theme] body #app #view-admin .admin-v1094-user .admin-v1094-pill.good{
+  background:#167249!important;color:#fff!important;border-color:#52b987!important;-webkit-text-fill-color:#fff!important;
+}
+html[data-theme] body #app #view-admin .admin-v1094-user .admin-v1094-pill.warn{
+  background:#9a6218!important;color:#fff!important;border-color:#d0a45a!important;-webkit-text-fill-color:#fff!important;
+}
+html[data-theme] body #app #view-admin .admin-v1094-user .admin-v1094-pill.bad{
+  background:#9f2932!important;color:#fff!important;border-color:#d36e75!important;-webkit-text-fill-color:#fff!important;
+}
+
+/* Ultimate-Admin identity data stays readable on the Level-2 account card. */
+html[data-theme] body #app #view-admin .admin-v1094-email{
+  margin-top:4px!important;color:var(--admin-layer-2-text)!important;
+  -webkit-text-fill-color:var(--admin-layer-2-text)!important;opacity:.9!important;
+  font-size:.7rem!important;font-weight:800!important;overflow-wrap:anywhere!important;
+}
+
+/* The directory title already carries the total; remove the awkward standalone “N found” bubble. */
+html[data-theme] body #app #view-admin .admin-v1094-searchrow>.admin-v1094-pill{display:none!important}
+html[data-theme] body #app #view-admin .admin-v1094-searchrow{grid-template-columns:minmax(0,1fr)!important}
+
+/* Account actions must contrast with their immediate Level-2 card. */
+html[data-theme] body #app #view-admin .admin-v1094-user :is(.btn-secondary,.btn-ghost){
+  background:var(--admin-layer-1)!important;color:var(--admin-layer-1-text)!important;
+  border-color:color-mix(in srgb,var(--admin-layer-1-text) 32%,transparent)!important;
+}
+html[data-theme] body #app #view-admin .admin-v1094-user :is(.btn-secondary,.btn-ghost) *{
+  color:var(--admin-layer-1-text)!important;-webkit-text-fill-color:var(--admin-layer-1-text)!important;
+}
+
+@media(max-width:720px){
+  html[data-theme] body #app #view-admin .admin-v1094-list{row-gap:12px!important}
+  html[data-theme] body #app #view-admin .admin-round-tab{padding-inline:7px!important;font-size:.74rem!important}
+}
+@media(prefers-reduced-motion:reduce){
+  html[data-theme] body #app #view-admin .admin-round-tabs:after{transition:none!important}
+}
+</style>
+
 </body>
 </html>
