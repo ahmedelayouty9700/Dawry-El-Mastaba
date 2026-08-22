@@ -14722,7 +14722,7 @@ function submissionTrackerV1085(){if(adminOpsV1085.error)return`<div class="admi
 window.copyMissingSubmissionReminderV1085=async function(){const d=adminOpsV1085.data||{},gw=d.gameweek||{},missing=(d.users||[]).filter(u=>u.is_private_member&&u.submission_status!=='submitted');if(!missing.length)return toast(L('Everyone has submitted.','الكل أرسل توقعاته.'),'good');const text=L(`Mastaba GW${gw.number} reminder: ${missing.map(x=>x.display_name).join(', ')} still need to submit predictions. Deadline: ${fmtV1085(gw.deadline_at,true)}.`,`تذكير المصطبة - الجولة ${gw.number}: ${missing.map(x=>x.display_name).join('، ')} لسه محتاجين يرسلوا توقعاتهم. الموعد النهائي: ${fmtV1085(gw.deadline_at,true)}.`);try{await navigator.clipboard.writeText(text);toast(L('Reminder copied.','تم نسخ التذكير.'),'good')}catch{window.prompt(L('Copy this reminder','انسخ التذكير ده'),text)}};
 function healthV1085(){if(!adminOpsV1085.loaded)return`<div class="admin-loading-v1085">${L('Loading Production health…','جاري تحميل حالة الإنتاج…')}</div>`;const h=adminOpsV1085.data.health||{},g=adminOpsV1085.data.gameweek||{},poolOk=Number(h.player_pool_teams)===Number(h.selected_teams)&&Number(h.selected_teams)>0,apiPct=Number(h.api_limit)?Math.round(Number(h.api_used)/Number(h.api_limit)*100):0;return`<div class="admin-health-grid-v1085"><div class="admin-health-card-v1085"><strong>${Number(h.registered_total||0)}</strong><small>${L('Registered Users','مستخدم مسجل')}</small></div><div class="admin-health-card-v1085"><strong class="${poolOk?'admin-health-good-v1085':'admin-health-warn-v1085'}">${Number(h.player_pool_teams||0)}/${Number(h.selected_teams||0)} ${L('teams','فريق')}</strong><small>${L(`Player Cache · ${Number(h.player_pool_players||0)} players`,`كاش اللاعبين · ${Number(h.player_pool_players||0)} لاعب`)}</small></div><div class="admin-health-card-v1085"><strong>${Number(h.api_used||0).toLocaleString()} / ${Number(h.api_limit||7500).toLocaleString()}</strong><small>${L(`API Today · ${apiPct}%`,`API اليوم · ${apiPct}%`)}</small></div><div class="admin-health-card-v1085"><strong>${fmtV1085(g.deadline_at,true)}</strong><small>${L('Prediction Deadline','موعد قفل التوقعات')}</small></div><div class="admin-health-card-v1085"><strong class="${String(h.public_league_status)==='active'?'admin-health-warn-v1085':'admin-health-good-v1085'}">${String(h.public_league_status)==='active'?L('Active','شغال'):L('Waiting','منتظر')}</strong><small>${L('Public League','الدوري العام')}</small></div></div>`}
 function clubOptionsV1085(selected){return Object.entries(RIVALRY_OPTIONS_V1085).map(([k,n])=>`<option value="${k}" ${selected===k?'selected':''}>${escV1085(n)}</option>`).join('')}
-function userManagerV1085(){if(adminOpsV1085.error)return`<div class="panel admin-users-panel"><div class="admin-error-v1085">${escV1085(adminOpsV1085.error)}</div></div>`;if(!adminOpsV1085.loaded)return`<div class="panel admin-users-panel"><div class="admin-loading-v1085">${L('Loading registered Production users…','جاري تحميل مستخدمي الإنتاج…')}</div></div>`;const users=adminOpsV1085.data.users||[],me=window.prodCtxV1073?.user?.id,gwCount=Number(adminOpsV1085.data?.gameweek?.fixture_count||0);return`<div class="panel admin-users-panel"><div class="admin-ops-head-v1085"><div><h3>${L('Registered Users','المستخدمون المسجلون')}</h3><small>${L('Latest registrations are shown first. Search finds older users without loading the entire Public League.','أحدث التسجيلات تظهر الأول. البحث يلاقي المستخدمين الأقدم من غير تحميل الدوري العام كله.')}</small></div><button class="btn btn-ghost admin-ops-refresh-v1085" onclick="refreshAdminOpsV1085()">${L('Refresh','تحديث')}</button></div><input class="admin-user-search-v1085" value="${escV1085(adminOpsV1085.search)}" placeholder="${L('Search registered user…','ابحث عن مستخدم مسجل…')}" oninput="setAdminUserSearchV1085(this.value)"><div class="admin-reg-list-v1085">${users.map(u=>{const slot=(state.users||[]).find(x=>x.authUserId===u.user_id)?.id||null,isMe=u.user_id===me;return`<div class="admin-reg-card-v1085 ${u.is_private_member?'':'waiting'}"><div class="admin-reg-top-v1085"><span class="admin-reg-avatar-v1085">${initialsV1085(u.display_name)}</span><div><strong>${escV1085(u.display_name)}</strong><small>${L('Registered','سجل')} ${fmtV1085(u.registered_at,true)} · ${u.active?L('Active','نشط'):L('Inactive','غير نشط')}</small>${activityBadgeV1086(u,gwCount)}</div><span class="admin-member-pill-v1085 ${u.is_private_member?'in':'out'}">${u.is_private_member?L('Mastaba Member','عضو المصطبة'):L('Waiting','منتظر')}</span></div>${u.is_private_member?`<div class="admin-rivalry-edit-v1085"><label>${L('Rivalry Clubs','أندية Rivalry')}</label><div class="admin-rivalry-row-v1085"><select id="rv1-${u.user_id}">${clubOptionsV1085(u.club_1||'BAR')}</select><select id="rv2-${u.user_id}">${clubOptionsV1085(u.club_2||'AHL')}</select><button class="btn btn-secondary" onclick="saveAdminRivalryV1085('${u.user_id}')">${L('Save Rivals','حفظ')}</button></div><div class="admin-start-row-v1085"><span>${L('Scoring begins from Gameweek','احتساب النقاط يبدأ من الجولة')}</span><input id="sgw-${u.user_id}" type="number" min="1" value="${Number(u.scoring_from_gameweek||1)}"><button class="btn btn-ghost" onclick="saveAdminScoringStartV1085('${u.user_id}')">${L('Save Start','حفظ البداية')}</button></div></div>`:''}<div class="admin-reg-actions-v1085">${u.is_private_member?(isMe?'':`<button class="btn btn-danger" onclick="setAdminMemberV1085('${u.user_id}',false)">${L('Remove from Mastaba','إزالة من المصطبة')}</button>`):`<button class="btn btn-primary" onclick="setAdminMemberV1085('${u.user_id}',true)">${L('Add to Mastaba','إضافة للمصطبة')}</button>`}${slot&&!isMe?`<button class="btn btn-secondary" onclick="adminViewAs('${slot}')">${L('View as User','عرض كمستخدم')}</button>`:''}${isMe?'':`<button class="btn btn-ghost" onclick="toggleAdminProfileV1085('${u.user_id}',${u.active?'false':'true'})">${u.active?L('Deactivate','إيقاف'):L('Reactivate','إعادة التفعيل')}</button>`}</div></div>`}).join('')}</div></div>`}
+function userManagerV1085(){if(adminOpsV1085.error)return`<div class="panel admin-users-panel"><div class="admin-error-v1085">${escV1085(adminOpsV1085.error)}</div></div>`;if(!adminOpsV1085.loaded)return`<div class="panel admin-users-panel"><div class="admin-loading-v1085">${L('Loading registered Production users…','جاري تحميل مستخدمي الإنتاج…')}</div></div>`;const users=adminOpsV1085.data.users||[],me=window.prodCtxV1073?.user?.id,gwCount=Number(adminOpsV1085.data?.gameweek?.fixture_count||0);return`<div class="panel admin-users-panel"><div class="admin-ops-head-v1085"><div><h3>${L('Registered Users','المستخدمون المسجلون')}</h3><small>${L('Latest registrations are shown first. Search finds older users without loading the entire Public League.','أحدث التسجيلات تظهر الأول. البحث يلاقي المستخدمين الأقدم من غير تحميل الدوري العام كله.')}</small></div><button class="btn btn-ghost admin-ops-refresh-v1085" onclick="refreshAdminOpsV1085()">${L('Refresh','تحديث')}</button></div><input class="admin-user-search-v1085" value="${escV1085(adminOpsV1085.search)}" placeholder="${L('Search registered user…','ابحث عن مستخدم مسجل…')}" oninput="setAdminUserSearchV1085(this.value)"><div class="admin-reg-list-v1085">${users.map(u=>{const slot=(state.users||[]).find(x=>x.authUserId===u.user_id)?.id||null,isMe=u.user_id===me;return`<div class="admin-reg-card-v1085 ${u.is_private_member?'':'waiting'}"><div class="admin-reg-top-v1085"><span class="admin-reg-avatar-v1085">${initialsV1085(u.display_name)}</span><div><strong>${escV1085(u.display_name)}</strong>${window.adminEmailForUserV1104?.(u.user_id)||''}<small>${L('Registered','سجل')} ${fmtV1085(u.registered_at,true)} · ${u.active?L('Active','نشط'):L('Inactive','غير نشط')}</small>${activityBadgeV1086(u,gwCount)}</div><span class="admin-member-pill-v1085 ${u.is_private_member?'in':'out'}">${u.is_private_member?L('Mastaba Member','عضو المصطبة'):L('Waiting','منتظر')}</span></div>${u.is_private_member?`<div class="admin-rivalry-edit-v1085"><label>${L('Rivalry Clubs','أندية Rivalry')}</label><div class="admin-rivalry-row-v1085"><select id="rv1-${u.user_id}">${clubOptionsV1085(u.club_1||'BAR')}</select><select id="rv2-${u.user_id}">${clubOptionsV1085(u.club_2||'AHL')}</select><button class="btn btn-secondary" onclick="saveAdminRivalryV1085('${u.user_id}')">${L('Save Rivals','حفظ')}</button></div><div class="admin-start-row-v1085"><span>${L('Scoring begins from Gameweek','احتساب النقاط يبدأ من الجولة')}</span><input id="sgw-${u.user_id}" type="number" min="1" value="${Number(u.scoring_from_gameweek||1)}"><button class="btn btn-ghost" onclick="saveAdminScoringStartV1085('${u.user_id}')">${L('Save Start','حفظ البداية')}</button></div></div>`:''}<div class="admin-reg-actions-v1085">${u.is_private_member?(isMe?'':`<button class="btn btn-danger" onclick="setAdminMemberV1085('${u.user_id}',false)">${L('Remove from Mastaba','إزالة من المصطبة')}</button>`):`<button class="btn btn-primary" onclick="setAdminMemberV1085('${u.user_id}',true)">${L('Add to Mastaba','إضافة للمصطبة')}</button>`}${slot&&!isMe?`<button class="btn btn-secondary" onclick="adminViewAs('${slot}')">${L('View as User','عرض كمستخدم')}</button>`:''}${isMe?'':`<button class="btn btn-ghost" onclick="toggleAdminProfileV1085('${u.user_id}',${u.active?'false':'true'})">${u.active?L('Deactivate','إيقاف'):L('Reactivate','إعادة التفعيل')}</button>`}</div></div>`}).join('')}</div></div>`}
 window.userManagerV1085Public=userManagerV1085;window.healthV1085Public=healthV1085;
 window.setAdminMemberV1085=async function(userId,join){const ctx=window.prodCtxV1073,d=adminOpsV1085.data;if(!ctx||!d)return;if(!join&&!confirm(L('Remove this user from the private Mastaba League? Their history will be kept.','إزالة المستخدم من دوري المصطبة الخاص؟ تاريخه هيفضل محفوظ.')))return;try{let r;if(join)r=await ctx.supa.from('mastaba_league_members').insert({league_id:d.privateLeagueId,user_id:userId,member_role:'member',scoring_from_gameweek:Number(state.week)||1});else r=await ctx.supa.from('mastaba_league_members').delete().eq('league_id',d.privateLeagueId).eq('user_id',userId);if(r.error)throw r.error;toast(join?L('Added to Mastaba League.','تمت الإضافة لدوري المصطبة.'):L('Removed from Mastaba League.','تمت الإزالة من دوري المصطبة.'),'good');setTimeout(()=>location.reload(),450)}catch(e){console.error(e);toast(e?.message||L('Could not update league membership.','تعذر تحديث العضوية.'),'warn')}};
 window.saveAdminRivalryV1085=async function(userId){const ctx=window.prodCtxV1073,c1=document.getElementById(`rv1-${userId}`)?.value,c2=document.getElementById(`rv2-${userId}`)?.value;if(!ctx||!c1||!c2||c1===c2)return toast(L('Choose two different Rivalry Clubs.','اختار ناديين مختلفين للـRivalry.'),'warn');try{const {error}=await ctx.supa.from('mastaba_rivalry_clubs').upsert({user_id:userId,club_1:c1,club_2:c2,updated_at:new Date().toISOString()},{onConflict:'user_id'});if(error)throw error;const slot=(state.users||[]).find(u=>u.authUserId===userId)?.id;if(slot&&typeof MASTABA_SUPPORTER_CLUBS_V1051!=='undefined')MASTABA_SUPPORTER_CLUBS_V1051[slot]=[c1,c2];toast(L('Rivalry Clubs saved.','تم حفظ أندية Rivalry.'),'good');await loadAdminOpsV1085(true);render()}catch(e){console.error(e);toast(e?.message||L('Could not save Rivalry Clubs.','تعذر حفظ أندية Rivalry.'),'warn')}};
@@ -16348,7 +16348,7 @@ function syncProductionRulesV1096(){
       const p=card.querySelector('p');if(p)p.textContent=L('Risky is calculated independently for each league. In the private 7-person Mastaba League, the established minority rule applies: a lone outcome is Risky, and when 5+ choose the majority, an outcome chosen by 2 or fewer is Risky. In Mastaba Public League, your outcome is Risky only when it represents strictly less than 20% of that league’s submitted picks. A correct Risky outcome earns +10 in that league only. The same prediction can therefore be Risky privately but not publicly, or vice versa.','المجازفة بتتحسب بشكل مستقل لكل دوري. في دوري المصطبة الخاص المكوّن من 7، قاعدة الأقلية المعروفة بتطبق: الاختيار المنفرد مجازفة، ولو 5 أو أكتر اختاروا الأغلبية فالاختيار اللي عليه 2 أو أقل يبقى مجازفة. في دوري المصطبة العام، اختيارك يبقى مجازفة فقط لو نسبته أقل من 20% بشكل صارم من توقعات الدوري المرسلة. لو المجازفة طلعت صح تاخد +10 في نفس الدوري فقط. لذلك نفس التوقع ممكن يكون مجازفة في الخاص ومش في العام، أو العكس.');
     }
     if(h===L('Goalscorer Rules','قواعد أول هداف')){
-      const p=card.querySelector('p');if(p)p.textContent=L('For a 0–0 prediction, No Team to Score and No Goalscorer are selected automatically, but no First Team / First Goalscorer points are awarded because no goal occurred. Own goals do not count as First Goalscorer. If you predict only one team to score, the scorer list is restricted to that team.','لو توقعت 0–0، لا يوجد فريق يسجل ولا يوجد هداف بيتحددوا تلقائيًا، لكن مفيش نقاط لأول فريق أو أول هداف لأن مفيش هدف حصل. الأهداف العكسية لا تُحسب كأول هداف. ولو توقعت فريق واحد بس يسجل، قائمة الهدافين بتبقى من الفريق ده بس.');
+      const p=card.querySelector('p');if(p)p.textContent=L('For a 0–0 prediction, No Team to Score and No Goalscorer are selected automatically. If the match finishes 0–0, they earn +2 and +3, so the complete 0–0 remains worth 20 base points. Own goals do not count as First Goalscorer. If you predict only one team to score, the scorer list is restricted to that team.','لو توقعت 0–0، لا يوجد فريق يسجل ولا يوجد هداف بيتحددوا تلقائيًا. لو الماتش خلص 0–0، ياخدوا +2 و+3 وبكده 0–0 الكاملة تفضل تساوي 20 نقطة أساسية. الأهداف العكسية لا تُحسب كأول هداف. ولو توقعت فريق واحد بس يسجل، قائمة الهدافين بتبقى من الفريق ده بس.');
     }
     if(h===L('Rivalry Clubs','أندية Rivalry')){
       const rows=window.prodLeagueV1096?.story?.rivalries||[];
@@ -17129,7 +17129,7 @@ html #view-admin .admin-workspace-v1100 .admin-empty-v1100{padding:18px;text-ali
 <script id="mastaba-v1100-admin-repair">
 (function mastabaV1100(){
 'use strict';
-window.MASTABA_BUILD_VERSION='11.03';
+window.MASTABA_BUILD_VERSION='11.04';
 
 const SCHEDULE_SYNC_V1101='https://bnwjtrtlwnlbldfhaggg.supabase.co/functions/v1/mastaba-schedule-sync';
 const scheduleV1100=window.adminScheduleV1100=window.adminScheduleV1100||{
@@ -17199,16 +17199,18 @@ async function loadFullScheduleV1100(force=false){
   scheduleV1100.completed=0;scheduleV1100.total=0;refreshScheduleStatusV1100();
   try{
     const ctx=window.prodCtxV1073;if(!ctx?.supa)throw new Error(L('Production session is not ready.','جلسة الإنتاج غير جاهزة.'));
-    const cutoff=new Date(Date.now()-12*3600000).toISOString();
-    const [catalogR,sourcesR]=await Promise.all([
+    const cutoff=new Date().toISOString();
+    const [catalogR,sourcesR,usedR]=await Promise.all([
       ctx.supa.from('mastaba_schedule_catalog')
         .select('api_fixture_id,api_league_id,season,competition_name,competition_country,canonical_name,home_team_id,home_team_name,home_team_logo,away_team_id,away_team_name,away_team_logo,kickoff_at,venue_name,fixture_status,source_refreshed_at')
-        .gte('kickoff_at',cutoff).order('kickoff_at',{ascending:true}).limit(2000).abortSignal(controller.signal),
+        .gt('kickoff_at',cutoff).order('kickoff_at',{ascending:true}).limit(2000).abortSignal(controller.signal),
       ctx.supa.from('mastaba_schedule_sources')
         .select('api_league_id,season,canonical_name,schedule_kind,fixture_count,last_success_at,next_refresh_at,last_error,consecutive_failures')
-        .eq('active',true).eq('provider_current',true).order('next_refresh_at',{ascending:true}).abortSignal(controller.signal)
+        .eq('active',true).eq('provider_current',true).order('next_refresh_at',{ascending:true}).abortSignal(controller.signal),
+      ctx.supa.from('mastaba_fixtures').select('api_fixture_id').abortSignal(controller.signal)
     ]);
-    if(catalogR.error)throw catalogR.error;if(sourcesR.error)throw sourcesR.error;
+    if(catalogR.error)throw catalogR.error;if(sourcesR.error)throw sourcesR.error;if(usedR.error)throw usedR.error;
+    window.adminUsedFixtureApiIdsV1104=new Set((usedR.data||[]).map(row=>Number(row?.api_fixture_id)).filter(Boolean));
     const sourceRows=sourcesR.data||[],catalogRows=catalogR.data||[];
     scheduleV1100.total=sourceRows.length;
     scheduleV1100.completed=sourceRows.filter(row=>row.last_success_at).length;
@@ -17223,7 +17225,7 @@ async function loadFullScheduleV1100(force=false){
     const merged=[...new Map([...catalog,...pinned].filter(Boolean).map(f=>[Number(f.apiFixtureId)||String(f.id),f])).values()]
       .sort((a,b)=>new Date(a.kickoff)-new Date(b.kickoff));
     state.fixturePool=merged;
-    const future=catalog.filter(f=>new Date(f.kickoff).getTime()>=Date.now()-12*3600000);
+    const future=catalog.filter(f=>new Date(f.kickoff).getTime()>Date.now());
     const dates=[...new Set(future.map(f=>adminFixtureDateKey(f.kickoff)))].sort();
     scheduleV1100.fixtures=future.length;
     scheduleV1100.competitions=new Set(future.map(f=>typeof window.canonicalCompetitionV1080==='function'?window.canonicalCompetitionV1080(f):f.competition)).size;
@@ -17340,17 +17342,17 @@ function accountDirectoryV1100(){
   const d=accountStateV1100?.data;
   if(accountStateV1100?.loading&&!d)return `<div class="panel"><div class="admin-loading-v1100">${L('Loading account display names…','جاري تحميل الأسماء الظاهرة…')}</div></div>`;
   if(accountStateV1100?.error&&!d)return `<div class="panel"><div class="admin-v1094-error">${escV1100(accountStateV1100.error)}</div></div>`;
-  const users=d?.users||[],total=Number(d?.stats?.registered_total||0),filtered=Number(d?.total_filtered||0),page=Number(d?.page||1),pages=Number(d?.total_pages||1);
+  const users=d?.users||[],total=Number(d?.stats?.registered_total||0),filtered=Number(d?.total_filtered||0),page=Number(d?.page||1),pages=Number(d?.total_pages||1),canSeeEmails=fullAdminV1100()&&d?.can_view_login_emails===true;
   const me=window.prodCtxV1073?.user?.id;
   return `<div class="panel admin-v1094-panel admin-accounts-v1094">
-    <div class="admin-v1094-head"><div><h3>${L('Website Account Directory','دليل حسابات الموقع')} · ${total.toLocaleString()}</h3><small>${L('Only display names are shown. Login emails stay stored in Auth and are never returned to this Admin page.','الأسماء الظاهرة فقط هي اللي بتظهر. إيميلات الدخول محفوظة في Auth ومش بترجع لصفحة الأدمن دي.')}</small></div><button class="btn btn-ghost" onclick="refreshAdminAccountsV1094()">${L('Refresh','تحديث')}</button></div>
-    <div class="admin-v1094-searchrow"><input class="admin-v1094-search" value="${escV1100(accountStateV1100?.search||'')}" placeholder="${L('Search display name…','ابحث بالاسم الظاهر…')}" oninput="setAdminAccountSearchV1094(this.value)"><span class="admin-v1094-pill">${filtered.toLocaleString()} ${L('found','نتيجة')}</span></div>
+    <div class="admin-v1094-head"><div><h3>${L('Website Account Directory','دليل حسابات الموقع')} · ${total.toLocaleString()}</h3><small>${canSeeEmails?L('Login emails are visible only in your Ultimate Admin session. Delegated managers receive display names only.','إيميلات الدخول ظاهرة في جلسة الأدمن الرئيسي بتاعتك فقط. المديرون المفوضون بيستلموا الأسماء الظاهرة فقط.'):L('Only display names are available for this management role.','الأسماء الظاهرة فقط متاحة لصلاحية الإدارة دي.')}</small></div><button class="btn btn-ghost" onclick="refreshAdminAccountsV1094()">${L('Refresh','تحديث')}</button></div>
+    <div class="admin-v1094-searchrow"><input class="admin-v1094-search" value="${escV1100(accountStateV1100?.search||'')}" placeholder="${canSeeEmails?L('Search display name or login email…','ابحث بالاسم الظاهر أو إيميل الدخول…'):L('Search display name…','ابحث بالاسم الظاهر…')}" oninput="setAdminAccountSearchV1094(this.value)"><span class="admin-v1094-pill">${filtered.toLocaleString()} ${L('found','نتيجة')}</span></div>
     <div class="admin-v1094-list">${users.map(u=>{
       const isMe=String(u.user_id)===String(me),status=u.active?L('Active','نشط'):L('Deactivated','موقوف');
       const submitted=Number(u.submitted_rows||0),rows=Number(u.prediction_rows||0),gw=rows?`${submitted}/${rows}`:L('No GW activity','لا يوجد نشاط جولة');
       const canAct=fullAdminV1100()&&!isMe&&!u.is_admin;
       return `<div class="admin-v1094-user ${u.active?'':'inactive'}">
-        <div class="admin-v1094-user-top"><div><div class="admin-v1094-user-name">${escV1100(u.display_name||L('Mastaba User','مستخدم المصطبة'))}</div></div><span class="admin-v1094-pill ${u.active?'good':'bad'}">${status}</span></div>
+        <div class="admin-v1094-user-top"><div><div class="admin-v1094-user-name">${escV1100(u.display_name||L('Mastaba User','مستخدم المصطبة'))}</div>${canSeeEmails&&u.email?`<div class="admin-login-email-v1104">${escV1100(u.email)}</div>`:''}</div><span class="admin-v1094-pill ${u.active?'good':'bad'}">${status}</span></div>
         <div class="admin-v1094-meta">
           <span class="admin-v1094-pill">${escV1100(providerV1100(u.provider))}</span>
           <span class="admin-v1094-pill ${u.email_confirmed?'good':'warn'}">${u.email_confirmed?L('Verified','مؤكد'):L('Unverified','غير مؤكد')}</span>
@@ -17471,7 +17473,7 @@ function productionHTMLV1100(){
   return `${readonly}
     <div class="admin-section-v1100"><div class="admin-block-title-v1100"><span>${L('Gameweek Submission Tracker','متابعة إرسال التوقعات')}</span></div><div class="admin-tracker-slot-v1100">${trackerHTMLV1100()}</div></div>
     ${fullAdminV1100()?`<div class="admin-section-v1100"><div class="admin-block-title-v1100"><span>${L('Production Health','حالة الإنتاج')}</span><small>${L('Independent live check','فحص حي مستقل')}</small></div><div class="admin-health-slot-v1100">${healthHTMLV1100()}</div></div>`:''}
-    <div class="admin-section-v1100"><div class="admin-block-title-v1100"><span>${L('Account Directory','دليل الحسابات')}</span><small>${L('Display names only','الأسماء الظاهرة فقط')}</small></div><div class="admin-accounts-slot-v1100">${accountDirectoryV1100()}</div></div>
+    <div class="admin-section-v1100"><div class="admin-block-title-v1100"><span>${L('Account Directory','دليل الحسابات')}</span><small>${fullAdminV1100()?L('Private login emails · Ultimate Admin only','إيميلات الدخول الخاصة · للأدمن الرئيسي فقط'):L('Display names only','الأسماء الظاهرة فقط')}</small></div><div class="admin-accounts-slot-v1100">${accountDirectoryV1100()}</div></div>
     ${fullAdminV1100()?`<div class="admin-section-v1100"><div class="admin-block-title-v1100"><span>${L('Mastaba League Management','إدارة دوري المصطبة')}</span></div><div class="admin-management-slot-v1100">${managementHTMLV1100()}</div></div>`:''}`;
 }
 function analyticsHTMLV1100(){
@@ -17574,12 +17576,19 @@ if(state?.view==='admin')setTimeout(renderAdminV1100,0);
 })();
 </script>
 
-<script id="mastaba-v1103-navigation-performance">
-/* V11.03 — restore instant page/subpage navigation while keeping the full
+<script id="mastaba-v1104-navigation-performance">
+/* V11.04 — instant navigation, future-only fixture eligibility, and a full
    Supabase schedule available exclusively inside Admin > Game Setup. */
 (function(){
 'use strict';
-window.MASTABA_BUILD_VERSION='11.03';
+window.MASTABA_BUILD_VERSION='11.04';
+
+window.adminEmailForUserV1104=function(userId){
+  const directory=window.adminAccountsV1094?.data;
+  if(!currentUser()?.admin||directory?.can_view_login_emails!==true)return'';
+  const email=(directory.users||[]).find(row=>String(row?.user_id)===String(userId))?.email;
+  return email?`<small class="admin-login-email-v1104">${escapeHTML(String(email))}</small>`:'';
+};
 
 const fixtureKeyV1102=f=>Number(f?.apiFixtureId)?`api:${Number(f.apiFixtureId)}`:`id:${String(f?.id||'')}`;
 function pinnedPoolV1102(){
@@ -17597,7 +17606,7 @@ function captureAndPrunePoolV1102(){
 const saveBaseV1102=window.save||save;
 window.save=save=function(){captureAndPrunePoolV1102();return saveBaseV1102()};
 captureAndPrunePoolV1102();
-try{saveBaseV1102()}catch(e){console.warn('V11.03 state cleanup deferred',e)}
+try{saveBaseV1102()}catch(e){console.warn('V11.04 state cleanup deferred',e)}
 
 function schedulePoolV1102(){
   const full=Array.isArray(window.adminSchedulePoolV1102)?window.adminSchedulePoolV1102:[],rows=full.length?[...full,...pinnedPoolV1102()]:(state.fixturePool||sandboxFixturePool());
@@ -17617,6 +17626,34 @@ window.adminFixtureDateLabel=adminFixtureDateLabel=function(key){
   try{return new Intl.DateTimeFormat(state.lang==='ar'?'ar-EG':'en-US',{weekday:'short',month:'short',day:'numeric',timeZone:userTZ()}).format(new Date(sample.kickoff))}catch{return key}
 };
 
+function fixtureIdentityV1104(f){return Number(f?.apiFixtureId)>0?`api:${Number(f.apiFixtureId)}`:`id:${String(f?.id||'')}`}
+function usedFixtureIdsV1104(){
+  const used=new Set(Array.from(window.adminUsedFixtureApiIdsV1104||[]).map(Number).filter(Boolean));
+  for(const f of state.fixtures||[])if(Number(f?.apiFixtureId)>0)used.add(Number(f.apiFixtureId));
+  return used;
+}
+function eligibleSchedulePoolV1104(target){
+  const selected=target==='current'?(state.fixtures||[]):(state.nextFixtures||[]),selectedKeys=new Set(selected.map(fixtureIdentityV1104)),used=usedFixtureIdsV1104(),now=Date.now();
+  return schedulePoolV1102().filter(f=>{
+    const selectedHere=selectedKeys.has(fixtureIdentityV1104(f));
+    if(target==='current'&&selectedHere)return true;
+    if(!Number.isFinite(new Date(f?.kickoff).getTime())||new Date(f.kickoff).getTime()<=now)return false;
+    if(selectedHere)return true;
+    if(String(f?.phase||'').toLowerCase()==='final')return false;
+    return !(Number(f?.apiFixtureId)>0&&used.has(Number(f.apiFixtureId)));
+  });
+}
+window.ensureAdminBrowser=ensureAdminBrowser=function(target){
+  const ui=adminBrowserState[target]||(adminBrowserState[target]={date:null,league:'all',q:'',limit:24}),pool=eligibleSchedulePoolV1104(target),selected=target==='current'?(state.fixtures||[]):(state.nextFixtures||[]);
+  const dates=[...new Set(pool.map(f=>adminFixtureDateKey(f.kickoff)))].sort();
+  if(!ui.date||!dates.includes(ui.date)){
+    const selectedDate=selected.map(f=>adminFixtureDateKey(f.kickoff)).find(d=>dates.includes(d));
+    ui.date=selectedDate||dates[0]||null;
+  }
+  if(ui.league!=='all'&&!pool.some(f=>competitionV1102(f)===ui.league))ui.league='all';
+  return ui;
+};
+
 let adminFixtureMountTokenV1103=0;
 function fullScheduleReadyV1103(){
   return !!window.adminScheduleV1100?.loaded||(Array.isArray(window.adminSchedulePoolV1102)&&window.adminSchedulePoolV1102.length>0);
@@ -17627,7 +17664,7 @@ function fixturePlaceholderV1103(target){
   return`<div class="fixture-browser fixture-browser-loading-v1103" data-admin-fixture-slot-v1103="${target}"><div class="fixture-empty">${label}</div></div>`;
 }
 function buildAdminFixtureSelectorV1103(target){
-  const selected=target==='current'?state.fixtures:(state.nextFixtures||[]),ui=ensureAdminBrowser(target),pool=schedulePoolV1102();
+  const selected=target==='current'?state.fixtures:(state.nextFixtures||[]),ui=ensureAdminBrowser(target),pool=eligibleSchedulePoolV1104(target);
   const sampleByDate=new Map(),dates=[];pool.forEach(f=>{const key=adminFixtureDateKey(f.kickoff);if(!sampleByDate.has(key)){sampleByDate.set(key,f);dates.push(key)}});dates.sort();
   if(!ui.date||!dates.includes(ui.date)){
     const selectedDate=selected.length?adminFixtureDateKey(selected.slice().sort((a,b)=>new Date(a.kickoff)-new Date(b.kickoff))[0].kickoff):null;
@@ -17645,7 +17682,7 @@ function buildAdminFixtureSelectorV1103(target){
     const sample=sampleByDate.get(key);if(!sample)return adminFixtureDateLabel(key);
     try{return new Intl.DateTimeFormat(state.lang==='ar'?'ar-EG':'en-US',{weekday:'short',month:'short',day:'numeric',timeZone:userTZ()}).format(new Date(sample.kickoff))}catch{return key}
   }
-  return`<div class="fixture-browser" data-admin-target-v1080="${target}"><div class="fixture-browser-search"><input class="fixture-search-box" value="${escapeHTML(ui.q||'')}" placeholder="${L('Search team, alias, league or stadium…','ابحث باسم فريق أو اختصار أو بطولة أو ملعب…')}" autocomplete="off" spellcheck="false" oninput="setAdminFixtureQueryV1080('${target}',this.value)"><select class="fixture-league-filter" onchange="setAdminFixtureLeague('${target}',this.value)"><option value="all">${L('All Leagues','كل البطولات')}</option>${leagues.map(x=>`<option value="${escapeHTML(x)}" ${ui.league===x?'selected':''}>${escapeHTML(x)}</option>`).join('')}</select></div><div class="fixture-day-strip">${dates.map(d=>{const label=dateLabel(d);return`<button class="fixture-day ${ui.date===d&&!query?'active':''}" onclick="setAdminFixtureDay('${target}','${d}')"><small>${label.split(' ')[0]}</small><b>${label.replace(/^\S+\s*/,'')}</b></button>`}).join('')}</div><div class="fixture-search-mode-v1080" data-search-status-v1080>${status}${limited}</div><div class="fixture-selector grouped">${rows}</div>${more}</div>`;
+  return`<div class="fixture-browser" data-admin-target-v1080="${target}"><div class="fixture-browser-search"><input class="fixture-search-box" value="${escapeHTML(ui.q||'')}" placeholder="${L('Search team, alias, league or stadium…','ابحث باسم فريق أو اختصار أو بطولة أو ملعب…')}" autocomplete="off" spellcheck="false" oninput="setAdminFixtureQueryV1080('${target}',this.value)"><select class="fixture-league-filter" onchange="setAdminFixtureLeague('${target}',this.value)"><option value="all">${L('All Leagues','كل البطولات')}</option>${leagues.map(x=>`<option value="${escapeHTML(x)}" ${ui.league===x?'selected':''}>${escapeHTML(x)}</option>`).join('')}</select></div><div class="fixture-day-strip">${dates.map(d=>{const label=dateLabel(d);return`<button type="button" class="fixture-day ${ui.date===d&&!query?'active':''}" aria-pressed="${ui.date===d&&!query?'true':'false'}" onclick="setAdminFixtureDay('${target}','${d}')"><small>${label.split(' ')[0]}</small><b>${label.replace(/^\S+\s*/,'')}</b></button>`}).join('')}</div><div class="fixture-search-mode-v1080" data-search-status-v1080>${status}${limited}</div><div class="fixture-selector grouped">${rows}</div>${more}</div>`;
 }
 function mountAdminFixtureSelectorV1103(target,token){
   if(token!==adminFixtureMountTokenV1103||state.view!=='admin'||String(state.adminWorkspaceTabV1095||'game')!=='game')return;
@@ -17661,9 +17698,9 @@ window.adminFixtureSelector=adminFixtureSelector=function(target){queueAdminFixt
 function refreshSearchV1102(target){
   if(state.view!=='admin')return;
   const old=document.querySelector(`#view-admin .fixture-browser[data-admin-target-v1080="${target}"]`);if(!old){queueAdminFixtureMountV1103(target);return}
-  const y=window.scrollY,active=document.activeElement,restoreFocus=!!active&&active===old.querySelector('.fixture-search-box'),start=restoreFocus?active.selectionStart:null,end=restoreFocus?active.selectionEnd:null;
+  const y=window.scrollY,dayScroll=old.querySelector('.fixture-day-strip')?.scrollLeft||0,active=document.activeElement,restoreFocus=!!active&&active===old.querySelector('.fixture-search-box'),start=restoreFocus?active.selectionStart:null,end=restoreFocus?active.selectionEnd:null;
   old.outerHTML=buildAdminFixtureSelectorV1103(target);
-  requestAnimationFrame(()=>{window.scrollTo({top:y,left:0,behavior:'auto'});if(!restoreFocus)return;const input=document.querySelector(`#view-admin .fixture-browser[data-admin-target-v1080="${target}"] .fixture-search-box`);if(input){try{input.focus({preventScroll:true})}catch{input.focus()}try{input.setSelectionRange(start??input.value.length,end??input.value.length)}catch{}}});
+  requestAnimationFrame(()=>{window.scrollTo({top:y,left:0,behavior:'auto'});const root=document.querySelector(`#view-admin .fixture-browser[data-admin-target-v1080="${target}"]`),strip=root?.querySelector('.fixture-day-strip');if(strip)strip.scrollLeft=dayScroll;if(!restoreFocus)return;const input=root?.querySelector('.fixture-search-box');if(input){try{input.focus({preventScroll:true})}catch{input.focus()}try{input.setSelectionRange(start??input.value.length,end??input.value.length)}catch{}}});
 }
 window.setAdminFixtureQueryV1080=window.setAdminFixtureQuery=function(target,value){const ui=ensureAdminBrowser(target);ui.q=value;ui.limit=24;clearTimeout(window.__adminFixtureSearchTimerV1102);window.__adminFixtureSearchTimerV1102=setTimeout(()=>refreshSearchV1102(target),120)};
 window.setAdminFixtureLeague=function(target,value){const ui=ensureAdminBrowser(target);ui.league=value;ui.limit=24;refreshSearchV1102(target)};
@@ -17693,7 +17730,7 @@ function renderRouteV1102(view){
 }
 let routeSaveHandleV1102=null;
 function persistRouteV1102(){
-  const commit=()=>{routeSaveHandleV1102=null;try{save()}catch(e){console.warn('V11.03 route persistence deferred',e)}};
+  const commit=()=>{routeSaveHandleV1102=null;try{save()}catch(e){console.warn('V11.04 route persistence deferred',e)}};
   if(routeSaveHandleV1102!=null){try{cancelIdleCallback(routeSaveHandleV1102)}catch{clearTimeout(routeSaveHandleV1102)}}
   routeSaveHandleV1102=typeof requestIdleCallback==='function'?requestIdleCallback(commit,{timeout:600}):setTimeout(commit,0);
 }
@@ -17740,6 +17777,90 @@ window.switchAdminWorkspaceTabV1095=switchAdminTabV1102;
 window.addEventListener('resize',()=>requestAnimationFrame(()=>{try{syncBottomNavGlider()}catch{}positionAdminLineV1102()}),{passive:true});
 })();
 </script>
+
+<style id="mastaba-v1104-admin-theme-awareness">
+/* V11.04 — Admin uses the same surface/text hierarchy as the homepage. */
+html #view-admin .admin-workspace-v1100{
+  --adm-bg:color-mix(in srgb,var(--theme-surface) 92%,var(--theme-bg-b) 8%);
+  --adm-card:var(--theme-surface);--adm-card-2:var(--theme-surface-2);
+  --adm-text:var(--theme-text);--adm-muted:var(--theme-muted);
+  --adm-line:color-mix(in srgb,var(--theme-accent) 24%,var(--theme-border));
+  --adm-accent:var(--theme-action);--adm-accent-2:var(--theme-action-2);--adm-highlight:var(--theme-accent);
+  --adm-head-a:var(--theme-head-a);--adm-head-b:var(--theme-head-b);--adm-head-text:var(--theme-head-text);
+  --adm-input:var(--theme-input);--adm-input-text:var(--theme-text);
+  --adm-secondary:var(--theme-secondary-button);--adm-secondary-text:var(--theme-secondary-text);
+  --adm-primary-text:var(--theme-action-text);--adm-key:var(--theme-accent)
+}
+html[data-theme="arsenal"] #view-admin .admin-workspace-v1100{
+  --adm-bg:#edf2f8;--adm-card:#fff;--adm-card-2:#f7f9fc;--adm-text:#1b3272;--adm-muted:#60708f;
+  --adm-line:rgba(27,50,114,.18);--adm-accent:#cf1f15;--adm-accent-2:#1b3272;--adm-highlight:#cf1f15;
+  --adm-head-a:#cf1f15;--adm-head-b:#a71710;--adm-head-text:#fff;
+  --adm-input:#fff;--adm-input-text:#1b3272;--adm-secondary:#1b3272;--adm-secondary-text:#fff;
+  --adm-primary-text:#fff;--adm-key:#cf1f15
+}
+html[data-theme="realmadrid"] #view-admin .admin-workspace-v1100{--adm-key:#274793}
+html[data-theme="barcelona"] #view-admin .admin-workspace-v1100{--adm-key:#d9b82e}
+html[data-theme="acmilan"] #view-admin .admin-workspace-v1100{--adm-key:#bf1b2d}
+
+html #view-admin .admin-workspace-v1100 .admin-workspace-head-v1100{
+  background:linear-gradient(128deg,var(--adm-head-a) 0 68%,var(--adm-head-b) 68% 100%)!important;
+  color:var(--adm-head-text)!important;border-color:var(--adm-line)!important
+}
+html #view-admin .admin-workspace-v1100 .admin-workspace-head-v1100 :is(h1,p,strong,span){color:var(--adm-head-text)!important}
+html #view-admin .admin-workspace-v1100 .admin-role-badge-v1100{color:var(--adm-head-text)!important;border-color:color-mix(in srgb,var(--adm-head-text) 38%,transparent)!important}
+html #view-admin .admin-workspace-v1100 :is(.admin-tabs-v1100,.admin-section-v1100){background:var(--adm-bg)!important;color:var(--adm-text)!important;border-color:var(--adm-line)!important}
+html #view-admin .admin-workspace-v1100 .admin-tabs-v1100{background:var(--adm-card)!important}
+html #view-admin .admin-workspace-v1100 .admin-tab-v1100{color:var(--adm-muted)!important}
+html #view-admin .admin-workspace-v1100 .admin-tab-v1100.active{color:var(--adm-key)!important}
+html #view-admin .admin-workspace-v1100 .admin-tab-line-v1100{background:var(--adm-key)!important;transition:left .18s ease,width .18s ease!important}
+
+html #view-admin .admin-workspace-v1100 :is(
+  .panel,.admin-live-note,.admin-v1094-user,.admin-v1094-box,.admin-v1094-metric,.admin-match-v1100,
+  .selected-fixtures-summary,.fixture-choice,.admin-reg-card-v1085,.admin-submit-row-v1085,
+  .admin-summary-chip-v1085,.admin-health-card-v1085,.admin-tracker-row-v1095
+){background:var(--adm-card)!important;color:var(--adm-text)!important;border-color:var(--adm-line)!important;box-shadow:none!important}
+html #view-admin .admin-workspace-v1100 :is(.admin-health-card-v1100,.admin-v1094-chip,.admin-member-pill-v1085){background:var(--adm-card-2)!important;border-color:var(--adm-line)!important}
+html #view-admin .admin-workspace-v1100 :is(
+  h1,h2,h3,h4,h5,strong,b,label,.admin-reg-top-v1085 strong,.admin-ops-head-v1085 h3,
+  .admin-reg-top-v1085 label,.fixture-team-line b,.fixture-kickoff,.fixture-check-label,
+  .admin-v1094-user-name,.admin-v1094-team-name,.admin-v1094-team-value
+){color:var(--adm-text)!important}
+html #view-admin .admin-workspace-v1100 :is(
+  small,.muted,.fixture-stadium,.admin-v1094-detail,.admin-v1094-privacy,.admin-reg-top-v1085 small,
+  .admin-start-row-v1085 span,.admin-v1094-pagination span,.admin-submit-count-v1085
+){color:var(--adm-muted)!important}
+html #view-admin .admin-workspace-v1100 :is(.admin-block-title-v1100,.fixture-league-title,.admin-ops-head-v1085){color:var(--adm-text)!important;border-color:var(--adm-line)!important}
+
+html #view-admin .admin-workspace-v1100 :is(input,select,textarea,.fixture-search-box,.fixture-league-filter,.admin-user-search-v1085,.admin-v1094-search){
+  background:var(--adm-input)!important;color:var(--adm-input-text)!important;border-color:var(--adm-line)!important;
+  -webkit-text-fill-color:var(--adm-input-text)!important
+}
+html #view-admin .admin-workspace-v1100 input::placeholder{color:var(--adm-muted)!important;-webkit-text-fill-color:var(--adm-muted)!important;opacity:.78}
+html #view-admin .admin-workspace-v1100 option{background:var(--adm-input)!important;color:var(--adm-input-text)!important}
+html #view-admin .admin-workspace-v1100 .fixture-day{background:var(--adm-card)!important;color:var(--adm-text)!important;border-color:var(--adm-line)!important}
+html #view-admin .admin-workspace-v1100 .fixture-day.active{background:var(--adm-accent)!important;color:var(--adm-primary-text)!important;border-color:var(--adm-accent)!important}
+html #view-admin .admin-workspace-v1100 .fixture-day.active *{color:var(--adm-primary-text)!important}
+html #view-admin .admin-workspace-v1100 :is(.admin-schedule-status-v1100,.admin-empty-v1100){background:var(--adm-card)!important;color:var(--adm-muted)!important;border-color:var(--adm-line)!important}
+
+html #view-admin .admin-workspace-v1100 .btn-primary{background:var(--adm-accent)!important;color:var(--adm-primary-text)!important;border-color:var(--adm-accent)!important;-webkit-text-fill-color:var(--adm-primary-text)!important}
+html #view-admin .admin-workspace-v1100 :is(.btn-secondary,.btn-ghost){background:var(--adm-secondary)!important;color:var(--adm-secondary-text)!important;border-color:var(--adm-line)!important;-webkit-text-fill-color:var(--adm-secondary-text)!important}
+html #view-admin .admin-workspace-v1100 .btn-danger{background:var(--adm-card)!important;color:var(--adm-bad)!important;border-color:color-mix(in srgb,var(--adm-bad) 45%,var(--adm-line))!important;-webkit-text-fill-color:var(--adm-bad)!important}
+html #view-admin .admin-workspace-v1100 .admin-publish-btn{display:flex!important;align-items:center!important;justify-content:center!important;width:100%!important;min-height:54px!important;height:auto!important;padding:13px 16px!important;line-height:1.2!important;color:var(--adm-primary-text)!important}
+
+html #view-admin .admin-workspace-v1100 .admin-reg-avatar-v1085{background:var(--adm-accent)!important;color:var(--adm-primary-text)!important}
+html #view-admin .admin-workspace-v1100 .admin-activity-v1086.submitted{color:#28a76c!important}
+html #view-admin .admin-workspace-v1100 .admin-activity-v1086.draft{color:#c88b19!important}
+html #view-admin .admin-workspace-v1100 .admin-activity-v1086.not_started{color:#c64a5c!important}
+html #view-admin .admin-workspace-v1100 .admin-member-pill-v1085.in{color:#168c58!important;background:color-mix(in srgb,#29a86b 13%,var(--adm-card))!important}
+html #view-admin .admin-workspace-v1100 .admin-member-pill-v1085.out{color:#a96f12!important;background:color-mix(in srgb,#d59a2c 13%,var(--adm-card))!important}
+html #view-admin .admin-workspace-v1100 .admin-login-email-v1104{display:block;margin-top:3px;color:var(--adm-key)!important;font-size:.66rem;font-weight:900;overflow-wrap:anywhere;-webkit-text-fill-color:var(--adm-key)!important}
+
+.bottom-nav .nav-glider{transition:left .24s cubic-bezier(.2,.8,.2,1),width .24s cubic-bezier(.2,.8,.2,1),background-color .18s ease!important;will-change:left,width}
+@media(max-width:760px){
+  html #view-admin .admin-workspace-v1100 .admin-reg-list-v1085{grid-template-columns:1fr!important}
+  html #view-admin .admin-workspace-v1100 .admin-reg-card-v1085{padding:12px!important}
+}
+</style>
 
 </body>
 </html>
