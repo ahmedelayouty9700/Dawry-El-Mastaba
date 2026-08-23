@@ -17174,7 +17174,7 @@ html #view-admin .admin-workspace-v1100 .admin-empty-v1100{padding:18px;text-ali
 <script id="mastaba-v1100-admin-repair">
 (function mastabaV1100(){
 'use strict';
-window.MASTABA_BUILD_VERSION='11.13';
+window.MASTABA_BUILD_VERSION='11.15';
 
 const SCHEDULE_SYNC_V1101='https://bnwjtrtlwnlbldfhaggg.supabase.co/functions/v1/mastaba-schedule-sync';
 const scheduleV1100=window.adminScheduleV1100=window.adminScheduleV1100||{
@@ -17677,7 +17677,7 @@ if(state?.view==='admin')setTimeout(renderAdminV1100,0);
    Supabase schedule available exclusively inside Admin > Game Setup. */
 (function(){
 'use strict';
-window.MASTABA_BUILD_VERSION='11.13';
+window.MASTABA_BUILD_VERSION='11.15';
 
 const fixtureKeyV1102=f=>Number(f?.apiFixtureId)?`api:${Number(f.apiFixtureId)}`:`id:${String(f?.id||'')}`;
 function pinnedPoolV1102(){
@@ -18452,7 +18452,7 @@ body.auth-pending-v1064::after{top:53%!important}
 <script id="mastaba-v1108-runtime-fixes">
 (function(){
 'use strict';
-window.MASTABA_BUILD_VERSION='11.13';
+window.MASTABA_BUILD_VERSION='11.15';
 
 /* Hard-mount every fixture slot that exists after the catalogue finishes. */
 window.mountAllAdminFixtureBrowsersV1108=function(){
@@ -18662,7 +18662,7 @@ html[data-theme] body #app #view-admin .admin-v1094-panel :is(.admin-v1094-metri
 <script id="mastaba-v1109-admin-schedule-runtime">
 (function(){
 'use strict';
-window.MASTABA_BUILD_VERSION='11.13';
+window.MASTABA_BUILD_VERSION='11.15';
 
 /* Local fallback is intentionally name-based, never T123. The central
    abbreviation table remains authoritative when it has a row. */
@@ -18776,7 +18776,7 @@ html[data-theme] body #app #view-admin .fixture-league-title :is(strong,b,span,s
 <script id="mastaba-v1110-team-identity-guard">
 (function(){
 'use strict';
-window.MASTABA_BUILD_VERSION='11.13';
+window.MASTABA_BUILD_VERSION='11.15';
 /* Repair any already-loaded cached schedule objects from V11.09 without a
    provider/Supabase reload. Per-fixture payload is authoritative. */
 function repair(f){
@@ -18925,7 +18925,7 @@ html[data-theme] body #app #view-admin .fixture-day[aria-pressed="true"] :is(sma
 <script id="mastaba-v1112-runtime">
 (function(){
 'use strict';
-window.MASTABA_BUILD_VERSION='11.13';
+window.MASTABA_BUILD_VERSION='11.15';
 
 /* ---------------- Admin fixture browser ----------------
    V11.11's cosmetic day change called private lexical functions that were not
@@ -19199,7 +19199,7 @@ html[data-theme] body #app #view-admin .admin-zero-calls-v1101 *{
 <script id="mastaba-v1113-predict-and-context">
 (function(){
 'use strict';
-window.MASTABA_BUILD_VERSION='11.13';
+window.MASTABA_BUILD_VERSION='11.15';
 
 const nextPredV1113={
   loading:false,loaded:false,error:null,gw:null,fixtures:[],dbById:{},picks:{},meta:{draftSavedAt:null,submittedAt:null,editing:true}
@@ -19571,6 +19571,346 @@ window.renderPredict=renderPredict=function(){
    the selector/context ready without forcing a full page reload. */
 setTimeout(()=>{if(state?.nextPublished&&nextIsSelectedV1113()){nextPredV1113.loaded=false;window.renderPredict?.()}else if(state?.view==='predict')requestAnimationFrame(injectPerformanceV1113)},950);
 })();
+</script>
+
+
+<style id="mastaba-v1114-home-next-predictions">
+#view-home .home-submit-status.status-next-pending,
+#view-home .home-submit-status.status-next-draft,
+#view-home .home-submit-status.status-next-submitted,
+#view-home .home-submit-status.status-next-locked{
+  border-color:color-mix(in srgb,var(--theme-accent) 38%,var(--theme-border))!important;
+}
+#view-home .home-submit-status.status-next-pending .status-cta,
+#view-home .home-submit-status.status-next-draft .status-cta{
+  background:var(--theme-action)!important;
+  color:var(--theme-action-text)!important;
+  -webkit-text-fill-color:var(--theme-action-text)!important;
+}
+</style>
+
+
+<script id="mastaba-v1114-home-next-predictions">
+(function(){
+'use strict';
+window.MASTABA_BUILD_VERSION='11.15';
+
+const homeSubmissionStatusBaseV1114=window.homeSubmissionStatus||homeSubmissionStatus;
+let homeNextHydrationQueuedV1114=false;
+
+function publishedNextPlayableV1114(){
+  return !!state.nextPublished&&Array.isArray(state.nextFixtures)&&state.nextFixtures.length>0;
+}
+function nextHomeWeekV1114(){return Number(state.week)+1}
+
+function queueNextHomePredictionHydrationV1114(){
+  if(homeNextHydrationQueuedV1114||nextPredV1113.loading||nextPredV1113.loaded||!publishedNextPlayableV1114())return;
+  if(!window.prodCtxV1073?.supa||!window.prodCtxV1073?.user?.id)return;
+  homeNextHydrationQueuedV1114=true;
+  Promise.resolve(loadNextPredictionContextV1113()).finally(()=>{
+    homeNextHydrationQueuedV1114=false;
+    if(state.view==='home'&&typeof window.renderHome==='function')window.renderHome();
+  });
+}
+
+window.homeSubmissionStatus=homeSubmissionStatus=function(){
+  if(!publishedNextPlayableV1114())return homeSubmissionStatusBaseV1114();
+
+  const week=nextHomeWeekV1114(),deadline=nextDeadlineDateV1113();
+  queueNextHomePredictionHydrationV1114();
+
+  if(deadline&&Date.now()>=deadline.getTime()){
+    return{
+      week,state:'next-locked',
+      title:L(`Gameweek ${week} Predictions Locked`,`توقعات الجولة ${week} اتقفلت`),
+      detail:L(`The Gameweek ${week} prediction deadline has passed.`,`موعد قفل توقعات الجولة ${week} عدى.`),
+      cta:L('View Predictions','شوف التوقعات')
+    };
+  }
+
+  const meta=nextPredV1113.meta||{};
+  if(nextPredV1113.loaded&&meta.submittedAt&&!meta.editing){
+    return{
+      week,state:'next-submitted',
+      title:L(`Gameweek ${week} Predictions Submitted`,`تم إرسال توقعات الجولة ${week}`),
+      detail:L(`Your Gameweek ${week} predictions are submitted. You can still edit them before the deadline.`,`توقعات الجولة ${week} اتبعتت. لسه تقدر تعدلها قبل موعد القفل.`),
+      cta:L('View Predictions','شوف توقعاتك')
+    };
+  }
+  if(nextPredV1113.loaded&&meta.draftSavedAt){
+    return{
+      week,state:'next-draft',
+      title:L(`Gameweek ${week} Draft Saved — Not Submitted`,`Draft الجولة ${week} محفوظ — لسه متبعتش`),
+      detail:L(`Your Gameweek ${week} Draft is saved, but you still need to submit it.`,`Draft الجولة ${week} محفوظ، بس لسه محتاج تبعته.`),
+      cta:L('Finish Predictions','كمّل توقعاتك')
+    };
+  }
+
+  return{
+    week,state:'next-pending',
+    title:L(`Gameweek ${week} Predictions Not Submitted`,`توقعات الجولة ${week} لسه متبعتتش`),
+    detail:L(`Gameweek ${week} is published and playable now. Complete and submit your predictions before the deadline.`,`الجولة ${week} منشورة ومفتوحة للتوقعات دلوقتي. كمّل توقعاتك وابعتها قبل موعد القفل.`),
+    cta:L('Make Predictions','اعمل توقعاتك')
+  };
+};
+
+const openPredictionWeekBaseV1114=window.openPredictionWeek;
+window.openPredictionWeek=function(week){
+  const max=Number(state.week)+(publishedNextPlayableV1114()?1:0);
+  const target=Math.max(1,Math.min(max,Number(week)||Number(state.week)));
+  state.selectedPredictWeek=target;
+  state.view='predict';
+  try{save()}catch{}
+  if(target===nextHomeWeekV1114()){
+    nextPredV1113.loaded=false;
+    if(typeof window.render==='function')window.render();
+    loadNextPredictionContextV1113(true).then(()=>{
+      if(state.view==='predict'&&Number(state.selectedPredictWeek)===target)window.renderPredict?.();
+    });
+    return;
+  }
+  if(typeof openPredictionWeekBaseV1114==='function')return openPredictionWeekBaseV1114(target);
+  if(typeof window.render==='function')window.render();
+};
+
+const publishBaseV1114=window.publishNextGameweek;
+if(typeof publishBaseV1114==='function'){
+  window.publishNextGameweek=async function(){
+    const out=await publishBaseV1114.apply(this,arguments);
+    if(publishedNextPlayableV1114()){
+      nextPredV1113.loaded=false;
+      try{await loadNextPredictionContextV1113(true)}catch{}
+      if(state.view==='home')window.renderHome?.();
+    }
+    return out;
+  };
+}
+
+if(state.view==='home'&&publishedNextPlayableV1114())queueNextHomePredictionHydrationV1114();
+})();
+</script>
+
+
+<style id="mastaba-v1115-admin-contrast-cleanup">
+/* =========================================================
+   V11.15 — Admin theme contrast + directory cleanup authority
+
+   Design rule:
+   - Keep the exact ATS outer / inner / third theme colors already defined.
+   - No new card colors.
+   - Nested surfaces alternate outer -> inner.
+   - Top navigation sits on the PAGE, so its text must contrast with the page,
+     not inherit the outer-card text color.
+   ========================================================= */
+
+html[data-theme] body #app #view-admin{
+  --admin-nav-text:var(--club-outer-text,var(--theme-text,#fff));
+  --admin-nav-underline:var(--admin-third);
+}
+
+/* Original themes: exact existing page-readable colors. */
+html[data-theme="barcelona"] body #app #view-admin{--admin-nav-text:#fff;--admin-nav-underline:#d9b82e}
+html:is([data-theme="realmadrid"],[data-theme="real-madrid"]) body #app #view-admin{--admin-nav-text:#274793;--admin-nav-underline:#edc130}
+html:is([data-theme="acmilan"],[data-theme="ac-milan"]) body #app #view-admin{--admin-nav-text:#f7f7f7;--admin-nav-underline:#f7f7f7}
+html[data-theme="arsenal"] body #app #view-admin{--admin-nav-text:#fff;--admin-nav-underline:#1b3272}
+html[data-theme="liverpool"] body #app #view-admin{--admin-nav-text:#fff;--admin-nav-underline:#f3f4f2}
+html[data-theme="manunited"] body #app #view-admin{--admin-nav-text:#fff;--admin-nav-underline:#fcff40}
+
+/* ---------------------------------------------------------
+   Game Setup / Production / Analytics
+   --------------------------------------------------------- */
+html[data-theme] body #app #view-admin .admin-workspace-v1100 :is(.admin-tabs-v1100,.admin-tabs-v1095){
+  color:var(--admin-nav-text)!important;
+  border-bottom:1px solid currentColor!important;
+}
+html[data-theme] body #app #view-admin .admin-workspace-v1100 :is(.admin-tab-v1100,.admin-tab-v1095),
+html[data-theme] body #app #view-admin .admin-workspace-v1100 :is(.admin-tab-v1100,.admin-tab-v1095).active{
+  background:transparent!important;
+  color:var(--admin-nav-text)!important;
+  -webkit-text-fill-color:var(--admin-nav-text)!important;
+  border:0!important;
+  opacity:.62!important;
+  text-shadow:none!important;
+}
+html[data-theme] body #app #view-admin .admin-workspace-v1100 :is(.admin-tab-v1100,.admin-tab-v1095).active{
+  opacity:1!important;
+}
+html[data-theme] body #app #view-admin .admin-workspace-v1100 :is(.admin-tab-line-v1100,.admin-tab-line-v1095){
+  background:var(--admin-nav-underline)!important;
+  height:4px!important;
+  opacity:1!important;
+  box-shadow:none!important;
+}
+
+/* Current / Upcoming gets the same theme-third underline language. */
+html[data-theme] body #app #view-admin .admin-round-tabs{
+  color:var(--admin-outer-text)!important;
+  border-bottom-color:color-mix(in srgb,var(--admin-outer-text) 35%,transparent)!important;
+}
+html[data-theme] body #app #view-admin .admin-round-tabs:after{
+  background:var(--admin-third)!important;
+}
+html[data-theme] body #app #view-admin .admin-round-tab,
+html[data-theme] body #app #view-admin .admin-round-tab.active{
+  color:var(--admin-outer-text)!important;
+  -webkit-text-fill-color:var(--admin-outer-text)!important;
+}
+
+/* ---------------------------------------------------------
+   Audience Analytics — make progress bars look like progress bars.
+   The card stays ATS outer. Track is transparent with the existing outer
+   border; fill is the exact ATS inner color. No reversed "cutout" effect.
+   --------------------------------------------------------- */
+html[data-theme] body #app #view-admin .admin-v1094-panel .admin-v1094-box .admin-v1094-team-row{
+  color:var(--admin-outer-text)!important;
+  -webkit-text-fill-color:var(--admin-outer-text)!important;
+}
+html[data-theme] body #app #view-admin .admin-v1094-panel .admin-v1094-box .admin-v1094-team-row :is(.admin-v1094-team-name,.admin-v1094-team-value){
+  color:var(--admin-outer-text)!important;
+  -webkit-text-fill-color:var(--admin-outer-text)!important;
+}
+html[data-theme] body #app #view-admin .admin-v1094-panel .admin-v1094-bar{
+  box-sizing:border-box!important;
+  height:10px!important;
+  padding:1px!important;
+  overflow:hidden!important;
+  background:transparent!important;
+  border:1px solid var(--admin-outer-line)!important;
+  border-radius:999px!important;
+  color:var(--admin-inner-text)!important;
+  -webkit-text-fill-color:var(--admin-inner-text)!important;
+}
+html[data-theme] body #app #view-admin .admin-v1094-panel .admin-v1094-bar>span{
+  display:block!important;
+  height:100%!important;
+  min-width:0!important;
+  width:var(--w)!important;
+  margin:0!important;
+  background:var(--admin-inner)!important;
+  border:0!important;
+  border-radius:999px!important;
+  box-shadow:none!important;
+}
+
+/* Audience Mix / Sign-in chips: outer analytics card -> ATS inner chip. */
+html[data-theme] body #app #view-admin .admin-v1094-panel .admin-v1094-box .admin-v1094-chip{
+  background:var(--admin-inner)!important;
+  color:var(--admin-inner-text)!important;
+  -webkit-text-fill-color:var(--admin-inner-text)!important;
+  border:1px solid var(--admin-inner-line)!important;
+}
+html[data-theme] body #app #view-admin .admin-v1094-panel .admin-v1094-box .admin-v1094-chip *{
+  color:var(--admin-inner-text)!important;
+  -webkit-text-fill-color:var(--admin-inner-text)!important;
+}
+
+/* ---------------------------------------------------------
+   Account Directory
+   Remove the rainbow of red / green / amber / blue chips.
+   Account card = ATS outer.
+   Everything nested directly inside = ATS inner.
+   --------------------------------------------------------- */
+html[data-theme] body #app #view-admin .admin-accounts-v1094 .admin-v1094-user{
+  background:var(--admin-outer-surface)!important;
+  color:var(--admin-outer-text)!important;
+  -webkit-text-fill-color:var(--admin-outer-text)!important;
+  border-color:var(--admin-outer-line)!important;
+  opacity:1!important;
+}
+html[data-theme] body #app #view-admin .admin-accounts-v1094 .admin-v1094-user.inactive{
+  opacity:.72!important;
+}
+html[data-theme] body #app #view-admin .admin-accounts-v1094 .admin-v1094-user :is(
+  .admin-v1094-user-name,.admin-v1094-email
+){
+  color:var(--admin-outer-text)!important;
+  -webkit-text-fill-color:var(--admin-outer-text)!important;
+}
+
+/* Identity + status pills all use one clean theme-native treatment. */
+html[data-theme] body #app #view-admin .admin-accounts-v1094 .admin-v1094-user :is(
+  .admin-v1094-meta .admin-v1094-pill,
+  .admin-v1094-user-top > .admin-v1094-pill
+){
+  background:var(--admin-inner)!important;
+  color:var(--admin-inner-text)!important;
+  -webkit-text-fill-color:var(--admin-inner-text)!important;
+  border:1px solid var(--admin-inner-line)!important;
+  box-shadow:none!important;
+}
+html[data-theme] body #app #view-admin .admin-accounts-v1094 .admin-v1094-user :is(
+  .admin-v1094-meta .admin-v1094-pill,
+  .admin-v1094-user-top > .admin-v1094-pill
+) *{
+  color:var(--admin-inner-text)!important;
+  -webkit-text-fill-color:var(--admin-inner-text)!important;
+}
+
+/* Registered / Last Sign-In / Current Gameweek are the clean inner row. */
+html[data-theme] body #app #view-admin .admin-accounts-v1094 .admin-v1094-detail{
+  background:var(--admin-inner)!important;
+  color:var(--admin-inner-text)!important;
+  -webkit-text-fill-color:var(--admin-inner-text)!important;
+  border:1px solid var(--admin-inner-line)!important;
+}
+html[data-theme] body #app #view-admin .admin-accounts-v1094 .admin-v1094-detail *{
+  color:var(--admin-inner-text)!important;
+  -webkit-text-fill-color:var(--admin-inner-text)!important;
+}
+
+/* Account actions no longer introduce unrelated colors. */
+html[data-theme] body #app #view-admin .admin-accounts-v1094 .admin-v1094-actions :is(.btn,.btn-secondary,.btn-ghost,.btn-danger){
+  background:var(--admin-inner)!important;
+  color:var(--admin-inner-text)!important;
+  -webkit-text-fill-color:var(--admin-inner-text)!important;
+  border:1px solid var(--admin-inner-line)!important;
+  box-shadow:none!important;
+}
+html[data-theme] body #app #view-admin .admin-accounts-v1094 .admin-v1094-actions :is(.btn,.btn-secondary,.btn-ghost,.btn-danger) *{
+  color:var(--admin-inner-text)!important;
+  -webkit-text-fill-color:var(--admin-inner-text)!important;
+}
+
+/* Search remains the alternating outer surface and is always readable. */
+html[data-theme] body #app #view-admin .admin-accounts-v1094 > .admin-v1094-searchrow .admin-v1094-search{
+  background:var(--admin-outer-surface)!important;
+  color:var(--admin-outer-text)!important;
+  -webkit-text-fill-color:var(--admin-outer-text)!important;
+  border-color:var(--admin-outer-line)!important;
+}
+html[data-theme] body #app #view-admin .admin-accounts-v1094 > .admin-v1094-searchrow .admin-v1094-search::placeholder{
+  color:var(--admin-outer-text)!important;
+  -webkit-text-fill-color:var(--admin-outer-text)!important;
+  opacity:.64!important;
+}
+
+/* Force headings and box copy to follow their actual surface instead of old
+   global Admin variables. */
+html[data-theme] body #app #view-admin .admin-v1094-panel .admin-v1094-box,
+html[data-theme] body #app #view-admin .admin-v1094-panel .admin-v1094-metric{
+  color:var(--admin-outer-text)!important;
+  -webkit-text-fill-color:var(--admin-outer-text)!important;
+}
+html[data-theme] body #app #view-admin .admin-v1094-panel :is(.admin-v1094-box,.admin-v1094-metric) :is(h1,h2,h3,h4,h5,strong,b,span,small,p,.muted,.admin-v1094-privacy){
+  color:inherit!important;
+  -webkit-text-fill-color:currentColor!important;
+}
+
+/* Barcelona requirement: the Admin top underline is explicitly yellow. */
+html[data-theme="barcelona"] body #app #view-admin .admin-workspace-v1100 :is(.admin-tab-line-v1100,.admin-tab-line-v1095){
+  background:#d9b82e!important;
+}
+
+@media(max-width:720px){
+  html[data-theme] body #app #view-admin .admin-accounts-v1094 .admin-v1094-actions{
+    gap:7px!important;
+  }
+}
+</style>
+
+
+<script id="mastaba-v1115-version">
+window.MASTABA_BUILD_VERSION='11.15';
 </script>
 
 </body>
