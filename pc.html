@@ -13237,7 +13237,7 @@ async function getSquadV1073(teamId){
  try{const {data:ss}=await window.mastabaSandboxV1064?.auth?.getSession?.();const tok=ss?.session?.access_token||'';const r=await fetch(`${FOOTBALL_EDGE_V1073}?endpoint=players/squads&team=${encodeURIComponent(teamId)}`,{cache:'no-store',headers:tok?{Authorization:`Bearer ${tok}`}:{}});if(!r.ok)return[];const j=await r.json();return j?.data?.response?.[0]?.players||[]}catch{return[]}
 }
 function fixturePhaseV1073(status,kickoff){const s=String(status||'NS').toUpperCase();if(['FT','AET','PEN'].includes(s))return'final';if(!['NS','TBD','PST','CANC','ABD','AWD','WO'].includes(s)||Date.now()>=new Date(kickoff).getTime())return'live';return'upcoming'}
-function rowToPickV1073(row,fixture){const homeCode=teamCodeV1073(fixture.home_team_id,fixture.home_team_name),awayCode=teamCodeV1073(fixture.away_team_id,fixture.away_team_name);let firstTeam='none';if(Number(row?.first_team_id)===Number(fixture.home_team_id))firstTeam=homeCode;else if(Number(row?.first_team_id)===Number(fixture.away_team_id))firstTeam=awayCode;return{home:row?.home_score??'',away:row?.away_score??'',firstTeam,firstScorer:row?.first_scorer_id?String(row.first_scorer_id):'none',double:!!row?.double_points,touched:row?.home_score!=null&&row?.away_score!=null}}
+function rowToPickV1073(row,fixture){const homeCode=teamCodeV1073(fixture.home_team_id,fixture.home_team_name),awayCode=teamCodeV1073(fixture.away_team_id,fixture.away_team_name);let firstTeam='none';if(Number(row?.first_team_id)===Number(fixture.home_team_id))firstTeam=homeCode;else if(Number(row?.first_team_id)===Number(fixture.away_team_id))firstTeam=awayCode;return{home:row?.home_score??'',away:row?.away_score??'',firstTeam,firstScorer:row?.first_scorer_id?String(row.first_scorer_id):'none',firstScorerName:row?.first_scorer_name||null,double:!!row?.double_points,touched:row?.home_score!=null&&row?.away_score!=null}}
 async function hydrateProductionV1073(profile,user,supa){
  // Scale-safe hydration: only load memberships/profiles for leagues the current user actually belongs to.
  const [leaguesR,gwR,roleR,ownMembershipR]=await Promise.all([
@@ -17174,7 +17174,7 @@ html #view-admin .admin-workspace-v1100 .admin-empty-v1100{padding:18px;text-ali
 <script id="mastaba-v1100-admin-repair">
 (function mastabaV1100(){
 'use strict';
-window.MASTABA_BUILD_VERSION='11.23';
+window.MASTABA_BUILD_VERSION='11.24';
 
 const SCHEDULE_SYNC_V1101='https://bnwjtrtlwnlbldfhaggg.supabase.co/functions/v1/mastaba-schedule-sync';
 const scheduleV1100=window.adminScheduleV1100=window.adminScheduleV1100||{
@@ -17677,7 +17677,7 @@ if(state?.view==='admin')setTimeout(renderAdminV1100,0);
    Supabase schedule available exclusively inside Admin > Game Setup. */
 (function(){
 'use strict';
-window.MASTABA_BUILD_VERSION='11.23';
+window.MASTABA_BUILD_VERSION='11.24';
 
 const fixtureKeyV1102=f=>Number(f?.apiFixtureId)?`api:${Number(f.apiFixtureId)}`:`id:${String(f?.id||'')}`;
 function pinnedPoolV1102(){
@@ -18452,7 +18452,7 @@ body.auth-pending-v1064::after{top:53%!important}
 <script id="mastaba-v1108-runtime-fixes">
 (function(){
 'use strict';
-window.MASTABA_BUILD_VERSION='11.23';
+window.MASTABA_BUILD_VERSION='11.24';
 
 /* Hard-mount every fixture slot that exists after the catalogue finishes. */
 window.mountAllAdminFixtureBrowsersV1108=function(){
@@ -18662,7 +18662,7 @@ html[data-theme] body #app #view-admin .admin-v1094-panel :is(.admin-v1094-metri
 <script id="mastaba-v1109-admin-schedule-runtime">
 (function(){
 'use strict';
-window.MASTABA_BUILD_VERSION='11.23';
+window.MASTABA_BUILD_VERSION='11.24';
 
 /* Local fallback is intentionally name-based, never T123. The central
    abbreviation table remains authoritative when it has a row. */
@@ -18776,7 +18776,7 @@ html[data-theme] body #app #view-admin .fixture-league-title :is(strong,b,span,s
 <script id="mastaba-v1110-team-identity-guard">
 (function(){
 'use strict';
-window.MASTABA_BUILD_VERSION='11.23';
+window.MASTABA_BUILD_VERSION='11.24';
 /* Repair any already-loaded cached schedule objects from V11.09 without a
    provider/Supabase reload. Per-fixture payload is authoritative. */
 function repair(f){
@@ -18925,7 +18925,7 @@ html[data-theme] body #app #view-admin .fixture-day[aria-pressed="true"] :is(sma
 <script id="mastaba-v1112-runtime">
 (function(){
 'use strict';
-window.MASTABA_BUILD_VERSION='11.23';
+window.MASTABA_BUILD_VERSION='11.24';
 
 /* ---------------- Admin fixture browser ----------------
    V11.11's cosmetic day change called private lexical functions that were not
@@ -19199,7 +19199,7 @@ html[data-theme] body #app #view-admin .admin-zero-calls-v1101 *{
 <script id="mastaba-v1113-predict-and-context">
 (function(){
 'use strict';
-window.MASTABA_BUILD_VERSION='11.23';
+window.MASTABA_BUILD_VERSION='11.24';
 
 const nextPredV1113={
   loading:false,loaded:false,error:null,gw:null,fixtures:[],dbById:{},picks:{},meta:{draftSavedAt:null,submittedAt:null,editing:true}
@@ -19208,7 +19208,7 @@ window.nextPredV1113=nextPredV1113;
 let nextPredLoadPromiseV1113=null;
 
 /* -------------------- Helpers -------------------- */
-function blankPickV1113(){return{home:'',away:'',firstTeam:'none',firstScorer:'none',double:false,touched:false}}
+function blankPickV1113(){return{home:'',away:'',firstTeam:'none',firstScorer:'none',firstScorerName:null,double:false,touched:false}}
 function nextWeekNoV1113(){return Number(state.week)+1}
 function nextIsSelectedV1113(){return Number(state.selectedPredictWeek)===nextWeekNoV1113()}
 function nextDeadlineDateV1113(){
@@ -19379,7 +19379,7 @@ function nextDoubleBarV1113(f,p,hardLocked){
 function nextPredictionCardV1113(f){
   const p=nextPickV1113(f.id),hardLocked=nextLockedV1113()||nextSubmittedV1113();
   const firstTeamName=p.firstTeam==='none'?L('No Team to Score','لا يوجد فريق يسجل'):TEAM[p.firstTeam]?.name||L('Choose First Team','اختر أول فريق');
-  const scorer=p.firstScorer==='none'?L('No Goalscorer','لا يوجد هداف'):scorerByIdV1113(p.firstScorer)?.name||L('Choose First Goalscorer','اختر أول هداف');
+  const scorer=p.firstScorer==='none'?L('No Goalscorer','لا يوجد هداف'):(p.firstScorerName||scorerByIdV1113(p.firstScorer)?.name||L('Choose First Goalscorer','اختر أول هداف'));
   const missing=(state.validationMissing||[]).includes(f.id);
   return`<article class="match-card upcoming ${missing?'missing-prediction':''}" data-mid="${f.id}" data-next-predict-v1113>${missing?`<div class="missing-banner">${L('Complete this prediction before submitting.','كمّل التوقع ده قبل الإرسال.')}</div>`:''}
     <div class="match-card-head"><div class="match-head-top"><div><div class="match-competition">${escapeHTML(f.competition||'')}</div><div class="match-date">${formatTime(f.kickoff)}</div></div><span class="status-chip upcoming">${L('Upcoming','قادمة')}</span></div></div>
@@ -19462,7 +19462,7 @@ window.openNextScorersV1113=async function(mid){
 const pickScorerBaseV1113=window.pickScorer;
 window.pickScorer=function(mid,pid){
   if(nextIsSelectedV1113()&&nextFixtureV1113(mid)){
-    const p=nextPickV1113(mid);p.firstScorer=String(pid);p.touched=true;markNextDirtyV1113();closeModal();refreshNextCardV1113(mid);return;
+    const p=nextPickV1113(mid),chosen=scorerByIdV1113(pid);p.firstScorer=String(pid);p.firstScorerName=chosen?.name||p.firstScorerName||null;p.touched=true;markNextDirtyV1113();closeModal();refreshNextCardV1113(mid);return;
   }
   return typeof pickScorerBaseV1113==='function'?pickScorerBaseV1113.apply(this,arguments):undefined;
 };
@@ -19471,17 +19471,30 @@ window.pickScorer=function(mid,pid){
 function nextDbRowsV1113(submitted){
   const ctx=window.prodCtxV1073,uid=ctx?.user?.id,gid=nextPredV1113.gw?.id;
   return nextPredV1113.fixtures.map(f=>{
-    const p=nextPickV1113(f.id),scorer=p.firstScorer&&p.firstScorer!=='none'?scorerByIdV1113(p.firstScorer):null;
+    const p=nextPickV1113(f.id),cachedScorer=p.firstScorer&&p.firstScorer!=='none'?scorerByIdV1113(p.firstScorer):null;
     const firstTeamId=p.firstTeam===f.home?Number(f.homeTeamId):p.firstTeam===f.away?Number(f.awayTeamId):null;
-    return{user_id:uid,fixture_id:f.id,gameweek_id:gid,home_score:p.home===''?null:Number(p.home),away_score:p.away===''?null:Number(p.away),first_team_id:firstTeamId,first_scorer_id:scorer?Number(scorer.id):null,first_scorer_name:scorer?.name||null,double_points:!!p.double,submitted:!!submitted,submitted_at:submitted?new Date().toISOString():null};
+    const scorerId=p.firstScorer&&p.firstScorer!=='none'&&Number.isFinite(Number(p.firstScorer))?Number(p.firstScorer):null;
+    const scorerName=scorerId?(p.firstScorerName||cachedScorer?.name||null):null;
+    return{user_id:uid,fixture_id:f.id,gameweek_id:gid,home_score:p.home===''?null:Number(p.home),away_score:p.away===''?null:Number(p.away),first_team_id:firstTeamId,first_scorer_id:scorerId,first_scorer_name:scorerName,double_points:!!p.double,submitted:!!submitted,submitted_at:submitted?new Date().toISOString():null};
   });
 }
 async function persistNextV1113(submitted){
   const ctx=window.prodCtxV1073;if(!ctx?.supa||!nextPredV1113.gw?.id)throw new Error(L('Next Gameweek is not ready yet.','الجولة الجاية لسه مش جاهزة.'));
   if(nextLockedV1113())throw new Error(L('This Gameweek deadline has passed.','موعد قفل الجولة عدى.'));
-  const {error}=await ctx.supa.from('mastaba_predictions').upsert(nextDbRowsV1113(submitted),{onConflict:'user_id,fixture_id'});
+  const rows=nextDbRowsV1113(submitted);
+  const uid=ctx.user.id,gid=nextPredV1113.gw.id;
+
+  /* The DB correctly enforces one X2 row per user/Gameweek. When a user moves
+     X2 to a different match, a bulk upsert can otherwise try to insert the new
+     true row before it clears the old one and hit the unique index. */
+  const {error:clearDoubleError}=await ctx.supa.from('mastaba_predictions')
+    .update({double_points:false}).eq('user_id',uid).eq('gameweek_id',gid).eq('double_points',true);
+  if(clearDoubleError)throw clearDoubleError;
+
+  const {error}=await ctx.supa.from('mastaba_predictions').upsert(rows,{onConflict:'user_id,fixture_id'});
   if(error)throw error;
 }
+window.persistNextV1113=persistNextV1113;
 window.saveNextDraftV1113=async function(){
   if(nextLockedV1113()||nextSubmittedV1113())return;
   nextAutosaveDirtyV1119=true;
@@ -19638,7 +19651,7 @@ setTimeout(()=>{if(state?.nextPublished&&nextIsSelectedV1113()){nextPredV1113.lo
 <script id="mastaba-v1114-home-next-predictions">
 (function(){
 'use strict';
-window.MASTABA_BUILD_VERSION='11.23';
+window.MASTABA_BUILD_VERSION='11.24';
 
 const homeSubmissionStatusBaseV1114=window.homeSubmissionStatus||homeSubmissionStatus;
 let homeNextHydrationQueuedV1114=false;
@@ -19955,7 +19968,7 @@ html[data-theme="barcelona"] body #app #view-admin .admin-workspace-v1100 :is(.a
 
 
 <script id="mastaba-v1115-version">
-window.MASTABA_BUILD_VERSION='11.23';
+window.MASTABA_BUILD_VERSION='11.24';
 </script>
 
 
@@ -20073,7 +20086,7 @@ html[data-theme] body #app #view-admin .admin-accounts-v1094 .admin-v1094-action
 <script id="mastaba-v1116-admin-interaction">
 (function(){
 'use strict';
-window.MASTABA_BUILD_VERSION='11.23';
+window.MASTABA_BUILD_VERSION='11.24';
 
 let roundCommitTimerV1116=0;
 let adminRoundObserverV1116=null;
@@ -20288,7 +20301,7 @@ html.mastaba-gw-started-v1117 #view-predict
 <script id="mastaba-v1117-runtime">
 (function(){
 'use strict';
-window.MASTABA_BUILD_VERSION='11.23';
+window.MASTABA_BUILD_VERSION='11.24';
 
 /* ---------- Shared publication helpers ---------- */
 function nextNumberV1117(){return Number(state.week)+1}
@@ -20626,7 +20639,7 @@ requestAnimationFrame(()=>{
 <script id="mastaba-v1119-route-and-autosave">
 (function(){
 'use strict';
-window.MASTABA_BUILD_VERSION='11.23';
+window.MASTABA_BUILD_VERSION='11.24';
 
 const goBaseV1119=window.go;
 if(typeof goBaseV1119==='function'){
@@ -20680,7 +20693,7 @@ window.addEventListener('pagehide',()=>{
 <script id="mastaba-v1120-player-and-gw-stability">
 (function(){
 'use strict';
-window.MASTABA_BUILD_VERSION='11.23';
+window.MASTABA_BUILD_VERSION='11.24';
 
 const LAST_WEEK_KEY_V1120='mastaba:last-predict-week:v1120';
 function rememberPredictWeekV1120(w){
@@ -20841,33 +20854,6 @@ if(typeof openPlayerDrawerBaseV1120==='function'){
   };
 }
 
-/* ------------------------------------------------------------------
-   Submit race fix.
-   A pending autosave is allowed to FINISH first; then Submit writes submitted
-   = true last and verifies all GW rows on the server before declaring success.
-   ------------------------------------------------------------------ */
-window.confirmNextSubmitV1113=async function(){
-  try{
-    if(typeof window.flushNextAutosaveV1119==='function')await window.flushNextAutosaveV1119(false);
-    await persistNextV1113(true);
-    const ctx=window.prodCtxV1073,gid=nextPredV1113.gw?.id;
-    if(ctx?.supa&&gid){
-      const {count,error}=await ctx.supa.from('mastaba_predictions').select('id',{count:'exact',head:true})
-        .eq('gameweek_id',gid).eq('user_id',ctx.user.id).eq('submitted',true);
-      if(error)throw error;
-      if(Number(count)!==Number(nextPredV1113.fixtures.length))throw new Error(L('Submission verification failed. Please try Submit again.','فشل تأكيد الإرسال. اضغط إرسال مرة تانية.'));
-    }
-    nextPredV1113.meta.draftSavedAt=new Date().toISOString();
-    nextPredV1113.meta.submittedAt=new Date().toISOString();
-    nextPredV1113.meta.editing=false;
-    state.validationMissing=[];
-    closeModal();window.renderPredict?.();
-    toast(L('Predictions Submitted','تم إرسال التوقعات'),'good');
-  }catch(e){
-    console.error(e);
-    toast(String(e?.message||L('Predictions could not be submitted.','تعذر إرسال التوقعات.')),'warn');
-  }
-};
 
 requestAnimationFrame(()=>rememberPredictWeekV1120(state.selectedPredictWeek));
 })();
@@ -20877,7 +20863,7 @@ requestAnimationFrame(()=>rememberPredictWeekV1120(state.selectedPredictWeek));
 <script id="mastaba-v1121-competition-stats">
 (function(){
 'use strict';
-window.MASTABA_BUILD_VERSION='11.23';
+window.MASTABA_BUILD_VERSION='11.24';
 
 /* V11.21
    Player stats in the scorer drawer must be for the competition being
@@ -20915,7 +20901,7 @@ window.playerRow=function(p,comp,mid){
 <script id="mastaba-v1122-season-competition-integrity">
 (function(){
 'use strict';
-window.MASTABA_BUILD_VERSION='11.23';
+window.MASTABA_BUILD_VERSION='11.24';
 
 /* fixtureById originally searched only the active Gameweek. That made every
    published-next-GW player drawer lose its competition identity and fall back
@@ -21034,7 +21020,7 @@ window.playerRow=function(p,comp,mid){
 <script id="mastaba-v1123-authoritative-runtime">
 (function(){
 'use strict';
-window.MASTABA_BUILD_VERSION='11.23';
+window.MASTABA_BUILD_VERSION='11.24';
 
 /* -------------------------------------------------------------------------
    1) PLAYER DATA: never allow demo/local-storage season stats to win in
@@ -21196,8 +21182,11 @@ function rowHTMLV1123(p,key,label){
   return`<button type="button" class="player-row ${disabled?'disabled':''}" data-player-id="${escapeHTML(p.id)}" ${disabled?'disabled':''}>
     <span class="player-name-cell"><span class="player-name-copy"><strong>${escapeHTML(p.name)}</strong><small>${escapeHTML(label)}</small>${reason}</span></span>
     <span class="player-cell player-pos-cell">${escapeHTML(typeof playerPositionGroup==='function'?playerPositionGroup(p.pos):p.pos)}</span>
-    <span class="player-cell player-stat-cell">${statCellV1123(nOrNullV1123(st.apps))}</span>
-    <span class="player-cell player-stat-cell">${statCellV1123(nOrNullV1123(st.bench))}</span>
+    <span class="player-cell player-stat-cell player-apps-sub-v1124">${(()=>{
+      const apps=nOrNullV1123(st.apps),subs=nOrNullV1123(st.bench);
+      if(apps==null)return statCellV1123(null);
+      return `${apps}${subs&&subs>0?` <span class="sub-count-v1124">(${subs})</span>`:''}`;
+    })()}</span>
     <span class="player-cell player-stat-cell">${statCellV1123(nOrNullV1123(st.goals))}</span>
     <span class="player-cell player-stat-cell">${statCellV1123(nOrNullV1123(st.assists))}</span>
     <span class="player-cell player-stat-cell">${statCellV1123(nOrNullV1123(st.xg))}</span>
@@ -21259,8 +21248,7 @@ window.openPlayerDrawer=async function(mid,team){
         <div class="player-table-head">
           <button type="button" data-psort="name">${L('Player','اللاعب')}</button>
           <button type="button" data-psort="pos">${L('Pos','مركز')}</button>
-          <button type="button" data-psort="apps">${L('Apps','لعب')}</button>
-          <button type="button" data-psort="bench">SUB</button>
+          <button type="button" data-psort="apps">${L('APPS (Sub)','لعب (بديل)')}</button>
           <button type="button" data-psort="goals">G</button>
           <button type="button" data-psort="assists">A</button>
           <button type="button" data-psort="xg">xG</button>
@@ -21302,6 +21290,11 @@ window.openPlayerDrawer=async function(mid,team){
     if(av==null&&bv!=null)return 1;
     if(av!=null&&bv==null)return -1;
     if(av!=null&&bv!=null&&av!==bv)return sortDir==='asc'?av-bv:bv-av;
+    if(sortKey==='apps'){
+      const as=nOrNullV1123(statsForV1123(a,compKey).bench)??0;
+      const bs=nOrNullV1123(statsForV1123(b,compKey).bench)??0;
+      if(as!==bs)return sortDir==='asc'?as-bs:bs-as;
+    }
 
     /* For the default goal sort, assists are the first meaningful tie-break. */
     if(sortKey==='goals'){
@@ -21468,6 +21461,105 @@ document.addEventListener('visibilitychange',()=>{if(!document.hidden)setTimeout
 window.addEventListener('focus',()=>setTimeout(safeATSSyncV1123,30));
 window.addEventListener('pageshow',()=>setTimeout(safeATSSyncV1123,30));
 setTimeout(safeATSSyncV1123,120);
+})();
+</script>
+
+
+<style id="mastaba-v1124-player-apps-sub">
+/* V11.24 — APPS and substitute appearances share one compact column. */
+#modalRoot .player-table-head,
+#modalRoot .player-row{
+  grid-template-columns:minmax(220px,2fr) 52px 84px 48px 48px 54px 54px 64px!important;
+  min-width:670px!important;
+}
+#modalRoot .player-apps-sub-v1124{
+  white-space:nowrap!important;
+  font-variant-numeric:tabular-nums;
+}
+#modalRoot .player-apps-sub-v1124 .sub-count-v1124{
+  margin-inline-start:2px;
+  font-size:.82em;
+  opacity:.68;
+}
+@media(max-width:720px){
+  #modalRoot .player-table-head,
+  #modalRoot .player-row{
+    grid-template-columns:minmax(175px,1.8fr) 45px 74px 42px 42px 48px 48px 58px!important;
+    min-width:570px!important;
+  }
+}
+</style>
+
+
+<script id="mastaba-v1124-next-submit-scope-hotfix">
+(function(){
+'use strict';
+window.MASTABA_BUILD_VERSION='11.24';
+
+/* Final GW2 Submit authority.
+   V11.20 tried to call the V11.13 persistence function outside the closure
+   where it was declared. V11.24 calls only the explicitly exported function.
+*/
+window.confirmNextSubmitV1113=async function(){
+  const ctx=window.prodCtxV1073;
+  const np=window.nextPredV1113;
+
+  if(!np?.gw?.id){
+    toast(L('Next Gameweek is not ready yet.','الجولة الجاية لسه مش جاهزة.'),'warn');
+    return;
+  }
+
+  try{
+    /* Finish the last autosave first. */
+    if(typeof window.flushNextAutosaveV1119==='function'){
+      await window.flushNextAutosaveV1119(false);
+    }
+
+    if(typeof window.persistNextV1113!=='function'){
+      throw new Error(L(
+        'Prediction save service is not ready. Please reload once and try again.',
+        'خدمة حفظ التوقعات مش جاهزة. اعمل تحديث مرة واحدة وحاول تاني.'
+      ));
+    }
+
+    /* submitted=true is the final write. */
+    await window.persistNextV1113(true);
+
+    /* Verify all fixtures really reached Supabase before reporting success. */
+    if(ctx?.supa&&ctx?.user?.id){
+      const {count,error}=await ctx.supa
+        .from('mastaba_predictions')
+        .select('fixture_id',{count:'exact',head:true})
+        .eq('gameweek_id',np.gw.id)
+        .eq('user_id',ctx.user.id)
+        .eq('submitted',true);
+
+      if(error)throw error;
+      if(Number(count)!==Number(np.fixtures?.length||0)){
+        throw new Error(L(
+          'Submission verification failed. Your draft is still safe — press Submit again.',
+          'فشل تأكيد الإرسال. الـ Draft محفوظ — اضغط إرسال مرة تانية.'
+        ));
+      }
+    }
+
+    const now=new Date().toISOString();
+    np.meta.draftSavedAt=now;
+    np.meta.submittedAt=now;
+    np.meta.editing=false;
+    state.validationMissing=[];
+    try{save()}catch{}
+    closeModal();
+    window.renderPredict?.();
+    toast(L('Predictions Submitted','تم إرسال التوقعات'),'good');
+  }catch(e){
+    console.error('GW2 submit failed',e);
+    toast(String(e?.message||L(
+      'Predictions could not be submitted. Your saved draft is still safe.',
+      'تعذر إرسال التوقعات. الـ Draft المحفوظ لسه موجود.'
+    )),'warn');
+  }
+};
 })();
 </script>
 
