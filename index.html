@@ -7690,6 +7690,13 @@ function animateRankGliderAt(segIndex,fromIndex){
 function syncBottomNavGlider(){
   const nav=document.querySelector('.bottom-nav');
   if(!nav)return;
+  const visibleItems=[...nav.querySelectorAll('.nav-item')].filter(item=>getComputedStyle(item).display!=='none');
+  const navCount=Math.max(1,visibleItems.length);
+  nav.style.setProperty('--mobile-nav-count',String(navCount));
+  visibleItems.forEach((item,index)=>{
+    item.style.setProperty('--mobile-nav-index',String(index));
+    item.style.setProperty('--mobile-nav-count',String(navCount));
+  });
   let glider=nav.querySelector('.nav-glider');
   if(!glider){
     glider=document.createElement('span');
@@ -7698,9 +7705,10 @@ function syncBottomNavGlider(){
   }
   const active=nav.querySelector('.nav-item.active');
   if(!active)return;
-  const inset=Math.max(10,active.offsetWidth*.24);
-  glider.style.left=`${active.offsetLeft+inset}px`;
-  glider.style.width=`${Math.max(24,active.offsetWidth-(inset*2))}px`;
+  const navRect=nav.getBoundingClientRect(),activeRect=active.getBoundingClientRect();
+  const inset=Math.max(10,activeRect.width*.24);
+  glider.style.left=`${(activeRect.left-navRect.left)+inset}px`;
+  glider.style.width=`${Math.max(24,activeRect.width-(inset*2))}px`;
 }
 window.setRankMode=function(m){
   const from=state.selectedRankMode==='gameweek'?1:0;
@@ -13256,7 +13264,7 @@ async function hydrateProductionV1073(profile,user,supa){
  const fixtureRows=fixturesR.data||[];
  const selectedTeamIds=[...new Set(fixtureRows.flatMap(f=>[Number(f.home_team_id),Number(f.away_team_id)]).filter(Boolean))];
  const [predsR,abbrR]=await Promise.all([
-  supa.from('mastaba_predictions').select('*').eq('gameweek_id',gw.id),
+  supa.from('mastaba_predictions').select('*').eq('gameweek_id',gw.id).in('user_id',profileIds),
   selectedTeamIds.length?supa.from('mastaba_team_abbreviations').select('team_id,abbreviation').in('team_id',selectedTeamIds):Promise.resolve({data:[],error:null})
  ]);
  if(predsR.error)throw predsR.error;
@@ -13649,27 +13657,31 @@ window.hydrateProductionV1073=async function(profile,user,supa){
   const ctx=window.prodCtxV1073;
   if(!ctx)return ok;
   adminSlotV1077=state.currentUser;
-  try{
-    const relevantProfileIdsV1083=(state.users||[]).map(u=>u.authUserId).filter(Boolean);
-    const [{data:activeRows},{data:nextRow}]=await Promise.all([
-      relevantProfileIdsV1083.length?supa.from('mastaba_profiles').select('id,active').in('id',relevantProfileIdsV1083):Promise.resolve({data:[]}),
-      supa.from('mastaba_gameweeks').select('id,gameweek_number,name_en,name_ar,status,opens_at,deadline_at,finalized_at').eq('gameweek_number',Number(state.week)+1).maybeSingle()
-    ]);
-    const activeById=Object.fromEntries((activeRows||[]).map(x=>[x.id,x.active!==false]));
-    state.users.forEach(u=>u.active=activeById[u.authUserId]!==false);
-    if(nextRow){
-      nextGwV1077=nextRow;
-      const {data:nfx,error:nfxErr}=await supa.from('mastaba_fixtures').select('*').eq('gameweek_id',nextRow.id).order('kickoff_at',{ascending:true});
-      if(nfxErr)throw nfxErr;
-      state.nextFixtures=(nfx||[]).map(f=>{
-        const home=registerTeamV1077(f.home_team_id,f.home_team_name,f.home_team_logo);
-        const away=registerTeamV1077(f.away_team_id,f.away_team_name,f.away_team_logo);
-        return{id:f.id,apiFixtureId:Number(f.api_fixture_id),apiLeagueId:f.api_league_id?Number(f.api_league_id):null,competition:f.competition_name,competitionCountry:f.competition_country||'',home,away,homeTeamId:Number(f.home_team_id),awayTeamId:Number(f.away_team_id),stadium:f.venue_name||'',kickoff:f.kickoff_at,phase:phaseV1077(f.fixture_status,f.kickoff_at),result:null,apiPayload:f.api_payload||{}};
-      });
-      state.nextPublished=state.nextFixtures.length>0;
-    }
-    state.fixturePool=[...(state.fixtures||[]),...(state.nextFixtures||[])];
-  }catch(e){console.warn('Production admin hydration warning',e)}
+  Promise.resolve().then(async()=>{
+    try{
+      const relevantProfileIdsV1083=(state.users||[]).map(u=>u.authUserId).filter(Boolean);
+      const [{data:activeRows},{data:nextRow}]=await Promise.all([
+        relevantProfileIdsV1083.length?supa.from('mastaba_profiles').select('id,active').in('id',relevantProfileIdsV1083):Promise.resolve({data:[]}),
+        supa.from('mastaba_gameweeks').select('id,gameweek_number,name_en,name_ar,status,opens_at,deadline_at,finalized_at').eq('gameweek_number',Number(state.week)+1).maybeSingle()
+      ]);
+      const activeById=Object.fromEntries((activeRows||[]).map(x=>[x.id,x.active!==false]));
+      state.users.forEach(u=>u.active=activeById[u.authUserId]!==false);
+      if(nextRow){
+        nextGwV1077=nextRow;
+        const {data:nfx,error:nfxErr}=await supa.from('mastaba_fixtures').select('*').eq('gameweek_id',nextRow.id).order('kickoff_at',{ascending:true});
+        if(nfxErr)throw nfxErr;
+        state.nextFixtures=(nfx||[]).map(f=>{
+          const home=registerTeamV1077(f.home_team_id,f.home_team_name,f.home_team_logo);
+          const away=registerTeamV1077(f.away_team_id,f.away_team_name,f.away_team_logo);
+          return{id:f.id,apiFixtureId:Number(f.api_fixture_id),apiLeagueId:f.api_league_id?Number(f.api_league_id):null,competition:f.competition_name,competitionCountry:f.competition_country||'',home,away,homeTeamId:Number(f.home_team_id),awayTeamId:Number(f.away_team_id),stadium:f.venue_name||'',kickoff:f.kickoff_at,phase:phaseV1077(f.fixture_status,f.kickoff_at),result:null,apiPayload:f.api_payload||{}};
+        });
+        state.nextPublished=state.nextFixtures.length>0;
+      }
+      state.fixturePool=[...(state.fixtures||[]),...(state.nextFixtures||[])];
+      try{save()}catch{}
+      if(['home','predict','admin'].includes(state.view))requestAnimationFrame(()=>{try{render()}catch{}});
+    }catch(e){console.warn('Production admin hydration warning',e)}
+  });
   /* V10.81: player data is loaded lazily when a scorer menu is opened. */
   lockProductionTitleV1077();
   return ok;
@@ -14425,7 +14437,7 @@ async function loadCentralPlayerPoolV1083(supa){
 }
 async function prefetchCentralV1083(supa){await Promise.all([loadCentralPlayerPoolV1083(supa),loadCentralAvailabilityV1083(supa)])}
 const hydrateV1083Base=window.hydrateProductionV1073;
-window.hydrateProductionV1073=async function(profile,user,supa){const ok=await hydrateV1083Base(profile,user,supa);await prefetchCentralV1083(supa);window.mastabaGameweekDeadlineV1083=deadlineV1083().toISOString();return ok};
+window.hydrateProductionV1073=async function(profile,user,supa){const ok=await hydrateV1083Base(profile,user,supa);window.mastabaGameweekDeadlineV1083=deadlineV1083().toISOString();Promise.resolve().then(()=>prefetchCentralV1083(supa)).catch(e=>console.warn('Central player prefetch deferred',e));return ok};
 window.ensureTeamPlayersV1082=async function(f,code){return (players[code]||[]).length>0};
 window.ensureTeamPlayersV1081=window.ensureTeamPlayersV1082;
 window.openScorers=function(mid){
@@ -14560,7 +14572,7 @@ async function refreshPrivateLiveV1083(){
 function startPrivateLiveV1083(){if(liveDbTimerV1083)clearInterval(liveDbTimerV1083);if(!(state.leagues||[]).some(l=>l.id==='mastaba'))return;liveDbTimerV1083=setInterval(refreshPrivateLiveV1083,60000);setTimeout(refreshPrivateLiveV1083,2500)}
 
 const hydrateFinalizeBaseV1083=window.hydrateProductionV1073;
-window.hydrateProductionV1073=async function(profile,user,supa){const ok=await hydrateFinalizeBaseV1083(profile,user,supa);await Promise.all([loadHistoricalPointsV1083(supa),loadPowerChipsV1083(supa)]);startPrivateLiveV1083();save();return ok};
+window.hydrateProductionV1073=async function(profile,user,supa){const ok=await hydrateFinalizeBaseV1083(profile,user,supa);window.startPrivateLiveV1083?.();Promise.all([loadHistoricalPointsV1083(supa),loadPowerChipsV1083(supa)]).then(()=>{try{save()}catch{};if(['home','rankings'].includes(state.view))requestAnimationFrame(()=>{try{render()}catch{}})}).catch(e=>console.warn('Historical/chip hydration deferred',e));return ok};
 
 window.requestPrivateLeague=async function(){
   const code=(document.querySelector('#privateLeagueCode')?.value||'').trim();if(!code)return toast(L('Enter an invite code first.','اكتب كود الدعوة الأول.'),'warn');
@@ -15033,8 +15045,8 @@ window.hydrateProductionV1073=async function(profile,user,supa){
       const row=window.prodCtxV1073?.fxById?.[f.id];
       if(f.phase==='live'&&!f.liveScore){f.liveScore={home:Number(row?.home_goals??f.result?.home??0),away:Number(row?.away_goals??f.result?.away??0)};f.liveFirstTeam=row?.first_scoring_team_id?teamCodeV1083(row.first_scoring_team_id):f.liveFirstTeam;f.liveFirstScorer=row?.first_scorer_id?String(row.first_scorer_id):f.liveFirstScorer}
     }
-    await resumeLatestLiveV1090();
   }catch{}
+  Promise.resolve().then(()=>resumeLatestLiveV1090()).catch(()=>{});
   return ok;
 };
 document.addEventListener('visibilitychange',()=>{if(!document.hidden)resumeLatestLiveV1090()});
@@ -16142,7 +16154,7 @@ window.scorePredictionForLeagueV1096=scorePredictionForLeagueV1096;
 scorePrediction=function(uid,f){return scorePredictionForLeagueV1096(uid,f,'mastaba')};window.scorePrediction=scorePrediction;
 
 const hydratePrevV1096=window.hydrateProductionV1073;
-window.hydrateProductionV1073=async function(profile,user,supa){const ok=await hydratePrevV1096(profile,user,supa);await loadProdLeagueV1096(supa,true);return ok};
+window.hydrateProductionV1073=async function(profile,user,supa){const ok=await hydratePrevV1096(profile,user,supa);Promise.resolve().then(()=>loadProdLeagueV1096(supa,true)).then(()=>{if(typeof window.renderLiveSurfaceV1094==='function')window.renderLiveSurfaceV1094()}).catch(e=>console.warn('League aggregate hydration deferred',e));return ok};
 let finalSigV1096='';setInterval(()=>{const sig=(state.fixtures||[]).filter(f=>f.phase==='final').map(f=>f.id).join('|');if(sig!==finalSigV1096){const had=finalSigV1096;finalSigV1096=sig;if(had&&window.prodCtxV1073?.supa)loadProdLeagueV1096(window.prodCtxV1073.supa,true).then(()=>{if(typeof window.renderLiveSurfaceV1094==='function')window.renderLiveSurfaceV1094()})}},2500);
 })();
 </script>
@@ -17156,7 +17168,7 @@ html #view-admin .admin-workspace-v1100 .admin-empty-v1100{padding:18px;text-ali
 <script id="mastaba-v1100-admin-repair">
 (function mastabaV1100(){
 'use strict';
-window.MASTABA_BUILD_VERSION='11.07';
+window.MASTABA_BUILD_VERSION='11.08';
 
 const SCHEDULE_SYNC_V1101='https://bnwjtrtlwnlbldfhaggg.supabase.co/functions/v1/mastaba-schedule-sync';
 const scheduleV1100=window.adminScheduleV1100=window.adminScheduleV1100||{
@@ -17184,14 +17196,14 @@ function addAdminCalendarDaysV1106(key,days){
 }
 function adminSevenDayKeysV1106(now=new Date()){
   const first=adminFixtureDateKey(now.toISOString());
-  return Array.from({length:7},(_,index)=>addAdminCalendarDaysV1106(first,index));
+  return Array.from({length:8},(_,index)=>addAdminCalendarDaysV1106(first,index));
 }
 function adminCatalogBoundsV1106(keys){
   const list=Array.isArray(keys)&&keys.length?keys:adminSevenDayKeysV1106();
   const start=new Date(`${list[0]}T00:00:00.000Z`);
   const afterLast=new Date(`${addAdminCalendarDaysV1106(list[list.length-1],1)}T00:00:00.000Z`);
   /* Widen only the Supabase timestamp bounds so every IANA timezone is safe;
-     the returned rows are then reduced to the exact seven calendar keys. */
+     the returned rows are then reduced to the exact eight calendar keys. */
   start.setUTCHours(start.getUTCHours()-15);
   afterLast.setUTCHours(afterLast.getUTCHours()+15);
   return{start:start.toISOString(),end:afterLast.toISOString()};
@@ -17296,7 +17308,7 @@ async function loadFullScheduleV1100(force=false){
       scheduleLoadAbortV1103=null;scheduleV1100.loading=false;refreshScheduleStatusV1100();
       // Mount only the fixture browser. Rebuilding the whole Admin workspace
       // caused the compressed flash, layout jump and multi-second navigation.
-      if(state.view==='admin'&&adminTabV1100()==='game')window.refreshAdminFixtureBrowserV1104?.();
+      if(state.view==='admin'&&adminTabV1100()==='game'){window.refreshAdminFixtureBrowserV1104?.();window.mountAllAdminFixtureBrowsersV1108?.()}
     }
   }
 }
@@ -17511,7 +17523,7 @@ function gameSetupHTMLV1100(){
   const subtitle=isCurrent?L('Edit the active round before it locks.','عدّل الجولة الحالية قبل القفل.'):L('Select any centrally cached match, then publish the next Gameweek.','اختار أي ماتش محفوظ مركزياً وبعدين انشر الجولة الجاية.');
   return `<div class="admin-section-v1100">
     <div class="admin-block-title-v1100"><span>${L('Gameweek Fixture Setup','إعداد ماتشات الجولة')}</span><small>${L('Central Supabase schedule catalogue','دليل جدول Supabase المركزي')}</small></div>
-    <div class="admin-live-note"><strong>${L('Central Fixture Catalogue','دليل الماتشات المركزي')}</strong><span>${L('This page reads only the next 7 days from Supabase. League schedules refresh about every 72 hours; cup and UEFA schedules about every 24 hours. Opening Game Setup makes zero provider calls.','الصفحة دي بتقرأ الـ7 أيام الجاية فقط من Supabase. جداول الدوري بتتحدث تقريباً كل 72 ساعة، والكؤوس وبطولات أوروبا كل 24 ساعة. فتح إعداد الجولة لا يطلب أي بيانات من المصدر.')}</span>${scheduleStatusHTMLV1100()}</div>
+    <div class="admin-live-note"><strong>${L('Central Fixture Catalogue','دليل الماتشات المركزي')}</strong><span>${L('This page reads only the next 8 days from Supabase. League schedules refresh about every 72 hours; cup and UEFA schedules about every 24 hours. Opening Game Setup makes zero provider calls.','الصفحة دي بتقرأ الـ8 أيام الجاية فقط من Supabase. جداول الدوري بتتحدث تقريباً كل 72 ساعة، والكؤوس وبطولات أوروبا كل 24 ساعة. فتح إعداد الجولة لا يطلب أي بيانات من المصدر.')}</span>${scheduleStatusHTMLV1100()}</div>
     <div class="admin-round-tabs">
       <button class="admin-round-tab ${isCurrent?'active':''}" onclick="setAdminSetupTargetV1100('current')">${L('Current Gameweek','الجولة الحالية')}<small>GW ${state.week} · ${(state.fixtures||[]).length} ${L('matches','ماتش')}</small></button>
       <button class="admin-round-tab ${!isCurrent?'active':''}" onclick="setAdminSetupTargetV1100('next')">${L('Upcoming Gameweek','الجولة الجاية')}<small>GW ${state.week+1} · ${(state.nextFixtures||[]).length} ${L('selected','مختارة')}</small></button>
@@ -17644,7 +17656,7 @@ if(state?.view==='admin')setTimeout(renderAdminV1100,0);
    Supabase schedule available exclusively inside Admin > Game Setup. */
 (function(){
 'use strict';
-window.MASTABA_BUILD_VERSION='11.07';
+window.MASTABA_BUILD_VERSION='11.08';
 
 const fixtureKeyV1102=f=>Number(f?.apiFixtureId)?`api:${Number(f.apiFixtureId)}`:`id:${String(f?.id||'')}`;
 function pinnedPoolV1102(){
@@ -17704,7 +17716,7 @@ function buildAdminFixtureSelectorV1103(target){
   const leagues=[...new Set(pool.map(competitionV1102))].sort(fixtureCompetitionSort),query=String(ui.q||'').trim();
   const matches=pool.filter(f=>{const league=competitionV1102(f);return(ui.league==='all'||league===ui.league)&&(query?searchMatchV1102(query,f):adminFixtureDateKey(f.kickoff)===ui.date)}).sort((a,b)=>new Date(a.kickoff)-new Date(b.kickoff));
   const visible=matches.slice(0,ui.limit),groups={};visible.forEach(f=>{const league=competitionV1102(f);(groups[league]??=[]).push(f)});
-  const status=query?`${L('Searching the next 7 days','البحث في الـ7 أيام الجاية')} · “${escapeHTML(query)}” · ${matches.length} ${L('matches','ماتش')}`:`${matches.length} ${L('matches on this day','ماتش في اليوم ده')}`;
+  const status=query?`${L('Searching the next 8 days','البحث في الـ8 أيام الجاية')} · “${escapeHTML(query)}” · ${matches.length} ${L('matches','ماتش')}`:`${matches.length} ${L('matches on this day','ماتش في اليوم ده')}`;
   const limited=matches.length>visible.length?` · ${L(`showing ${visible.length} of ${matches.length}`,`عرض ${visible.length} من ${matches.length}`)}`:'';
   const rows=Object.keys(groups).length?Object.entries(groups).sort((a,b)=>fixtureCompetitionSort(a[0],b[0])).map(([league,fixtures])=>`<div class="fixture-league-group" data-league-group-v1080="${escapeHTML(league)}"><div class="fixture-league-title"><strong>${escapeHTML(league)}</strong><span data-group-count-v1080>${fixtures.length} ${L('fixtures','ماتش')}</span></div>${fixtures.map(f=>{const picked=selected.find(x=>(Number(x?.apiFixtureId)>0&&Number(x.apiFixtureId)===Number(f.apiFixtureId))||String(x?.id)===String(f.id)),checked=!!picked,disabled=target==='current'&&isRoundLocked(),actionId=picked?.id||f.id,h=teamV1102(f,'home'),a=teamV1102(f,'away');return`<label class="fixture-choice fixture-choice-livescore ${checked?'selected':''} ${disabled?'disabled':''}" data-fixture-row-v1080 data-fixture-date-v1080="${adminFixtureDateKey(f.kickoff)}" data-fixture-league-v1080="${escapeHTML(league)}" data-fixture-search-v1080="${escapeHTML(searchTextV1102(f))}"><span class="fixture-kickoff">${formatFixtureClock(f.kickoff)}</span><span class="fixture-team-stack"><span class="fixture-team-line"><span class="fixture-team-logo"><img loading="lazy" decoding="async" src="${escapeHTML(h.logo)}" alt="${escapeHTML(h.name)}"></span><b>${escapeHTML(h.name)}</b></span><span class="fixture-team-line"><span class="fixture-team-logo"><img loading="lazy" decoding="async" src="${escapeHTML(a.logo)}" alt="${escapeHTML(a.name)}"></span><b>${escapeHTML(a.name)}</b></span><small class="fixture-stadium">${escapeHTML(f.stadium||L('Venue TBC','الملعب لم يحدد'))}</small></span><span class="fixture-checkbox-wrap"><input type="checkbox" ${checked?'checked':''} ${disabled?'disabled':''} onchange="toggleAdminFixture('${actionId}','${target}',this.checked)"><span class="fixture-check-label">${checked?L('Selected','مختار'):L('Add','إضافة')}</span></span></label>`}).join('')}</div>`).join(''):`<div class="fixture-empty">${L('No fixtures match these filters.','مفيش ماتشات مطابقة للبحث ده.')}</div>`;
   const more='';
@@ -17729,7 +17741,7 @@ function queueAdminFixtureMountV1103(target){
   const token=++adminFixtureMountTokenV1103;
   requestAnimationFrame(()=>requestAnimationFrame(()=>mountAdminFixtureSelectorV1103(target,token)));
 }
-window.adminFixtureSelector=adminFixtureSelector=function(target){queueAdminFixtureMountV1103(target);return fixturePlaceholderV1103(target)};
+window.adminFixtureSelector=adminFixtureSelector=function(target){if(fullScheduleReadyV1103()||window.adminScheduleV1100?.error)return buildAdminFixtureSelectorV1103(target);queueAdminFixtureMountV1103(target);return fixturePlaceholderV1103(target)};
 
 function refreshSearchV1102(target){
   if(state.view!=='admin')return;
@@ -17971,7 +17983,7 @@ html[data-theme] body #app #view-admin .selected-fixture-chip{
   border-color:var(--admin-outer-line)!important;
 }
 
-/* Fixture browser: seven equal days always fit inside the Game Setup card. */
+/* Fixture browser: eight equal days always fit inside the Game Setup card. */
 html[data-theme] body #app #view-admin :is(.admin-pane-v1100,.admin-game-body-v1100,.admin-section-v1100,.admin-focus-panel,.admin-round-panel,.fixture-browser,.fixture-selector,.fixture-league-group,.fixture-choice,.admin-match-grid-v1100,.admin-match-v1100,.admin-v1094-list,.admin-v1094-user){
   box-sizing:border-box!important;width:100%!important;max-width:100%!important;min-width:0!important;
 }
@@ -18128,136 +18140,6 @@ html[data-theme] body #app #view-admin .admin-publish-btn{width:100%!important;m
   html[data-theme] body #app #view-admin .admin-v1094-details{grid-template-columns:1fr!important}
 }
 </style>
-<style id="mastaba-v1106-schedule-and-theme-finish">
-/* V11.06 — one theme-native accent completes the ATS two-surface Admin system. */
-html[data-theme] body #app #view-admin{
-  --admin-accent:var(--theme-accent,#d7cc35);
-  --admin-accent-text:var(--home-btn3-text,var(--admin-outer-text));
-}
-html[data-theme="barcelona"] body #app #view-admin{--admin-accent:#e0c12d;--admin-accent-text:#172e77}
-html:is([data-theme="realmadrid"],[data-theme="real-madrid"]) body #app #view-admin{--admin-accent:#edc130;--admin-accent-text:#274793}
-html:is([data-theme="acmilan"],[data-theme="ac-milan"]) body #app #view-admin{--admin-accent:#bf1b2d;--admin-accent-text:#fff}
-html[data-theme="arsenal"] body #app #view-admin{--admin-accent:#1b3272;--admin-accent-text:#fff}
-html[data-theme="liverpool"] body #app #view-admin{--admin-accent:#f3f4f2;--admin-accent-text:#af181d}
-html[data-theme="manunited"] body #app #view-admin{--admin-accent:#fcff40;--admin-accent-text:#9f160b}
-
-/* Match the unboxed Profile navigation: readable labels and one accent line. */
-html[data-theme] body #app #view-admin .admin-tabs-v1100{
-  width:min(760px,100%)!important;max-width:760px!important;
-  margin:4px auto 16px!important;padding:0!important;gap:0!important;
-  border-bottom:1px solid color-mix(in srgb,var(--theme-accent) 25%,transparent)!important;
-  background:transparent!important;border-radius:0!important;box-shadow:none!important;
-}
-html[data-theme] body #app #view-admin .admin-tab-v1100{
-  min-height:0!important;padding:12px 8px!important;
-  background:transparent!important;color:var(--theme-muted)!important;
-  border:0!important;border-radius:0!important;box-shadow:none!important;
-  font-size:.82rem!important;line-height:1.2!important;
-}
-html[dir="rtl"][data-theme] body #app #view-admin .admin-tab-v1100{border-radius:0!important}
-html[data-theme] body #app #view-admin .admin-tab-v1100.active{
-  background:transparent!important;color:var(--theme-text)!important;
-  border:0!important;box-shadow:none!important;
-}
-html[data-theme] body #app #view-admin .admin-tab-line-v1100{
-  bottom:-2px!important;height:4px!important;border-radius:99px!important;
-  background:var(--admin-accent)!important;opacity:1!important;
-}
-html[data-theme] body #app #view-admin .admin-block-title-v1100{
-  border-bottom:2px solid var(--admin-accent)!important;
-}
-
-/* The seven buttons are calendar keys, not device-local timestamps. The third
-   line makes the year explicit without increasing the strip width. */
-html[data-theme] body #app #view-admin .fixture-day{
-  min-height:66px!important;padding:6px 2px!important;
-  display:flex!important;flex-direction:column!important;align-items:center!important;justify-content:center!important;
-}
-html[data-theme] body #app #view-admin .fixture-day :is(.fixture-day-weekday,.fixture-day-date,.fixture-day-year){
-  display:block!important;width:100%!important;margin:0!important;overflow:hidden!important;
-  color:inherit!important;white-space:nowrap!important;text-overflow:ellipsis!important;text-align:center!important;
-}
-html[data-theme] body #app #view-admin .fixture-day-weekday{font-size:.6rem!important;line-height:1!important;font-weight:900!important}
-html[data-theme] body #app #view-admin .fixture-day-date{margin-top:3px!important;font-size:.68rem!important;line-height:1.05!important;font-weight:1000!important}
-html[data-theme] body #app #view-admin .fixture-day-year{margin-top:3px!important;font-size:.54rem!important;line-height:1!important;font-style:normal!important;font-weight:850!important;opacity:.78!important}
-
-/* League separators use the third theme color and read as true section heads. */
-html[data-theme] body #app #view-admin .fixture-league-group{margin-top:13px!important}
-html[data-theme] body #app #view-admin .fixture-league-title{
-  min-height:48px!important;padding:12px 14px!important;
-  background:var(--admin-accent)!important;color:var(--admin-accent-text)!important;
-  border:1px solid color-mix(in srgb,var(--admin-accent-text) 32%,transparent)!important;
-  border-radius:4px 14px 0 0!important;font-size:1rem!important;line-height:1.18!important;
-}
-html[dir="rtl"][data-theme] body #app #view-admin .fixture-league-title{border-radius:14px 4px 0 0!important}
-html[data-theme] body #app #view-admin .fixture-league-title strong{font-size:1.02rem!important;font-weight:1000!important;color:inherit!important}
-html[data-theme] body #app #view-admin .fixture-league-title [data-group-count-v1080]{
-  padding:4px 7px!important;border-radius:999px!important;color:inherit!important;
-  background:color-mix(in srgb,var(--admin-accent-text) 11%,transparent)!important;
-  border:1px solid color-mix(in srgb,var(--admin-accent-text) 24%,transparent)!important;
-  font-size:.66rem!important;font-weight:950!important;
-}
-
-/* Remove the remaining fixed-white pills and tables. */
-html[data-theme] body #app #view-admin .admin-zero-calls-v1101{
-  background:var(--admin-outer-surface)!important;color:var(--admin-outer-text)!important;
-  border:1px solid var(--admin-outer-line)!important;-webkit-text-fill-color:var(--admin-outer-text)!important;
-}
-html[data-theme] body #app #view-admin .admin-analytics-body-v1095 .admin-v1094-panel{background:transparent!important}
-
-/* Submission Tracker: blue table rows with theme-native, high-contrast state chips. */
-html[data-theme] body #app #view-admin :is(.admin-tracker-chip-v1095,.admin-tracker-row-v1095,.league-admin-tracker-row-v1104){
-  background:var(--admin-outer-surface)!important;color:var(--admin-outer-text)!important;
-  border:1px solid var(--admin-outer-line)!important;box-shadow:none!important;
-}
-html[data-theme] body #app #view-admin :is(.admin-tracker-chip-v1095,.admin-tracker-row-v1095,.league-admin-tracker-row-v1104) :is(strong,span,.name,.sub){
-  color:inherit!important;-webkit-text-fill-color:currentColor!important;
-}
-html[data-theme] body #app #view-admin .admin-tracker-chip-v1095 span,
-html[data-theme] body #app #view-admin .admin-tracker-row-v1095 .sub{opacity:.78!important}
-html[data-theme] body #app #view-admin .admin-status-v1095.submitted,
-html[data-theme] body #app #view-admin .league-admin-tracker-v1104 .admin-v1094-pill.good{
-  background:var(--admin-accent)!important;color:var(--admin-accent-text)!important;
-  border-color:color-mix(in srgb,var(--admin-accent-text) 32%,transparent)!important;
-  -webkit-text-fill-color:var(--admin-accent-text)!important;
-}
-html[data-theme] body #app #view-admin .admin-status-v1095.draft,
-html[data-theme] body #app #view-admin .league-admin-tracker-v1104 .admin-v1094-pill.warn{
-  background:var(--admin-inner)!important;color:var(--admin-inner-text)!important;
-  border-color:var(--admin-inner-line)!important;-webkit-text-fill-color:var(--admin-inner-text)!important;
-}
-html[data-theme] body #app #view-admin .admin-status-v1095.missing{
-  background:color-mix(in srgb,var(--admin-outer) 72%,#000 28%)!important;
-  color:var(--admin-outer-text)!important;border-color:var(--admin-outer-line)!important;
-  -webkit-text-fill-color:var(--admin-outer-text)!important;
-}
-
-/* Audience Mix and analytics chips now use the same blue table surface. */
-html[data-theme] body #app #view-admin .admin-v1094-chip{
-  background:var(--admin-outer-surface)!important;color:var(--admin-outer-text)!important;
-  border:1px solid var(--admin-outer-line)!important;-webkit-text-fill-color:var(--admin-outer-text)!important;
-}
-html[data-theme] body #app #view-admin .admin-v1094-privacy{color:var(--admin-inner-text)!important;opacity:.8!important}
-html[data-theme] body #app #view-admin .admin-v1094-team-row{color:var(--admin-inner-text)!important}
-html[data-theme] body #app #view-admin .admin-v1094-bar{background:color-mix(in srgb,var(--admin-inner-text) 20%,transparent)!important}
-html[data-theme] body #app #view-admin .admin-v1094-bar>span{background:var(--admin-accent)!important;color:var(--admin-accent)!important}
-
-@media(max-width:720px){
-  html[data-theme] body #app #view-admin .admin-tabs-v1100{margin-bottom:10px!important}
-  html[data-theme] body #app #view-admin .admin-tab-v1100{min-height:0!important;padding:11px 3px!important;font-size:.7rem!important}
-  html[data-theme] body #app #view-admin .fixture-day-strip{gap:3px!important}
-  html[data-theme] body #app #view-admin .fixture-day{min-height:63px!important;padding-inline:1px!important}
-  html[data-theme] body #app #view-admin .fixture-day-weekday{font-size:.48rem!important}
-  html[data-theme] body #app #view-admin .fixture-day-date{font-size:.53rem!important}
-  html[data-theme] body #app #view-admin .fixture-day-year{font-size:.46rem!important}
-  html[data-theme] body #app #view-admin .fixture-league-title{min-height:44px!important;padding:10px!important}
-  html[data-theme] body #app #view-admin .fixture-league-title strong{font-size:.88rem!important}
-}
-@media(max-width:390px){
-  html[data-theme] body #app #view-admin .fixture-day-date{font-size:.49rem!important}
-  html[data-theme] body #app #view-admin .fixture-day-year{font-size:.43rem!important}
-}
-</style>
 <script id="mastaba-v1104-runtime-fixes">
 (()=>{
   window.refreshAdminFixtureBrowserV1104=function(){
@@ -18271,176 +18153,370 @@ html[data-theme] body #app #view-admin .admin-v1094-bar>span{background:var(--ad
 })();
 </script>
 
-<style id="mastaba-v1107-admin-finish">
-/* V11.07 — Admin schedule-state repair + deliberate three-level theme hierarchy. */
-html[data-theme] body #app #view-admin{
-  --admin-layer-1:var(--admin-outer,#171147);
-  --admin-layer-1-text:var(--admin-outer-text,#fff);
-  --admin-layer-2:var(--admin-inner,#25164f);
-  --admin-layer-2-text:var(--admin-inner-text,#fff);
-  --admin-layer-3:var(--theme-accent,#d8ae43);
-  --admin-layer-3-text:#12171f;
-}
 
-/* Explicit theme hierarchy so a child surface never repeats its direct parent. */
+
+<style id="mastaba-v1108-exact-ats-admin-mobile">
+/* =========================================================
+   V11.08 — exact As Things Stand palette + mobile regression authority
+   ========================================================= */
+
+/* Admin palette: these are the exact two ATS surfaces already used by each
+   theme. Solid themes stay solid; Barcelona keeps the same approved ATS outer
+   gradient rather than inventing a third Admin colour. */
+html[data-theme] body #app #view-admin{
+  --admin-outer:#171147;--admin-outer-text:#fff;
+  --admin-inner:#25164f;--admin-inner-text:#fff;
+  --admin-outer-surface:var(--admin-outer)!important;
+  --admin-inner-surface:var(--admin-inner)!important;
+  --admin-outer-line:color-mix(in srgb,var(--admin-outer-text) 18%,transparent)!important;
+  --admin-inner-line:color-mix(in srgb,var(--admin-inner-text) 19%,transparent)!important;
+}
 html[data-theme="barcelona"] body #app #view-admin{
-  --admin-layer-1:#9d2545;--admin-layer-1-text:#fff;
-  --admin-layer-2:#1c14bf;--admin-layer-2-text:#fff;
-  --admin-layer-3:#d9b82e;--admin-layer-3-text:#151922;
+  --admin-outer:#172e77;--admin-outer-text:#fff;
+  --admin-inner:#9d2545;--admin-inner-text:#fff;
+  --admin-outer-surface:linear-gradient(135deg,#172e77,#12295a)!important;
+  --admin-outer-line:rgba(255,255,255,.27)!important;--admin-inner-line:rgba(255,255,255,.19)!important;
 }
 html:is([data-theme="realmadrid"],[data-theme="real-madrid"]) body #app #view-admin{
-  --admin-layer-1:#f7f7f7;--admin-layer-1-text:#274793;
-  --admin-layer-2:#274793;--admin-layer-2-text:#fff;
-  --admin-layer-3:#edc130;--admin-layer-3-text:#151922;
+  --admin-outer:#f7f7f7;--admin-outer-text:#274793;
+  --admin-inner:#274793;--admin-inner-text:#fff;
+  --admin-outer-line:rgba(39,71,147,.18)!important;--admin-inner-line:rgba(255,255,255,.19)!important;
 }
-html[data-theme="acmilan"] body #app #view-admin{
-  --admin-layer-1:#12171f;--admin-layer-1-text:#fff;
-  --admin-layer-2:#bf1b2d;--admin-layer-2-text:#fff;
-  --admin-layer-3:#f7f7f7;--admin-layer-3-text:#12171f;
+html:is([data-theme="acmilan"],[data-theme="ac-milan"]) body #app #view-admin{
+  --admin-outer:#fff;--admin-outer-text:#12171f;
+  --admin-inner:#bf1b2d;--admin-inner-text:#fff;
+  --admin-outer-line:#12171f!important;--admin-inner-line:rgba(255,255,255,.22)!important;
 }
 html[data-theme="arsenal"] body #app #view-admin{
-  --admin-layer-1:#cf1f15;--admin-layer-1-text:#fff;
-  --admin-layer-2:#fff;--admin-layer-2-text:#1b3272;
-  --admin-layer-3:#1b3272;--admin-layer-3-text:#fff;
+  --admin-outer:#cf1f15;--admin-outer-text:#fff;
+  --admin-inner:#fff;--admin-inner-text:#1b3272;
 }
 html[data-theme="liverpool"] body #app #view-admin{
-  --admin-layer-1:#af181d;--admin-layer-1-text:#fff;
-  --admin-layer-2:#f3f4f2;--admin-layer-2-text:#341014;
-  --admin-layer-3:#741015;--admin-layer-3-text:#fff;
+  --admin-outer:#af181d;--admin-outer-text:#fff;
+  --admin-inner:#8f1318;--admin-inner-text:#fff;
+  --admin-outer-line:#fff!important;--admin-inner-line:#fff!important;
 }
 html[data-theme="manunited"] body #app #view-admin{
-  --admin-layer-1:#9f160b;--admin-layer-1-text:#fff;
-  --admin-layer-2:#f7fef8;--admin-layer-2-text:#42100c;
-  --admin-layer-3:#fcff40;--admin-layer-3-text:#171717;
+  --admin-outer:#fff;--admin-outer-text:#9f160b;
+  --admin-inner:#9f160b;--admin-inner-text:#fff;
+  --admin-outer-line:#9f160b!important;--admin-inner-line:#fff!important;
+}
+html:is([data-theme="midnight"],[data-theme="emerald"],[data-theme="desert"],[data-theme="violet"],[data-theme="alahly"],[data-theme="zamalek"],[data-theme="bayern"],[data-theme="psg"],[data-theme="inter"],[data-theme="juventus"],[data-theme="roma"],[data-theme="mancity"],[data-theme="chelsea"],[data-theme="alhilal"],[data-theme="alnassr"],[data-theme="alittihad"],[data-theme="alahlisaudi"]) body #app #view-admin{
+  --admin-outer:var(--club-outer);--admin-outer-text:var(--club-outer-text);
+  --admin-inner:var(--club-inner);--admin-inner-text:var(--club-inner-text);
 }
 
-/* Current / Upcoming now uses the same flat navigation language as the
-   Game Setup / Production Management / Analytics navigation. */
-html[data-theme] body #app #view-admin .admin-round-tabs{
-  position:relative!important;display:grid!important;grid-template-columns:1fr 1fr!important;
-  gap:0!important;margin:10px 0 17px!important;padding:0!important;
-  background:transparent!important;border:0!important;
-  border-bottom:1px solid color-mix(in srgb,var(--admin-layer-3) 38%,transparent)!important;
-  border-radius:0!important;box-shadow:none!important;
+/* Level 1 = ATS outer table. */
+html[data-theme] body #app #view-admin :is(.admin-workspace-head-v1100,.admin-section-v1100){
+  background:var(--admin-outer-surface)!important;color:var(--admin-outer-text)!important;
+  border-color:var(--admin-outer-line)!important;box-shadow:none!important;
 }
-html[data-theme] body #app #view-admin .admin-round-tabs:after{
-  content:""!important;position:absolute!important;inset-inline-start:0!important;bottom:-2px!important;
-  width:50%!important;height:4px!important;border-radius:999px!important;
-  background:var(--admin-layer-3)!important;
-  box-shadow:0 2px 9px color-mix(in srgb,var(--admin-layer-3) 38%,transparent)!important;
-  transform:translateX(0);transition:transform .22s ease!important;pointer-events:none!important;
-}
-html[dir="ltr"][data-theme] body #app #view-admin .admin-round-tabs:has(.admin-round-tab:nth-child(2).active):after{transform:translateX(100%)}
-html[dir="rtl"][data-theme] body #app #view-admin .admin-round-tabs:has(.admin-round-tab:nth-child(2).active):after{transform:translateX(-100%)}
-html[data-theme] body #app #view-admin .admin-round-tab,
-html[data-theme] body #app #view-admin .admin-round-tab.active{
-  position:relative!important;min-height:56px!important;padding:10px 14px!important;
-  background:transparent!important;border:0!important;border-radius:0!important;box-shadow:none!important;
-  color:color-mix(in srgb,var(--admin-layer-1-text) 72%,transparent)!important;
-}
-html[data-theme] body #app #view-admin .admin-round-tab.active{color:var(--admin-layer-1-text)!important}
-html[data-theme] body #app #view-admin .admin-round-tab.active:after{display:none!important}
-
-/* Give every large Production / Analytics module and directory card real breathing room. */
-html[data-theme] body #app #view-admin :is(.admin-production-body-v1100,.admin-analytics-body-v1100){
-  display:grid!important;gap:16px!important;
-}
-html[data-theme] body #app #view-admin .admin-v1094-list{
-  column-gap:16px!important;row-gap:12px!important;
-}
-
-/* Level 1 — large outer modules. */
-html[data-theme] body #app #view-admin .admin-section-v1100{
-  background:var(--admin-layer-1)!important;color:var(--admin-layer-1-text)!important;
-  border-color:color-mix(in srgb,var(--admin-layer-3) 45%,transparent)!important;
-}
+html[data-theme] body #app #view-admin :is(.admin-workspace-head-v1100,.admin-section-v1100) > :is(h1,h2,h3,h4,h5,p,span,small,strong,b,label),
 html[data-theme] body #app #view-admin .admin-block-title-v1100,
-html[data-theme] body #app #view-admin .admin-block-title-v1100 :is(span,small){
-  color:var(--admin-layer-1-text)!important;-webkit-text-fill-color:var(--admin-layer-1-text)!important;
+html[data-theme] body #app #view-admin .admin-block-title-v1100 *{
+  color:var(--admin-outer-text)!important;-webkit-text-fill-color:var(--admin-outer-text)!important;
 }
 
-/* Remove the redundant same-colour intermediate panel in Analytics/Accounts. */
-html[data-theme] body #app #view-admin .admin-v1094-panel{
-  background:transparent!important;border:0!important;box-shadow:none!important;color:inherit!important;
-}
-
-/* Level 2 — cards inside a Level-1 module. */
-html[data-theme] body #app #view-admin :is(
- .admin-v1094-user,.admin-v1094-metric,.admin-v1094-box,.admin-health-card-v1100,
- .admin-tracker-chip-v1095,.admin-tracker-row-v1095,.league-admin-tracker-row-v1104,
- .admin-live-note,.admin-focus-panel,.selected-fixtures-summary,.admin-empty-v1100
+/* Level 2 = ATS inner table. */
+html[data-theme] body #app #view-admin .admin-section-v1100 :is(
+  .panel,.admin-live-note,.admin-match-v1100,.admin-readonly-note-v1100,.admin-empty-v1100,
+  .admin-health-card-v1100,.admin-tracker-chip-v1095,.admin-tracker-row-v1095,.league-admin-tracker-v1104
 ){
-  background:var(--admin-layer-2)!important;color:var(--admin-layer-2-text)!important;
-  border-color:color-mix(in srgb,var(--admin-layer-2-text) 25%,transparent)!important;
+  background:var(--admin-inner)!important;color:var(--admin-inner-text)!important;
+  border-color:var(--admin-inner-line)!important;box-shadow:none!important;
 }
-html[data-theme] body #app #view-admin :is(
- .admin-v1094-user,.admin-v1094-metric,.admin-v1094-box,.admin-health-card-v1100,
- .admin-tracker-chip-v1095,.admin-tracker-row-v1095,.league-admin-tracker-row-v1104,
- .admin-live-note,.admin-focus-panel,.selected-fixtures-summary,.admin-empty-v1100
-) :is(h1,h2,h3,h4,h5,p,strong,b,span,small,label,.muted){
+html[data-theme] body #app #view-admin .admin-section-v1100 :is(
+  .panel,.admin-live-note,.admin-match-v1100,.admin-readonly-note-v1100,.admin-empty-v1100,
+  .admin-health-card-v1100,.admin-tracker-chip-v1095,.admin-tracker-row-v1095,.league-admin-tracker-v1104
+) :is(h1,h2,h3,h4,h5,p,strong,b,span,small,label,.muted,.name,.sub){
   color:inherit!important;-webkit-text-fill-color:currentColor!important;
 }
 
-/* The empty-selection state is the same secondary/table surface, never white. */
-html[data-theme] body #app #view-admin .selected-fixtures-empty{
-  margin:10px 0!important;padding:13px 14px!important;border-radius:12px!important;
-  background:var(--admin-layer-2)!important;color:var(--admin-layer-2-text)!important;
-  border:1px solid color-mix(in srgb,var(--admin-layer-2-text) 25%,transparent)!important;
+/* Level 3 = back to the exact ATS outer table. This is what prevents a blue
+   card inside a blue card or a maroon card inside a maroon card. */
+html[data-theme] body #app #view-admin .admin-section-v1100 :is(
+  .panel,.admin-live-note,.admin-match-v1100,.admin-health-card-v1100,.league-admin-tracker-v1104
+) :is(
+  .admin-v1094-metric,.admin-v1094-box,.admin-v1094-user,.admin-v1094-chip,.admin-v1094-detail,
+  .admin-schedule-status-v1100,.selected-fixtures-summary,.selected-fixtures-empty,.selected-fixture-chips>span,
+  .fixture-league-title,.fixture-choice,.fixture-day,.admin-control-v1100 input,.admin-control-v1100 select,
+  .fixture-search-box,.fixture-league-filter,.league-admin-tracker-row-v1104
+){
+  background:var(--admin-outer-surface)!important;color:var(--admin-outer-text)!important;
+  border-color:var(--admin-outer-line)!important;-webkit-text-fill-color:var(--admin-outer-text)!important;
+  box-shadow:none!important;
+}
+html[data-theme] body #app #view-admin .admin-section-v1100 :is(
+  .panel,.admin-live-note,.admin-match-v1100,.admin-health-card-v1100,.league-admin-tracker-v1104
+) :is(
+  .admin-v1094-metric,.admin-v1094-box,.admin-v1094-user,.admin-v1094-chip,.admin-v1094-detail,
+  .admin-schedule-status-v1100,.selected-fixtures-summary,.selected-fixtures-empty,.selected-fixture-chips>span,
+  .fixture-league-title,.fixture-choice,.fixture-day,.league-admin-tracker-row-v1104
+) :is(h1,h2,h3,h4,h5,p,strong,b,span,small,label,.muted,.name,.sub){
+  color:inherit!important;-webkit-text-fill-color:currentColor!important;
 }
 
-/* Level 3 — boxes/pills nested inside Level-2 cards. */
-html[data-theme] body #app #view-admin .admin-v1094-detail{
-  background:var(--admin-layer-3)!important;color:var(--admin-layer-3-text)!important;
-  border:1px solid color-mix(in srgb,var(--admin-layer-3-text) 24%,transparent)!important;
-  border-radius:10px!important;padding:8px 9px!important;
+/* Analytics/Account Directory are: outer section -> inner panel -> outer cards. */
+html[data-theme] body #app #view-admin .admin-v1094-panel{
+  background:var(--admin-inner)!important;color:var(--admin-inner-text)!important;
+  border-color:var(--admin-inner-line)!important;box-shadow:none!important;
 }
-html[data-theme] body #app #view-admin .admin-v1094-detail :is(strong,span,small){
-  color:var(--admin-layer-3-text)!important;-webkit-text-fill-color:var(--admin-layer-3-text)!important;
+html[data-theme] body #app #view-admin .admin-v1094-panel :is(.admin-v1094-head,.admin-v1094-head *){
+  color:var(--admin-inner-text)!important;-webkit-text-fill-color:var(--admin-inner-text)!important;
 }
-html[data-theme] body #app #view-admin .admin-v1094-chip,
-html[data-theme] body #app #view-admin .admin-v1094-user .admin-v1094-pill:not(.good):not(.warn):not(.bad){
-  background:var(--admin-layer-3)!important;color:var(--admin-layer-3-text)!important;
-  border-color:color-mix(in srgb,var(--admin-layer-3-text) 25%,transparent)!important;
-  -webkit-text-fill-color:var(--admin-layer-3-text)!important;
+html[data-theme] body #app #view-admin .admin-v1094-panel :is(.admin-v1094-metric,.admin-v1094-box,.admin-v1094-user){
+  background:var(--admin-outer-surface)!important;color:var(--admin-outer-text)!important;
+  border-color:var(--admin-outer-line)!important;box-shadow:none!important;
 }
-html[data-theme] body #app #view-admin .admin-v1094-user .admin-v1094-pill.good{
-  background:#167249!important;color:#fff!important;border-color:#52b987!important;-webkit-text-fill-color:#fff!important;
+html[data-theme] body #app #view-admin .admin-v1094-panel :is(.admin-v1094-metric,.admin-v1094-box,.admin-v1094-user) :is(h1,h2,h3,h4,h5,p,strong,b,span,small,label,.muted,.admin-v1094-user-name,.admin-v1094-email,.admin-v1094-team-row,.admin-v1094-privacy){
+  color:inherit!important;-webkit-text-fill-color:currentColor!important;
 }
-html[data-theme] body #app #view-admin .admin-v1094-user .admin-v1094-pill.warn{
-  background:#9a6218!important;color:#fff!important;border-color:#d0a45a!important;-webkit-text-fill-color:#fff!important;
+/* Level 4 inside an outer account/analytics card = inner again. */
+html[data-theme] body #app #view-admin .admin-v1094-panel :is(.admin-v1094-metric,.admin-v1094-box,.admin-v1094-user) :is(.admin-v1094-detail,.admin-v1094-chip,.admin-v1094-pill:not(.good):not(.warn):not(.bad),.admin-v1094-search,.admin-v1094-bar){
+  background:var(--admin-inner)!important;color:var(--admin-inner-text)!important;
+  border-color:var(--admin-inner-line)!important;-webkit-text-fill-color:var(--admin-inner-text)!important;
 }
-html[data-theme] body #app #view-admin .admin-v1094-user .admin-v1094-pill.bad{
-  background:#9f2932!important;color:#fff!important;border-color:#d36e75!important;-webkit-text-fill-color:#fff!important;
+html[data-theme] body #app #view-admin .admin-v1094-detail *{color:inherit!important;-webkit-text-fill-color:currentColor!important}
+html[data-theme] body #app #view-admin .admin-v1094-bar>span{background:var(--admin-outer-surface)!important}
+
+/* Search box belongs to the inner panel, so its next nested surface is outer. */
+html[data-theme] body #app #view-admin .admin-v1094-panel>.admin-v1094-searchrow .admin-v1094-search{
+  background:var(--admin-outer-surface)!important;color:var(--admin-outer-text)!important;border-color:var(--admin-outer-line)!important;
+  -webkit-text-fill-color:var(--admin-outer-text)!important;
+}
+html[data-theme] body #app #view-admin .admin-v1094-panel>.admin-v1094-searchrow .admin-v1094-search::placeholder{color:var(--admin-outer-text)!important;opacity:.72!important}
+
+/* Status semantics stay semantic; everything else obeys the two-surface rule. */
+html[data-theme] body #app #view-admin .admin-v1094-pill.good{background:#167249!important;color:#fff!important;-webkit-text-fill-color:#fff!important;border-color:#fff!important}
+html[data-theme] body #app #view-admin .admin-v1094-pill.warn{background:#9a6218!important;color:#fff!important;-webkit-text-fill-color:#fff!important;border-color:#fff!important}
+html[data-theme] body #app #view-admin .admin-v1094-pill.bad{background:#9f2932!important;color:#fff!important;-webkit-text-fill-color:#fff!important;border-color:#fff!important}
+
+/* Buttons nested in an inner surface alternate back to outer. */
+html[data-theme] body #app #view-admin :is(.admin-v1094-panel,.admin-focus-panel,.admin-match-v1100,.admin-health-card-v1100) .btn:not(.btn-danger){
+  background:var(--admin-outer-surface)!important;color:var(--admin-outer-text)!important;border-color:var(--admin-outer-line)!important;
+  -webkit-text-fill-color:var(--admin-outer-text)!important;
 }
 
-/* Ultimate-Admin identity data stays readable on the Level-2 account card. */
-html[data-theme] body #app #view-admin .admin-v1094-email{
-  margin-top:4px!important;color:var(--admin-layer-2-text)!important;
-  -webkit-text-fill-color:var(--admin-layer-2-text)!important;opacity:.9!important;
-  font-size:.7rem!important;font-weight:800!important;overflow-wrap:anywhere!important;
+/* “No matches selected yet” is the same outer/table colour that is nested in
+   the inner fixture-setup panel, exactly following the alternation rule. */
+html[data-theme] body #app #view-admin .admin-focus-panel .selected-fixtures-empty{
+  background:var(--admin-outer-surface)!important;color:var(--admin-outer-text)!important;border-color:var(--admin-outer-line)!important;
 }
 
-/* The directory title already carries the total; remove the awkward standalone “N found” bubble. */
+/* Flat sliding underline language for both Admin navigation levels. */
+html[data-theme] body #app #view-admin :is(.admin-tabs-v1100,.admin-tabs-v1095,.admin-round-tabs){
+  position:relative!important;background:transparent!important;border:0!important;
+  border-bottom:1px solid currentColor!important;border-radius:0!important;box-shadow:none!important;gap:0!important;
+}
+html[data-theme] body #app #view-admin :is(.admin-tab-v1100,.admin-tab-v1095,.admin-round-tab),
+html[data-theme] body #app #view-admin :is(.admin-tab-v1100,.admin-tab-v1095,.admin-round-tab).active{
+  background:transparent!important;border:0!important;border-radius:0!important;box-shadow:none!important;
+}
+html[data-theme] body #app #view-admin :is(.admin-tab-v1100,.admin-tab-v1095){color:var(--admin-outer-text)!important}
+html[data-theme] body #app #view-admin :is(.admin-tab-line-v1100,.admin-tab-line-v1095){background:var(--admin-outer-text)!important;height:4px!important}
+html[data-theme] body #app #view-admin .admin-round-tabs{display:grid!important;grid-template-columns:1fr 1fr!important;color:var(--admin-outer-text)!important;margin:10px 0 17px!important}
+html[data-theme] body #app #view-admin .admin-round-tabs:after{
+  content:""!important;position:absolute!important;inset-inline-start:0!important;bottom:-2px!important;width:50%!important;height:4px!important;
+  border-radius:999px!important;background:var(--admin-outer-text)!important;transform:translateX(0);transition:transform .22s ease!important;pointer-events:none!important;
+}
+html[dir="ltr"][data-theme] body #app #view-admin .admin-round-tabs:has(.admin-round-tab:nth-child(2).active):after{transform:translateX(100%)}
+html[dir="rtl"][data-theme] body #app #view-admin .admin-round-tabs:has(.admin-round-tab:nth-child(2).active):after{transform:translateX(-100%)}
+html[data-theme] body #app #view-admin .admin-round-tab{color:var(--admin-outer-text)!important;opacity:.72!important}
+html[data-theme] body #app #view-admin .admin-round-tab.active{opacity:1!important}
+html[data-theme] body #app #view-admin .admin-round-tab.active:after{display:none!important}
+
+/* Eight calendar days fit in the Admin panel without a horizontal scroller. */
+html[data-theme] body #app #view-admin .fixture-day-strip{
+  display:grid!important;grid-template-columns:repeat(8,minmax(0,1fr))!important;
+  gap:5px!important;overflow:visible!important;padding:9px 0 11px!important;max-width:100%!important;
+}
+html[data-theme] body #app #view-admin .fixture-day{
+  min-width:0!important;width:auto!important;min-height:58px!important;padding:6px 1px!important;
+}
+html[data-theme] body #app #view-admin .fixture-day-weekday{font-size:.54rem!important}
+html[data-theme] body #app #view-admin .fixture-day-date{font-size:.61rem!important}
+html[data-theme] body #app #view-admin .fixture-day-year{font-size:.48rem!important}
+
+/* Production modules and Account cards retain clear horizontal/vertical space. */
+html[data-theme] body #app #view-admin :is(.admin-production-body-v1100,.admin-analytics-body-v1100){display:grid!important;gap:16px!important}
+html[data-theme] body #app #view-admin .admin-v1094-list{column-gap:16px!important;row-gap:12px!important}
 html[data-theme] body #app #view-admin .admin-v1094-searchrow>.admin-v1094-pill{display:none!important}
 html[data-theme] body #app #view-admin .admin-v1094-searchrow{grid-template-columns:minmax(0,1fr)!important}
 
-/* Account actions must contrast with their immediate Level-2 card. */
-html[data-theme] body #app #view-admin .admin-v1094-user :is(.btn-secondary,.btn-ghost){
-  background:var(--admin-layer-1)!important;color:var(--admin-layer-1-text)!important;
-  border-color:color-mix(in srgb,var(--admin-layer-1-text) 32%,transparent)!important;
+/* Auth hydration is no longer a blank page while the essential queries run. */
+body.auth-pending-v1064::before{
+  content:"المصطبة"!important;position:fixed!important;z-index:2147483646!important;
+  left:50%!important;top:43%!important;transform:translate(-50%,-50%)!important;
+  color:#fff!important;font-size:1.45rem!important;font-weight:1000!important;letter-spacing:.02em!important;
+  pointer-events:none!important;
 }
-html[data-theme] body #app #view-admin .admin-v1094-user :is(.btn-secondary,.btn-ghost) *{
-  color:var(--admin-layer-1-text)!important;-webkit-text-fill-color:var(--admin-layer-1-text)!important;
+body.auth-pending-v1064::after{top:53%!important}
+
+/* ---------- Phone regression authority ---------- */
+@media(max-width:760px){
+  .top-social-word-v1029{display:none!important}
+  .top-social-link-v1029{width:42px!important;height:42px!important;min-width:42px!important;min-height:42px!important;border-radius:12px!important}
+  .top-social-link-v1029 svg{width:20px!important;height:20px!important}
+
+  .bottom-nav{display:block!important;position:fixed!important;overflow:hidden!important;gap:0!important;padding-left:0!important;padding-right:0!important}
+  .bottom-nav .nav-item{
+    position:absolute!important;top:0!important;bottom:0!important;
+    left:calc((var(--mobile-nav-index,0) + .5) * (100% / var(--mobile-nav-count,5)))!important;
+    width:calc(100% / var(--mobile-nav-count,5))!important;height:100%!important;min-width:0!important;max-width:none!important;flex:none!important;
+    transform:translateX(-50%)!important;display:grid!important;grid-template-rows:28px 18px!important;align-content:center!important;align-items:center!important;
+    justify-items:center!important;justify-content:center!important;row-gap:4px!important;padding:3px 0!important;margin:0!important;box-sizing:border-box!important;
+  }
+  .bottom-nav .nav-item[style*="display: none"]{display:none!important}
+  .bottom-nav .nav-svg,.bottom-nav .nav-logo{width:26px!important;height:26px!important;min-width:26px!important;min-height:26px!important;margin:0!important;align-self:center!important;justify-self:center!important}
+  .bottom-nav .nav-svg{display:grid!important;place-items:center!important}
+  .bottom-nav .nav-svg svg{width:23px!important;height:23px!important;display:block!important;margin:0 auto!important}
+  .bottom-nav .nav-logo{object-fit:cover!important;border-radius:5px!important}
+  .bottom-nav .nav-item small{display:flex!important;align-items:center!important;justify-content:center!important;width:100%!important;height:18px!important;min-height:18px!important;max-width:100%!important;margin:0!important;padding:0!important;overflow:hidden!important;text-overflow:clip!important;white-space:nowrap!important;line-height:18px!important;font-size:.58rem!important;font-weight:950!important;text-align:center!important}
+  .bottom-nav .mastaba-show-nav-v1029 small,.bottom-nav .mastaba-show-nav-v1032 small,.bottom-nav .mastaba-show-nav-v1033 small{font-size:.58rem!important;line-height:18px!important;font-family:inherit!important}
+  /* Remove the reverted coloured/clipped Predict icon box. */
+  .bottom-nav .nav-item[data-view="predict"] .nav-svg{width:26px!important;height:26px!important;background:transparent!important;color:inherit!important;clip-path:none!important;border:0!important;box-shadow:none!important}
+
+  /* Stadium, actual score and prediction label share the same true centre. */
+  #view-predict .match-card .score-area{transform:none!important;display:flex!important;flex-direction:column!important;align-items:center!important;justify-content:center!important;text-align:center!important;min-width:0!important}
+  #view-predict .match-card .stadium,
+  #view-predict .match-card .score-area .actual-score-line,
+  #view-predict .match-card .score-area .score-label{width:100%!important;box-sizing:border-box!important;text-align:center!important;transform:none!important;padding:0 2px!important}
+  #view-predict .match-card .stadium{margin:0 0 5px!important;font-size:.72rem!important;line-height:1.18!important;white-space:normal!important}
+  #view-predict .match-card .score-area .actual-score-line{margin:0 0 5px!important;min-height:16px!important;line-height:1.15!important}
+  #view-predict .match-card .score-area .score-label{margin:0 0 7px!important;line-height:1.15!important}
+  #view-predict .score-stepper input{padding:0!important}
+  #view-predict .step-controls{display:none!important}
+
+  /* “Your Pick” is not drawn as a badge; the filled outcome is enough. */
+  #view-predict .pick-battery-v21.yours:after,
+  #modalRoot .insight-pick-battery-v21.yours:after,
+  #modalRoot .insight-pick-row-v22.yours b:after{display:none!important;content:none!important}
+  #view-predict .pick-battery-v21.yours .pick-battery-content-v21 strong,
+  #modalRoot .insight-pick-row-v22.yours>strong{border:0!important;border-radius:0!important;padding:0!important;box-shadow:none!important;outline:0!important}
+
+  /* Previously approved centred Best Case / Maximum Points phone geometry. */
+  #view-home .ats-box-v25.right .ats-metric-v25,#view-home .ats-box-v25.right .ats-metric-v25>span,
+  #view-home .ats-box-v25.right .ats-point-line-v26,#view-home .ats-box-v25.right .ats-sub-v25,
+  #view-home .ats-box-v25.right .ats-best-score-row-v26,#view-home .ats-box-v25.right .ats-best-score-value-v26,
+  #view-home .ats-box-v25.right .ats-best-detail-v25,#view-home .ats-box-v25.right .ats-need-copy-v27{
+    text-align:center!important;justify-content:center!important;justify-items:center!important;align-items:center!important;
+  }
+
+  /* Keep X2 flush to the bar after its animation. */
+  .double-power.active .double-x2-large,.double-power.active.activating .double-x2-large,.double-power.active.activating.x2-ready .double-x2-large{
+    display:flex!important;align-items:center!important;justify-content:center!important;position:absolute!important;top:-7px!important;bottom:-7px!important;height:calc(100% + 14px)!important;margin:0!important;padding:0!important;transform:none!important;font-size:7.8rem!important;line-height:.54!important;font-weight:1000!important;letter-spacing:-.06em!important;overflow:visible!important;transform-origin:center center!important;
+  }
+
+  /* Mastaba Show: YouTube first, Reel second — never side by side on phone. */
+  #view-show .show-media-grid-v1029{display:grid!important;grid-template-columns:minmax(0,1fr)!important;gap:13px!important;width:100%!important}
+  #view-show .show-media-card-v1029{width:100%!important;min-width:0!important}
+  #view-show .show-reel-fallback-v1037 small{display:none!important}
+
+  /* Eight day keys still fit on a 390px phone without sideways scrolling. */
+  html[data-theme] body #app #view-admin .fixture-day-strip{gap:2px!important;padding-inline:0!important}
+  html[data-theme] body #app #view-admin .fixture-day{min-height:55px!important;padding:5px 0!important}
+  html[data-theme] body #app #view-admin .fixture-day-weekday{font-size:.42rem!important}
+  html[data-theme] body #app #view-admin .fixture-day-date{font-size:.45rem!important}
+  html[data-theme] body #app #view-admin .fixture-day-year{font-size:.39rem!important}
+}
+@media(prefers-reduced-motion:reduce){html[data-theme] body #app #view-admin .admin-round-tabs:after{transition:none!important}}
+</style>
+
+<script id="mastaba-v1108-runtime-fixes">
+(function(){
+'use strict';
+window.MASTABA_BUILD_VERSION='11.08';
+
+/* Hard-mount every fixture slot that exists after the catalogue finishes. */
+window.mountAllAdminFixtureBrowsersV1108=function(){
+  if(state.view!=='admin'||String(state.adminWorkspaceTabV1095||'game')!=='game')return;
+  for(const target of ['current','next']){
+    const ready=!!window.adminScheduleV1100?.loaded||(Array.isArray(window.adminSchedulePoolV1102)&&window.adminSchedulePoolV1102.length>0)||!!window.adminScheduleV1100?.error;
+    if(!ready)continue;
+    const slot=document.querySelector(`#view-admin [data-admin-fixture-slot-v1103="${target}"]`);
+    if(slot&&typeof buildAdminFixtureSelectorV1103==='function'){slot.outerHTML=buildAdminFixtureSelectorV1103(target);continue}
+    const old=document.querySelector(`#view-admin .fixture-browser[data-admin-target-v1080="${target}"]`);
+    if(old&&typeof buildAdminFixtureSelectorV1103==='function')old.outerHTML=buildAdminFixtureSelectorV1103(target);
+  }
+};
+
+/* Phone prediction geometry. Some older PC passes write inline !important
+   transforms, so a CSS-only fix is not enough; normalize the DOM after every
+   prediction render as well. */
+const predictionMetaBaseV1108=window.fixPredictionScoreMetaV23||window.fixPredictionScoreMetaV1025Base;
+if(typeof predictionMetaBaseV1108==='function'){
+  window.fixPredictionScoreMetaV23=fixPredictionScoreMetaV23=function(){
+    const out=predictionMetaBaseV1108();
+    const mobile=window.matchMedia('(max-width:760px)').matches;
+    document.querySelectorAll('#view-predict .match-card').forEach(card=>{
+      const body=card.querySelector('.match-card-body'),area=card.querySelector('.score-area'),stadium=card.querySelector('.stadium'),actual=card.querySelector('.actual-score-line'),label=area?.querySelector('.score-label'),teams=card.querySelector('.teams-and-score');
+      if(!body||!area)return;
+      if(actual&&actual.parentElement!==area){if(label)label.insertAdjacentElement('beforebegin',actual);else area.prepend(actual)}
+      if(mobile){
+        if(stadium&&stadium.parentElement!==area)area.insertBefore(stadium,actual||label||area.firstChild);
+        for(const el of [area,stadium,actual,label].filter(Boolean))el.style.setProperty('transform','none','important');
+        if(stadium){stadium.style.setProperty('margin','0 0 5px','important');stadium.style.setProperty('text-align','center','important')}
+        if(actual){actual.style.setProperty('margin','0 0 5px','important');actual.style.setProperty('text-align','center','important')}
+        if(label){label.style.setProperty('margin','0 0 7px','important');label.style.setProperty('text-align','center','important')}
+      }else if(stadium&&stadium.parentElement===area&&teams){body.insertBefore(stadium,teams)}
+    });
+    return out;
+  };
 }
 
-@media(max-width:720px){
-  html[data-theme] body #app #view-admin .admin-v1094-list{row-gap:12px!important}
-  html[data-theme] body #app #view-admin .admin-round-tab{padding-inline:7px!important;font-size:.74rem!important}
+/* Predict opens at the match that matters now: active first, then latest final,
+   then nearest upcoming. This runs once per route entry, not on every live re-render. */
+let autoFocusPredictV1108=false;
+function focusPredictMatchV1108(){
+  if(!autoFocusPredictV1108||state.view!=='predict')return;
+  const rows=[...(state.fixtures||[])];if(!rows.length)return;
+  const byKick=(a,b)=>new Date(a.kickoff)-new Date(b.kickoff);
+  const live=rows.filter(f=>f.phase==='live').sort((a,b)=>-byKick(a,b));
+  const finals=rows.filter(f=>f.phase==='final').sort((a,b)=>-byKick(a,b));
+  const future=rows.filter(f=>f.phase!=='final'&&f.phase!=='live').sort(byKick);
+  const target=live[0]||finals[0]||future[0];if(!target)return;
+  const card=document.querySelector(`#view-predict .match-card[data-mid="${CSS.escape(String(target.id))}"]`);if(!card)return;
+  autoFocusPredictV1108=false;
+  card.style.scrollMarginTop='92px';
+  requestAnimationFrame(()=>card.scrollIntoView({behavior:'smooth',block:'center',inline:'nearest'}));
 }
-@media(prefers-reduced-motion:reduce){
-  html[data-theme] body #app #view-admin .admin-round-tabs:after{transition:none!important}
+window.focusPredictMatchV1108=focusPredictMatchV1108;
+const goBaseV1108=window.go;
+if(typeof goBaseV1108==='function')window.go=function(view){if(view==='predict'&&state.view!==view)autoFocusPredictV1108=true;const out=goBaseV1108.apply(this,arguments);if(view==='predict')setTimeout(focusPredictMatchV1108,180);return out};
+const renderPredictBaseV1108=window.renderPredict||renderPredict;
+if(typeof renderPredictBaseV1108==='function')window.renderPredict=renderPredict=function(){const out=renderPredictBaseV1108.apply(this,arguments);if(autoFocusPredictV1108)setTimeout(focusPredictMatchV1108,70);return out};
+if(state?.view==='predict'){autoFocusPredictV1108=true;setTimeout(focusPredictMatchV1108,220)}
+
+/* Network audit fix: don't poll the shared live JSON all day when no fixture is
+   in a live window. Also collapse the focus/pageshow/visibility burst into one
+   fetch. This is local gating only — the native minute clock remains local. */
+const snapshotFetchBaseV1108=window.fetchLiveSnapshotV1088;
+let lastSnapshotRequestV1108=0,efficientSnapshotTimerV1108=null;
+function liveWindowV1108(){
+  const now=Date.now();return (state.fixtures||[]).some(f=>{
+    if(f.phase==='final')return false;
+    const k=new Date(f.kickoff).getTime();return f.phase==='live'||(Number.isFinite(k)&&now>=k-120000&&now<=k+5*3600000);
+  });
 }
-</style>
+async function fetchEfficientSnapshotV1108(force=false){
+  if(typeof snapshotFetchBaseV1108!=='function')return false;
+  if(!force&&!liveWindowV1108())return false;
+  if(!force&&Date.now()-lastSnapshotRequestV1108<25000)return false;
+  lastSnapshotRequestV1108=Date.now();return snapshotFetchBaseV1108();
+}
+window.fetchLiveSnapshotV1088=fetchEfficientSnapshotV1108;
+window.startSharedLiveV1088=window.startPrivateLiveV1083=function(){
+  try{if(liveDbTimerV1083){clearInterval(liveDbTimerV1083);liveDbTimerV1083=null}}catch{}
+  if(efficientSnapshotTimerV1108)clearInterval(efficientSnapshotTimerV1108);
+  fetchEfficientSnapshotV1108(false);
+  efficientSnapshotTimerV1108=setInterval(()=>fetchEfficientSnapshotV1108(false),15000);
+};
+window.refreshPrivateLiveV1083=fetchEfficientSnapshotV1108;
+
+/* Make sure current mobile geometry is applied after the final script wins. */
+requestAnimationFrame(()=>{try{syncBottomNavGlider()}catch{};if(state?.view==='predict')try{window.fixPredictionScoreMetaV23?.()}catch{}});
+})();
+</script>
 
 </body>
 </html>
