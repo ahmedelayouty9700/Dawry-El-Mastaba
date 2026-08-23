@@ -17169,7 +17169,7 @@ html #view-admin .admin-workspace-v1100 .admin-empty-v1100{padding:18px;text-ali
 <script id="mastaba-v1100-admin-repair">
 (function mastabaV1100(){
 'use strict';
-window.MASTABA_BUILD_VERSION='11.10';
+window.MASTABA_BUILD_VERSION='11.11';
 
 const SCHEDULE_SYNC_V1101='https://bnwjtrtlwnlbldfhaggg.supabase.co/functions/v1/mastaba-schedule-sync';
 const scheduleV1100=window.adminScheduleV1100=window.adminScheduleV1100||{
@@ -17672,7 +17672,7 @@ if(state?.view==='admin')setTimeout(renderAdminV1100,0);
    Supabase schedule available exclusively inside Admin > Game Setup. */
 (function(){
 'use strict';
-window.MASTABA_BUILD_VERSION='11.10';
+window.MASTABA_BUILD_VERSION='11.11';
 
 const fixtureKeyV1102=f=>Number(f?.apiFixtureId)?`api:${Number(f.apiFixtureId)}`:`id:${String(f?.id||'')}`;
 function pinnedPoolV1102(){
@@ -18443,7 +18443,7 @@ body.auth-pending-v1064::after{top:53%!important}
 <script id="mastaba-v1108-runtime-fixes">
 (function(){
 'use strict';
-window.MASTABA_BUILD_VERSION='11.10';
+window.MASTABA_BUILD_VERSION='11.11';
 
 /* Hard-mount every fixture slot that exists after the catalogue finishes. */
 window.mountAllAdminFixtureBrowsersV1108=function(){
@@ -18653,7 +18653,7 @@ html[data-theme] body #app #view-admin .admin-v1094-panel :is(.admin-v1094-metri
 <script id="mastaba-v1109-admin-schedule-runtime">
 (function(){
 'use strict';
-window.MASTABA_BUILD_VERSION='11.10';
+window.MASTABA_BUILD_VERSION='11.11';
 
 /* Local fallback is intentionally name-based, never T123. The central
    abbreviation table remains authoritative when it has a row. */
@@ -18767,7 +18767,7 @@ html[data-theme] body #app #view-admin .fixture-league-title :is(strong,b,span,s
 <script id="mastaba-v1110-team-identity-guard">
 (function(){
 'use strict';
-window.MASTABA_BUILD_VERSION='11.10';
+window.MASTABA_BUILD_VERSION='11.11';
 /* Repair any already-loaded cached schedule objects from V11.09 without a
    provider/Supabase reload. Per-fixture payload is authoritative. */
 function repair(f){
@@ -18790,6 +18790,197 @@ requestAnimationFrame(()=>{
   if(state?.view==='admin'&&String(state.adminWorkspaceTabV1095||'game')==='game'){
     try{window.refreshAdminFixtureBrowserV1104?.();window.mountAllAdminFixtureBrowsersV1108?.()}catch(e){console.warn('V11.10 schedule identity repaint',e)}
   }
+});
+})();
+</script>
+
+
+<style id="mastaba-v1111-admin-fixture-browser-authority">
+/* V11.11 — final Admin fixture-browser authority. */
+
+/* League separator = approved Theme colour #3 + its paired readable text. */
+html[data-theme] body #app #view-admin
+.admin-focus-panel .fixture-selector .fixture-league-group > .fixture-league-title{
+  background:var(--admin-third)!important;
+  color:var(--admin-third-text)!important;
+  -webkit-text-fill-color:var(--admin-third-text)!important;
+  border-color:color-mix(in srgb,var(--admin-third-text) 32%,transparent)!important;
+  box-shadow:none!important;
+}
+html[data-theme] body #app #view-admin
+.admin-focus-panel .fixture-selector .fixture-league-group > .fixture-league-title :is(strong,b,span,small){
+  color:var(--admin-third-text)!important;
+  -webkit-text-fill-color:var(--admin-third-text)!important;
+  opacity:1!important;
+}
+
+/* Selected day = Theme colour #3, inactive days remain on the ATS outer surface. */
+html[data-theme] body #app #view-admin
+.admin-focus-panel .fixture-browser .fixture-day.active,
+html[data-theme] body #app #view-admin
+.admin-focus-panel .fixture-browser .fixture-day[aria-pressed="true"]{
+  background:var(--admin-third)!important;
+  color:var(--admin-third-text)!important;
+  -webkit-text-fill-color:var(--admin-third-text)!important;
+  border-color:color-mix(in srgb,var(--admin-third-text) 68%,transparent)!important;
+  box-shadow:
+    inset 0 0 0 1px color-mix(in srgb,var(--admin-third-text) 28%,transparent),
+    0 3px 9px rgba(0,0,0,.14)!important;
+  transform:translateY(-1px)!important;
+  opacity:1!important;
+}
+html[data-theme] body #app #view-admin
+.admin-focus-panel .fixture-browser .fixture-day.active :is(small,b,em,span),
+html[data-theme] body #app #view-admin
+.admin-focus-panel .fixture-browser .fixture-day[aria-pressed="true"] :is(small,b,em,span){
+  color:var(--admin-third-text)!important;
+  -webkit-text-fill-color:var(--admin-third-text)!important;
+  opacity:1!important;
+}
+html[data-theme] body #app #view-admin
+.admin-focus-panel .fixture-browser .fixture-day:not(.active):not([aria-pressed="true"]){
+  background:var(--admin-outer-surface)!important;
+  color:var(--admin-outer-text)!important;
+  -webkit-text-fill-color:var(--admin-outer-text)!important;
+}
+
+/* Accepted alternate IDs. */
+html[data-theme="ac-milan"] body #app #view-admin{--admin-third:#f7f7f7;--admin-third-text:#12171f}
+html[data-theme="real-madrid"] body #app #view-admin{--admin-third:#edc130;--admin-third-text:#20345f}
+
+@media(max-width:720px){
+  html[data-theme] body #app #view-admin
+  .admin-focus-panel .fixture-browser .fixture-day.active,
+  html[data-theme] body #app #view-admin
+  .admin-focus-panel .fixture-browser .fixture-day[aria-pressed="true"]{
+    transform:none!important;
+  }
+}
+</style>
+
+
+<script id="mastaba-v1111-admin-fixture-browser-runtime">
+(function(){
+'use strict';
+window.MASTABA_BUILD_VERSION='11.11';
+
+/* Upcoming-first load race:
+   the Supabase read was finishing, but the initial Upcoming placeholder could
+   survive the old async mount token. This watcher only mounts already-loaded
+   data; it does NOT perform another Supabase/provider request. */
+let adminFixtureReadyWatchV1111=0;
+function fixtureScheduleReadyV1111(){
+  return !!window.adminScheduleV1100?.loaded ||
+    (Array.isArray(window.adminSchedulePoolV1102) && window.adminSchedulePoolV1102.length>0) ||
+    !!window.adminScheduleV1100?.error;
+}
+function mountReadyFixtureSlotsV1111(){
+  if(state?.view!=='admin' || (typeof adminTabV1100==='function' && adminTabV1100()!=='game')) return false;
+  if(!fixtureScheduleReadyV1111()) return false;
+  let changed=false;
+  document.querySelectorAll('#view-admin [data-admin-fixture-slot-v1103]').forEach(slot=>{
+    const target=slot.getAttribute('data-admin-fixture-slot-v1103')==='current'?'current':'next';
+    if(typeof buildAdminFixtureSelectorV1103==='function'){
+      slot.outerHTML=buildAdminFixtureSelectorV1103(target);
+      changed=true;
+    }
+  });
+  return changed;
+}
+function startFixtureReadyWatchV1111(){
+  clearInterval(adminFixtureReadyWatchV1111);
+  const started=Date.now();
+  adminFixtureReadyWatchV1111=setInterval(()=>{
+    if(state?.view!=='admin'){
+      clearInterval(adminFixtureReadyWatchV1111);adminFixtureReadyWatchV1111=0;return;
+    }
+    const placeholder=document.querySelector('#view-admin [data-admin-fixture-slot-v1103]');
+    if(!placeholder){
+      clearInterval(adminFixtureReadyWatchV1111);adminFixtureReadyWatchV1111=0;return;
+    }
+    if(mountReadyFixtureSlotsV1111()){
+      clearInterval(adminFixtureReadyWatchV1111);adminFixtureReadyWatchV1111=0;return;
+    }
+    if(Date.now()-started>20000){
+      clearInterval(adminFixtureReadyWatchV1111);adminFixtureReadyWatchV1111=0;
+    }
+  },120);
+}
+
+/* Selected day reacts immediately and then only the browser is rebuilt. */
+window.setAdminFixtureDay=function(target,value){
+  const ui=typeof ensureAdminBrowser==='function'?ensureAdminBrowser(target):adminBrowserState?.[target];
+  if(!ui)return;
+  ui.date=value;ui.q='';
+  const browser=document.querySelector(`#view-admin .fixture-browser[data-admin-target-v1080="${target}"]`);
+  if(browser){
+    browser.querySelectorAll('.fixture-day').forEach(btn=>{
+      const call=String(btn.getAttribute('onclick')||'');
+      const selected=call.includes(`'${value}'`);
+      btn.classList.toggle('active',selected);
+      btn.setAttribute('aria-pressed',selected?'true':'false');
+    });
+  }
+  if(typeof refreshSearchV1102==='function')refreshSearchV1102(target);
+  else if(typeof refreshGameSetupV1100==='function')refreshGameSetupV1100();
+};
+
+function markSelectedAdminDayV1111(target){
+  const ui=typeof ensureAdminBrowser==='function'?ensureAdminBrowser(target):adminBrowserState?.[target];
+  const browser=document.querySelector(`#view-admin .fixture-browser[data-admin-target-v1080="${target}"]`);
+  if(!ui||!browser)return;
+  browser.querySelectorAll('.fixture-day').forEach(btn=>{
+    const call=String(btn.getAttribute('onclick')||'');
+    const selected=!!ui.date && call.includes(`'${ui.date}'`) && !String(ui.q||'').trim();
+    btn.classList.toggle('active',selected);
+    btn.setAttribute('aria-pressed',selected?'true':'false');
+  });
+}
+function settleAdminFixtureBrowserV1111(){
+  mountReadyFixtureSlotsV1111();
+  markSelectedAdminDayV1111('current');
+  markSelectedAdminDayV1111('next');
+}
+
+/* Wrap the final Admin renderer so Upcoming works even when it is the first
+   active Gameweek shown. */
+const renderAdminBaseV1111=window.renderAdmin||window.renderAdminWorkspaceV1100;
+if(typeof renderAdminBaseV1111==='function'){
+  window.renderAdmin=renderAdmin=function(){
+    const out=renderAdminBaseV1111.apply(this,arguments);
+    requestAnimationFrame(()=>{
+      settleAdminFixtureBrowserV1111();
+      if(document.querySelector('#view-admin [data-admin-fixture-slot-v1103]'))startFixtureReadyWatchV1111();
+    });
+    return out;
+  };
+}
+
+/* Hook Current / Upcoming switches too. */
+const setupTargetBaseV1111=window.setAdminSetupTargetV1100||window.setAdminSetupTarget;
+if(typeof setupTargetBaseV1111==='function'){
+  window.setAdminSetupTargetV1100=function(target){
+    const out=setupTargetBaseV1111.call(this,target);
+    requestAnimationFrame(()=>{
+      settleAdminFixtureBrowserV1111();
+      if(document.querySelector('#view-admin [data-admin-fixture-slot-v1103]'))startFixtureReadyWatchV1111();
+    });
+    return out;
+  };
+  window.setAdminSetupTarget=window.setAdminSetupTargetV1100;
+}
+
+/* Catch the existing Supabase completion mount. */
+const originalMountAllV1111=window.mountAllAdminFixtureBrowsersV1108;
+window.mountAllAdminFixtureBrowsersV1108=function(){
+  const out=typeof originalMountAllV1111==='function'?originalMountAllV1111.apply(this,arguments):undefined;
+  requestAnimationFrame(settleAdminFixtureBrowserV1111);
+  return out;
+};
+
+requestAnimationFrame(()=>{
+  settleAdminFixtureBrowserV1111();
+  if(document.querySelector('#view-admin [data-admin-fixture-slot-v1103]'))startFixtureReadyWatchV1111();
 });
 })();
 </script>
