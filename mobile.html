@@ -13553,8 +13553,8 @@ function addStatV1077(a,s){
   return a;
 }
 function registerTeamV1077(id,name,logo){
-  const code=teamCodeV1077(id,name);
-  TEAM[code]={name:name||code,short:code,logo:logo||TEAM[code]?.logo||''};
+  const short=teamCodeV1077(id,name),code=`sched-${Number(id)}`;
+  TEAM[code]={teamId:Number(id),name:name||short,short:String(short).toUpperCase(),logo:logo||TEAM[code]?.logo||''};
   return code;
 }
 function providerFixtureV1077(x){
@@ -13668,7 +13668,7 @@ window.hydrateProductionV1073=async function(profile,user,supa){
       const activeById=Object.fromEntries((activeRows||[]).map(x=>[x.id,x.active!==false]));
       state.users.forEach(u=>u.active=activeById[u.authUserId]!==false);
       if(nextRow){
-        nextGwV1077=nextRow;
+        nextGwV1077=nextRow;state.nextDeadlineAt=nextRow.deadline_at||null;
         const {data:nfx,error:nfxErr}=await supa.from('mastaba_fixtures').select('*').eq('gameweek_id',nextRow.id).order('kickoff_at',{ascending:true});
         if(nfxErr)throw nfxErr;
         state.nextFixtures=(nfx||[]).map(f=>{
@@ -13677,6 +13677,7 @@ window.hydrateProductionV1073=async function(profile,user,supa){
           return{id:f.id,apiFixtureId:Number(f.api_fixture_id),apiLeagueId:f.api_league_id?Number(f.api_league_id):null,competition:f.competition_name,competitionCountry:f.competition_country||'',home,away,homeTeamId:Number(f.home_team_id),awayTeamId:Number(f.away_team_id),stadium:f.venue_name||'',kickoff:f.kickoff_at,phase:phaseV1077(f.fixture_status,f.kickoff_at),result:null,apiPayload:f.api_payload||{}};
         });
         state.nextPublished=state.nextFixtures.length>0;
+        if(!state.nextDeadlineAt&&state.nextFixtures.length){const first=Math.min(...state.nextFixtures.map(f=>new Date(f.kickoff).getTime()).filter(Number.isFinite));if(Number.isFinite(first))state.nextDeadlineAt=new Date(first-60000).toISOString()}
       }
       state.fixturePool=[...(state.fixtures||[]),...(state.nextFixtures||[])];
       try{save()}catch{}
@@ -13741,6 +13742,7 @@ window.toggleAdminFixture=async function(mid,target,checked){
   const ctx=window.prodCtxV1073;if(!ctx||!currentUser()?.admin)return;
   const availablePool=[...(window.adminSchedulePoolV1102||[]),...(state.fixturePool||[])];
   const pool=availablePool.find(f=>String(f.id)===String(mid));if(!pool)return;
+  if(target==='next'&&checked){const api=Number(pool.apiFixtureId),used=(state.fixtures||[]).some(f=>(api>0&&Number(f.apiFixtureId)===api)||String(f.id)===String(pool.id));if(used){toast(L('This match is already in the Current Gameweek and cannot be reused in the Upcoming Gameweek.','الماتش ده موجود بالفعل في الجولة الحالية ومينفعش يتكرر في الجولة الجاية.'),'warn');render();return}}
   if(target==='current'&&isRoundLocked()&&checked)return toast(L('The current Gameweek is locked. You can still remove an unstarted selected match.','الجولة الحالية مقفولة. تقدر فقط تشيل ماتش مختار لسه مبدأش.'),'warn');if(target==='current'&&!checked){const selectedNow=(state.fixtures||[]).find(x=>String(x.id)===String(mid));if(selectedNow&&!(Date.now()<new Date(selectedNow.kickoff).getTime()&&selectedNow.phase==='upcoming'))return toast(L('This match has already started and can no longer be removed.','الماتش بدأ بالفعل ومينفعش يتشال.'),'warn')}
   try{
     if(target==='current'){
@@ -13775,6 +13777,9 @@ window.publishNextGameweek=async function(){
   const ctx=window.prodCtxV1073;if(!ctx||!currentUser()?.admin)return;
   if(!(state.nextFixtures||[]).length)return toast(L('Select at least one upcoming match first.','اختار ماتش واحد على الأقل للجولة الجاية.'),'warn');
   try{
+    const currentApiIds=new Set((state.fixtures||[]).map(f=>Number(f.apiFixtureId)).filter(Boolean));
+    const overlap=(state.nextFixtures||[]).filter(f=>currentApiIds.has(Number(f.apiFixtureId)));
+    if(overlap.length){state.nextFixtures=(state.nextFixtures||[]).filter(f=>!currentApiIds.has(Number(f.apiFixtureId)));state.nextPublished=false;save();render();toast(L('Current Gameweek matches were removed from Upcoming. A match can only belong to one Gameweek.','تم شيل ماتشات الجولة الحالية من الجولة الجاية. كل ماتش ينفع يكون في جولة واحدة بس.'),'warn');return}
     const number=Number(state.week)+1;
     const {data:gw,error:gwErr}=await ctx.supa.from('mastaba_gameweeks').upsert({gameweek_number:number,name_en:`Gameweek ${number}`,name_ar:`الجولة ${number}`,status:'setup',updated_at:new Date().toISOString()},{onConflict:'gameweek_number'}).select('*').single();if(gwErr)throw gwErr;
     nextGwV1077=gw;
@@ -13787,7 +13792,7 @@ window.publishNextGameweek=async function(){
       const {data,error}=await ctx.supa.from('mastaba_fixtures').upsert(dbRowForFixtureV1077(f,gw.id),{onConflict:'api_fixture_id'}).select('*').single();if(error)throw error;
       persisted.push({...f,id:data.id,apiPayload:data.api_payload||f.apiPayload});
     }
-    state.nextFixtures=persisted;state.nextPublished=true;
+    state.nextFixtures=persisted;state.nextPublished=true;const firstNext=Math.min(...persisted.map(f=>new Date(f.kickoff).getTime()).filter(Number.isFinite));state.nextDeadlineAt=Number.isFinite(firstNext)?new Date(firstNext-60000).toISOString():null;
     state.fixturePool=(state.fixturePool||[]).map(x=>persisted.find(p=>Number(p.apiFixtureId)===Number(x.apiFixtureId))||x);
     if(Array.isArray(window.adminSchedulePoolV1102))window.adminSchedulePoolV1102=window.adminSchedulePoolV1102.map(x=>persisted.find(p=>Number(p.apiFixtureId)===Number(x.apiFixtureId))||x);
     save();render();toast(L('Upcoming Gameweek saved to Production.','تم حفظ الجولة الجاية على النسخة الحية.'),'good');
@@ -17169,7 +17174,7 @@ html #view-admin .admin-workspace-v1100 .admin-empty-v1100{padding:18px;text-ali
 <script id="mastaba-v1100-admin-repair">
 (function mastabaV1100(){
 'use strict';
-window.MASTABA_BUILD_VERSION='11.11';
+window.MASTABA_BUILD_VERSION='11.12';
 
 const SCHEDULE_SYNC_V1101='https://bnwjtrtlwnlbldfhaggg.supabase.co/functions/v1/mastaba-schedule-sync';
 const scheduleV1100=window.adminScheduleV1100=window.adminScheduleV1100||{
@@ -17672,7 +17677,7 @@ if(state?.view==='admin')setTimeout(renderAdminV1100,0);
    Supabase schedule available exclusively inside Admin > Game Setup. */
 (function(){
 'use strict';
-window.MASTABA_BUILD_VERSION='11.11';
+window.MASTABA_BUILD_VERSION='11.12';
 
 const fixtureKeyV1102=f=>Number(f?.apiFixtureId)?`api:${Number(f.apiFixtureId)}`:`id:${String(f?.id||'')}`;
 function pinnedPoolV1102(){
@@ -17724,7 +17729,8 @@ function fixturePlaceholderV1103(target){
 function buildAdminFixtureSelectorV1103(target){
   const selected=target==='current'?state.fixtures:(state.nextFixtures||[]),ui=ensureAdminBrowser(target);
   const dates=window.adminSevenDayKeysV1106(),dateKeySet=new Set(dates);
-  const pool=schedulePoolV1102().filter(f=>dateKeySet.has(adminFixtureDateKey(f.kickoff)));
+  const currentApiIds=new Set((state.fixtures||[]).map(f=>Number(f?.apiFixtureId)).filter(Boolean)),currentIds=new Set((state.fixtures||[]).map(f=>String(f?.id)));
+  const pool=schedulePoolV1102().filter(f=>dateKeySet.has(adminFixtureDateKey(f.kickoff))).filter(f=>target!=='next'||(!currentApiIds.has(Number(f?.apiFixtureId))&&!currentIds.has(String(f?.id))));
   const sampleByDate=new Map();pool.forEach(f=>{const key=adminFixtureDateKey(f.kickoff);if(!sampleByDate.has(key))sampleByDate.set(key,f)});
   if(!ui.date||!dates.includes(ui.date)){
     const selectedDate=selected.length?adminFixtureDateKey(selected.slice().sort((a,b)=>new Date(a.kickoff)-new Date(b.kickoff))[0].kickoff):null;
@@ -17772,6 +17778,9 @@ window.setAdminFixtureQueryV1080=window.setAdminFixtureQuery=function(target,val
 window.setAdminFixtureLeague=function(target,value){const ui=ensureAdminBrowser(target);ui.league=value;ui.limit=24;refreshSearchV1102(target)};
 window.setAdminFixtureDay=function(target,value){const ui=ensureAdminBrowser(target);ui.date=value;ui.q='';ui.limit=24;refreshSearchV1102(target)};
 window.showMoreAdminFixturesV1103=function(target){const ui=ensureAdminBrowser(target);ui.limit=Math.min(96,(Number(ui.limit)||24)+24);refreshSearchV1102(target)};
+window.buildAdminFixtureSelectorV1103=buildAdminFixtureSelectorV1103;
+window.refreshSearchV1102=refreshSearchV1102;
+window.queueAdminFixtureMountV1103=queueAdminFixtureMountV1103;
 
 const toggleFixtureBaseV1102=window.toggleAdminFixture;
 window.toggleAdminFixture=async function(mid,target,checked){
@@ -18164,9 +18173,9 @@ html[data-theme] body #app #view-admin .admin-publish-btn{width:100%!important;m
     if(state.view!=='admin'||String(state.adminWorkspaceTabV1095||'game')!=='game')return;
     const target=adminSetupTarget==='current'?'current':'next';
     const slot=document.querySelector(`#view-admin [data-admin-fixture-slot-v1103="${target}"]`);
-    if(slot){queueAdminFixtureMountV1103(target);return}
+    if(slot){window.queueAdminFixtureMountV1103?.(target);return}
     const old=document.querySelector(`#view-admin .fixture-browser[data-admin-target-v1080="${target}"]`);
-    if(old)old.outerHTML=buildAdminFixtureSelectorV1103(target);
+    if(old&&typeof window.buildAdminFixtureSelectorV1103==='function')old.outerHTML=window.buildAdminFixtureSelectorV1103(target);
   };
 })();
 </script>
@@ -18443,7 +18452,7 @@ body.auth-pending-v1064::after{top:53%!important}
 <script id="mastaba-v1108-runtime-fixes">
 (function(){
 'use strict';
-window.MASTABA_BUILD_VERSION='11.11';
+window.MASTABA_BUILD_VERSION='11.12';
 
 /* Hard-mount every fixture slot that exists after the catalogue finishes. */
 window.mountAllAdminFixtureBrowsersV1108=function(){
@@ -18452,9 +18461,9 @@ window.mountAllAdminFixtureBrowsersV1108=function(){
     const ready=!!window.adminScheduleV1100?.loaded||(Array.isArray(window.adminSchedulePoolV1102)&&window.adminSchedulePoolV1102.length>0)||!!window.adminScheduleV1100?.error;
     if(!ready)continue;
     const slot=document.querySelector(`#view-admin [data-admin-fixture-slot-v1103="${target}"]`);
-    if(slot&&typeof buildAdminFixtureSelectorV1103==='function'){slot.outerHTML=buildAdminFixtureSelectorV1103(target);continue}
+    if(slot&&typeof window.buildAdminFixtureSelectorV1103==='function'){slot.outerHTML=window.buildAdminFixtureSelectorV1103(target);continue}
     const old=document.querySelector(`#view-admin .fixture-browser[data-admin-target-v1080="${target}"]`);
-    if(old&&typeof buildAdminFixtureSelectorV1103==='function')old.outerHTML=buildAdminFixtureSelectorV1103(target);
+    if(old&&typeof window.buildAdminFixtureSelectorV1103==='function')old.outerHTML=window.buildAdminFixtureSelectorV1103(target);
   }
 };
 
@@ -18487,7 +18496,7 @@ if(typeof predictionMetaBaseV1108==='function'){
 let autoFocusPredictV1108=false;
 function focusPredictMatchV1108(){
   if(!autoFocusPredictV1108||state.view!=='predict')return;
-  const rows=[...(state.fixtures||[])];if(!rows.length)return;
+  const rows=[...(state.fixtures||[])];if(!rows.length)return;if(rows.every(f=>f.phase==='final')){autoFocusPredictV1108=false;return}
   const byKick=(a,b)=>new Date(a.kickoff)-new Date(b.kickoff);
   const live=rows.filter(f=>f.phase==='live').sort((a,b)=>-byKick(a,b));
   const finals=rows.filter(f=>f.phase==='final').sort((a,b)=>-byKick(a,b));
@@ -18653,7 +18662,7 @@ html[data-theme] body #app #view-admin .admin-v1094-panel :is(.admin-v1094-metri
 <script id="mastaba-v1109-admin-schedule-runtime">
 (function(){
 'use strict';
-window.MASTABA_BUILD_VERSION='11.11';
+window.MASTABA_BUILD_VERSION='11.12';
 
 /* Local fallback is intentionally name-based, never T123. The central
    abbreviation table remains authoritative when it has a row. */
@@ -18767,7 +18776,7 @@ html[data-theme] body #app #view-admin .fixture-league-title :is(strong,b,span,s
 <script id="mastaba-v1110-team-identity-guard">
 (function(){
 'use strict';
-window.MASTABA_BUILD_VERSION='11.11';
+window.MASTABA_BUILD_VERSION='11.12';
 /* Repair any already-loaded cached schedule objects from V11.09 without a
    provider/Supabase reload. Per-fixture payload is authoritative. */
 function repair(f){
@@ -18858,130 +18867,238 @@ html[data-theme="real-madrid"] body #app #view-admin{--admin-third:#edc130;--adm
 }
 </style>
 
+<style id="mastaba-v1112-fixes-style">
+/* =========================================================
+   V11.12 — Admin browser reliability + status contrast + Predict navigation
+   ========================================================= */
 
-<script id="mastaba-v1111-admin-fixture-browser-runtime">
+/* Semantic status chips keep their original readable pairs. Theme inheritance
+   must never turn the text white on a light status background. */
+html[data-theme] body #app #view-admin .status-chip.upcoming,
+html[data-theme] body #app #view-admin .status-chip.upcoming *{
+  background:#ffd7b4!important;color:#3d2310!important;-webkit-text-fill-color:#3d2310!important;
+}
+html[data-theme] body #app #view-admin .status-chip.live,
+html[data-theme] body #app #view-admin .status-chip.live *{
+  background:#19d988!important;color:#06261a!important;-webkit-text-fill-color:#06261a!important;
+}
+html[data-theme] body #app #view-admin .status-chip.final,
+html[data-theme] body #app #view-admin .status-chip.final *{
+  background:#ebe7e1!important;color:#333!important;-webkit-text-fill-color:#333!important;
+}
+
+/* Restore the intended readable green-on-light-green diagnostic badge. */
+html[data-theme] body #app #view-admin .admin-zero-calls-v1101,
+html[data-theme] body #app #view-admin .admin-zero-calls-v1101 *{
+  background:#effaf3!important;color:#17663a!important;-webkit-text-fill-color:#17663a!important;
+  border-color:#afd5be!important;opacity:1!important;
+}
+
+/* Selected day remains Theme Color #3. */
+html[data-theme] body #app #view-admin .fixture-day.active,
+html[data-theme] body #app #view-admin .fixture-day[aria-pressed="true"]{
+  background:var(--admin-third)!important;color:var(--admin-third-text)!important;
+  -webkit-text-fill-color:var(--admin-third-text)!important;
+  border-color:color-mix(in srgb,var(--admin-third-text) 60%,transparent)!important;
+}
+html[data-theme] body #app #view-admin .fixture-day.active :is(small,b,em,span),
+html[data-theme] body #app #view-admin .fixture-day[aria-pressed="true"] :is(small,b,em,span){
+  color:var(--admin-third-text)!important;-webkit-text-fill-color:var(--admin-third-text)!important;opacity:1!important;
+}
+
+/* Bottom Gameweek switcher mirrors the top one without looking like a new UI. */
+#view-predict .week-switcher-bottom-v1112{margin-top:18px!important;margin-bottom:8px!important}
+#view-predict .predict-next-preview-v1112{margin-top:12px}
+#view-predict .predict-next-preview-v1112 .match-card-body{padding-bottom:18px}
+#view-predict .next-week-preview-note-v1112{margin:0 auto 14px;max-width:810px}
+#view-predict .next-week-preview-card-v1112 .score-area{min-width:120px}
+#view-predict .next-week-preview-card-v1112 .next-preview-vs-v1112{
+  display:grid;place-items:center;min-height:60px;font-size:1.05rem;font-weight:1000;
+}
+
+@media(max-width:760px){
+  #view-predict .week-switcher-bottom-v1112{margin-top:14px!important}
+}
+</style>
+
+
+<script id="mastaba-v1112-runtime">
 (function(){
 'use strict';
-window.MASTABA_BUILD_VERSION='11.11';
+window.MASTABA_BUILD_VERSION='11.12';
 
-/* Upcoming-first load race:
-   the Supabase read was finishing, but the initial Upcoming placeholder could
-   survive the old async mount token. This watcher only mounts already-loaded
-   data; it does NOT perform another Supabase/provider request. */
-let adminFixtureReadyWatchV1111=0;
-function fixtureScheduleReadyV1111(){
+/* ---------------- Admin fixture browser ----------------
+   V11.11's cosmetic day change called private lexical functions that were not
+   reachable from the final script. The real data therefore only changed when
+   Current -> Upcoming rebuilt Game Setup. V11.12 uses the exported V11.03
+   builder/refresh functions directly. No extra Supabase request is involved. */
+function scheduleReadyV1112(){
   return !!window.adminScheduleV1100?.loaded ||
-    (Array.isArray(window.adminSchedulePoolV1102) && window.adminSchedulePoolV1102.length>0) ||
+    (Array.isArray(window.adminSchedulePoolV1102)&&window.adminSchedulePoolV1102.length>0) ||
     !!window.adminScheduleV1100?.error;
 }
-function mountReadyFixtureSlotsV1111(){
-  if(state?.view!=='admin' || (typeof adminTabV1100==='function' && adminTabV1100()!=='game')) return false;
-  if(!fixtureScheduleReadyV1111()) return false;
-  let changed=false;
-  document.querySelectorAll('#view-admin [data-admin-fixture-slot-v1103]').forEach(slot=>{
-    const target=slot.getAttribute('data-admin-fixture-slot-v1103')==='current'?'current':'next';
-    if(typeof buildAdminFixtureSelectorV1103==='function'){
-      slot.outerHTML=buildAdminFixtureSelectorV1103(target);
-      changed=true;
-    }
-  });
-  return changed;
+function mountAdminFixtureTargetV1112(target){
+  if(state?.view!=='admin'||String(state.adminWorkspaceTabV1095||'game')!=='game'||!scheduleReadyV1112())return false;
+  const html=typeof window.adminFixtureSelector==='function'?window.adminFixtureSelector(target):'';
+  if(!html)return false;
+  const slot=document.querySelector(`#view-admin [data-admin-fixture-slot-v1103="${target}"]`);
+  if(slot){slot.outerHTML=html;return true}
+  const old=document.querySelector(`#view-admin .fixture-browser[data-admin-target-v1080="${target}"]`);
+  if(old){old.outerHTML=html;return true}
+  return false;
 }
-function startFixtureReadyWatchV1111(){
-  clearInterval(adminFixtureReadyWatchV1111);
-  const started=Date.now();
-  adminFixtureReadyWatchV1111=setInterval(()=>{
-    if(state?.view!=='admin'){
-      clearInterval(adminFixtureReadyWatchV1111);adminFixtureReadyWatchV1111=0;return;
-    }
-    const placeholder=document.querySelector('#view-admin [data-admin-fixture-slot-v1103]');
-    if(!placeholder){
-      clearInterval(adminFixtureReadyWatchV1111);adminFixtureReadyWatchV1111=0;return;
-    }
-    if(mountReadyFixtureSlotsV1111()){
-      clearInterval(adminFixtureReadyWatchV1111);adminFixtureReadyWatchV1111=0;return;
-    }
-    if(Date.now()-started>20000){
-      clearInterval(adminFixtureReadyWatchV1111);adminFixtureReadyWatchV1111=0;
-    }
-  },120);
+function mountAllAdminFixturesV1112(){
+  const target=String(window.adminSetupTarget||'')==='current'?'current':(typeof adminSetupTarget!=='undefined'&&adminSetupTarget==='current'?'current':'next');
+  mountAdminFixtureTargetV1112(target);
 }
+window.mountAllAdminFixtureBrowsersV1108=mountAllAdminFixturesV1112;
+window.refreshAdminFixtureBrowserV1104=mountAllAdminFixturesV1112;
 
-/* Selected day reacts immediately and then only the browser is rebuilt. */
 window.setAdminFixtureDay=function(target,value){
-  const ui=typeof ensureAdminBrowser==='function'?ensureAdminBrowser(target):adminBrowserState?.[target];
+  const ui=typeof ensureAdminBrowser==='function'?ensureAdminBrowser(target):window.adminBrowserState?.[target];
   if(!ui)return;
-  ui.date=value;ui.q='';
-  const browser=document.querySelector(`#view-admin .fixture-browser[data-admin-target-v1080="${target}"]`);
-  if(browser){
-    browser.querySelectorAll('.fixture-day').forEach(btn=>{
-      const call=String(btn.getAttribute('onclick')||'');
-      const selected=call.includes(`'${value}'`);
-      btn.classList.toggle('active',selected);
-      btn.setAttribute('aria-pressed',selected?'true':'false');
-    });
-  }
-  if(typeof refreshSearchV1102==='function')refreshSearchV1102(target);
-  else if(typeof refreshGameSetupV1100==='function')refreshGameSetupV1100();
+  ui.date=value;ui.q='';ui.limit=96;
+  if(typeof window.refreshSearchV1102==='function')window.refreshSearchV1102(target);
+  else mountAdminFixtureTargetV1112(target);
+};
+window.setAdminFixtureLeague=function(target,value){
+  const ui=typeof ensureAdminBrowser==='function'?ensureAdminBrowser(target):window.adminBrowserState?.[target];
+  if(!ui)return;ui.league=value;ui.limit=96;
+  if(typeof window.refreshSearchV1102==='function')window.refreshSearchV1102(target);
+  else mountAdminFixtureTargetV1112(target);
 };
 
-function markSelectedAdminDayV1111(target){
-  const ui=typeof ensureAdminBrowser==='function'?ensureAdminBrowser(target):adminBrowserState?.[target];
-  const browser=document.querySelector(`#view-admin .fixture-browser[data-admin-target-v1080="${target}"]`);
-  if(!ui||!browser)return;
-  browser.querySelectorAll('.fixture-day').forEach(btn=>{
-    const call=String(btn.getAttribute('onclick')||'');
-    const selected=!!ui.date && call.includes(`'${ui.date}'`) && !String(ui.q||'').trim();
-    btn.classList.toggle('active',selected);
-    btn.setAttribute('aria-pressed',selected?'true':'false');
-  });
+/* A small DOM observer closes the one remaining race: the initial Upcoming
+   placeholder may already exist before the central schedule promise resolves.
+   It only watches DOM/state and never performs network work. */
+let fixtureMountTimerV1112=null;
+function startFixtureMountWatchV1112(){
+  if(fixtureMountTimerV1112)clearInterval(fixtureMountTimerV1112);
+  const started=Date.now();
+  fixtureMountTimerV1112=setInterval(()=>{
+    if(state?.view!=='admin'||Date.now()-started>15000){clearInterval(fixtureMountTimerV1112);fixtureMountTimerV1112=null;return}
+    if(scheduleReadyV1112()&&document.querySelector('#view-admin [data-admin-fixture-slot-v1103]')){
+      mountAllAdminFixturesV1112();clearInterval(fixtureMountTimerV1112);fixtureMountTimerV1112=null;
+    }
+  },100);
 }
-function settleAdminFixtureBrowserV1111(){
-  mountReadyFixtureSlotsV1111();
-  markSelectedAdminDayV1111('current');
-  markSelectedAdminDayV1111('next');
-}
-
-/* Wrap the final Admin renderer so Upcoming works even when it is the first
-   active Gameweek shown. */
-const renderAdminBaseV1111=window.renderAdmin||window.renderAdminWorkspaceV1100;
-if(typeof renderAdminBaseV1111==='function'){
-  window.renderAdmin=renderAdmin=function(){
-    const out=renderAdminBaseV1111.apply(this,arguments);
-    requestAnimationFrame(()=>{
-      settleAdminFixtureBrowserV1111();
-      if(document.querySelector('#view-admin [data-admin-fixture-slot-v1103]'))startFixtureReadyWatchV1111();
-    });
-    return out;
-  };
-}
-
-/* Hook Current / Upcoming switches too. */
-const setupTargetBaseV1111=window.setAdminSetupTargetV1100||window.setAdminSetupTarget;
-if(typeof setupTargetBaseV1111==='function'){
-  window.setAdminSetupTargetV1100=function(target){
-    const out=setupTargetBaseV1111.call(this,target);
-    requestAnimationFrame(()=>{
-      settleAdminFixtureBrowserV1111();
-      if(document.querySelector('#view-admin [data-admin-fixture-slot-v1103]'))startFixtureReadyWatchV1111();
-    });
-    return out;
-  };
-  window.setAdminSetupTarget=window.setAdminSetupTargetV1100;
-}
-
-/* Catch the existing Supabase completion mount. */
-const originalMountAllV1111=window.mountAllAdminFixtureBrowsersV1108;
-window.mountAllAdminFixtureBrowsersV1108=function(){
-  const out=typeof originalMountAllV1111==='function'?originalMountAllV1111.apply(this,arguments):undefined;
-  requestAnimationFrame(settleAdminFixtureBrowserV1111);
+const renderAdminBaseV1112=window.renderAdmin;
+if(typeof renderAdminBaseV1112==='function')window.renderAdmin=renderAdmin=function(){
+  const out=renderAdminBaseV1112.apply(this,arguments);
+  requestAnimationFrame(()=>{if(document.querySelector('#view-admin [data-admin-fixture-slot-v1103]'))startFixtureMountWatchV1112();else if(scheduleReadyV1112())mountAllAdminFixturesV1112()});
   return out;
 };
 
-requestAnimationFrame(()=>{
-  settleAdminFixtureBrowserV1111();
-  if(document.querySelector('#view-admin [data-admin-fixture-slot-v1103]'))startFixtureReadyWatchV1111();
-});
+/* ---------------- Published-next scheduling ---------------- */
+function nextWeekAvailableV1112(){return !!state.nextPublished&&Array.isArray(state.nextFixtures)&&state.nextFixtures.length>0}
+function nextKickoffV1112(){
+  if(!nextWeekAvailableV1112())return null;
+  const times=state.nextFixtures.map(f=>new Date(f.kickoff).getTime()).filter(Number.isFinite);
+  return times.length?new Date(Math.min(...times)):null;
+}
+function nextDeadlineV1112(){
+  if(state.nextDeadlineAt){const d=new Date(state.nextDeadlineAt);if(Number.isFinite(d.getTime()))return d}
+  const k=nextKickoffV1112();return k?new Date(k.getTime()-60000):null;
+}
+const homeKickoffBaseV1112=window.homeKickoff||homeKickoff;
+window.homeKickoff=homeKickoff=function(){return nextKickoffV1112()||homeKickoffBaseV1112()};
+window.homeDeadline=homeDeadline=function(){return nextDeadlineV1112()||homeKickoff()};
+
+const renderHomeBaseV1112=window.renderHome||renderHome;
+if(typeof renderHomeBaseV1112==='function')window.renderHome=renderHome=function(){
+  const out=renderHomeBaseV1112.apply(this,arguments);
+  if(nextWeekAvailableV1112()){
+    const card=document.querySelector('#view-home .deadline-card'),label=card?.querySelector('.stat-label'),strong=card?.querySelector('strong'),deadline=nextDeadlineV1112();
+    if(label)label.textContent=L(`Gameweek ${Number(state.week)+1} Predictions Deadline`,`موعد قفل توقعات الجولة ${Number(state.week)+1}`);
+    if(strong&&deadline)strong.textContent=formatTime(deadline.toISOString());
+    const countdown=document.querySelector('#view-home #gwCountdown'),kick=nextKickoffV1112();
+    if(countdown&&kick)countdown.textContent=countdownText(kick);
+  }
+  return out;
+};
+
+/* ---------------- Predict Gameweek navigation ---------------- */
+function maxPredictWeekV1112(){return Number(state.week)+(nextWeekAvailableV1112()?1:0)}
+window.gameweekOptionsHTML=gameweekOptionsHTML=function(selected){
+  const max=Math.max(1,maxPredictWeekV1112());
+  return Array.from({length:max},(_,i)=>i+1).map(w=>`<option value="${w}" ${Number(selected)===w?'selected':''}>${L('Gameweek','الجولة')} ${w}</option>`).join('');
+};
+window.setPredictWeek=function(w){
+  state.selectedPredictWeek=Math.max(1,Math.min(maxPredictWeekV1112(),Number(w)||Number(state.week)));
+  try{save()}catch{}
+  if(typeof window.renderPredict==='function')window.renderPredict();
+};
+window.openPredictionWeek=function(week){state.selectedPredictWeek=Math.max(1,Math.min(maxPredictWeekV1112(),Number(week)||Number(state.week)));state.view='predict';try{save()}catch{};render()};
+
+function switcherHTMLV1112(selected,extra=''){
+  const max=maxPredictWeekV1112(),w=Number(selected)||Number(state.week);
+  return`<div class="week-switcher ${extra}"><button ${w<=1?'disabled':''} onclick="setPredictWeek(${w-1})">‹</button><div class="week-label"><select class="predict-week-select" aria-label="${L('Select Gameweek','اختار الجولة')}" onchange="setPredictWeek(this.value)">${gameweekOptionsHTML(w)}</select></div><button ${w>=max?'disabled':''} onclick="setPredictWeek(${w+1})">›</button></div>`;
+}
+function upcomingPreviewCardV1112(f){
+  const h=TEAM[f.home]||{name:f.home,logo:'',short:f.home},a=TEAM[f.away]||{name:f.away,logo:'',short:f.away};
+  return`<article class="match-card upcoming next-week-preview-card-v1112" data-mid="${escapeHTML(f.id)}"><div class="match-card-head"><div class="match-head-top"><div><div class="match-competition">${escapeHTML(f.competition||'')}</div><div class="match-date">${formatTime(f.kickoff)}</div></div><span class="status-chip upcoming">${L('Upcoming','قادمة')}</span></div></div><div class="match-card-body"><div class="stadium">${escapeHTML(f.stadium||'')}</div><div class="teams-and-score"><div class="team">${teamBadge(f.home)}<div class="team-name">${escapeHTML(h.name)}</div></div><div class="score-area"><div class="next-preview-vs-v1112">VS</div></div><div class="team">${teamBadge(f.away)}<div class="team-name">${escapeHTML(a.name)}</div></div></div></div></article>`;
+}
+function renderNextPreviewV1112(){
+  const view=document.querySelector('#view-predict');if(!view)return;
+  const nextNo=Number(state.week)+1,deadline=nextDeadlineV1112();
+  view.classList.remove('results-only');
+  view.innerHTML=`<h1 class="page-title">${L(`Gameweek ${nextNo} Predictions`,`توقعات الجولة ${nextNo}`)}</h1><p class="page-sub">${L('The next Gameweek is published and visible now. It becomes the default prediction Gameweek 12 hours after the current Gameweek is finalized.','الجولة الجاية منشورة وواضحة دلوقتي. هتبقى جولة التوقعات الأساسية بعد 12 ساعة من تثبيت آخر ماتش في الجولة الحالية.')}</p>${switcherHTMLV1112(nextNo)}<div class="notice next-week-preview-note-v1112">${deadline?`${L('Predictions Deadline','موعد قفل التوقعات')}: ${formatTime(deadline.toISOString())}`:L('Deadline will appear when the fixture list is saved.','موعد القفل هيظهر بعد حفظ قائمة الماتشات.')}</div><div class="match-list predict-next-preview-v1112">${(state.nextFixtures||[]).map(upcomingPreviewCardV1112).join('')}</div>${switcherHTMLV1112(nextNo,'week-switcher-bottom-v1112')}`;
+}
+function syncPredictSwitchersV1112(){
+  const view=document.querySelector('#view-predict');if(!view)return;
+  const w=Number(state.selectedPredictWeek)||Number(state.week),max=maxPredictWeekV1112();
+  view.querySelectorAll('.week-switcher').forEach(sw=>{
+    const buttons=sw.querySelectorAll('button'),sel=sw.querySelector('.predict-week-select');
+    if(sel){sel.innerHTML=gameweekOptionsHTML(w);sel.value=String(w)}
+    if(buttons[0]){buttons[0].disabled=w<=1;buttons[0].setAttribute('onclick',`setPredictWeek(${w-1})`)}
+    if(buttons[1]){buttons[1].disabled=w>=max;buttons[1].setAttribute('onclick',`setPredictWeek(${w+1})`)}
+  });
+  if(!view.querySelector('.week-switcher-bottom-v1112')){
+    const top=view.querySelector('.week-switcher');
+    if(top){const bottom=top.cloneNode(true);bottom.classList.add('week-switcher-bottom-v1112');view.appendChild(bottom)}
+  }
+}
+const renderPredictBaseV1112=window.renderPredict||renderPredict;
+window.renderPredict=renderPredict=function(){
+  if(nextWeekAvailableV1112()&&Number(state.selectedPredictWeek)===Number(state.week)+1){renderNextPreviewV1112();return}
+  const out=renderPredictBaseV1112.apply(this,arguments);syncPredictSwitchersV1112();return out;
+};
+
+/* Current GW: active match first, latest final only while at least one match is
+   still unfinished. If every match is final, keep the page at the top. */
+const focusBaseV1112=window.focusPredictMatchV1108;
+window.focusPredictMatchV1108=function(){
+  if((state.fixtures||[]).length&&(state.fixtures||[]).every(f=>f.phase==='final'))return;
+  if(typeof focusBaseV1112==='function')return focusBaseV1112();
+};
+
+/* ---------------- 12-hour automatic rollover ----------------
+   The backend cron opens the setup Gameweek 12h after the previous Gameweek's
+   finalized_at. This client timer simply reloads once around that moment so a
+   tab left open also adopts the newly active Gameweek. */
+let rolloverTimerV1112=null,rolloverAnchorReadV1112=false;
+function scheduleRolloverV1112(finalizedAt){
+  if(!nextWeekAvailableV1112()||!finalizedAt)return;
+  const t=new Date(finalizedAt).getTime()+12*3600000;if(!Number.isFinite(t))return;
+  if(rolloverTimerV1112)clearTimeout(rolloverTimerV1112);
+  const wait=t-Date.now();
+  if(wait<=0){rolloverTimerV1112=setTimeout(()=>location.reload(),5*60*1000);return}
+  rolloverTimerV1112=setTimeout(()=>location.reload(),Math.min(wait+3*60*1000,2147483000));
+}
+async function ensureRolloverAnchorV1112(){
+  if(rolloverAnchorReadV1112||!nextWeekAvailableV1112()||!(state.fixtures||[]).length||!(state.fixtures||[]).every(f=>f.phase==='final'))return;
+  const ctx=window.prodCtxV1073;if(!ctx?.supa||!ctx?.gw?.id)return;
+  rolloverAnchorReadV1112=true;
+  try{
+    const {data,error}=await ctx.supa.from('mastaba_gameweeks').select('status,finalized_at').eq('id',ctx.gw.id).maybeSingle();
+    if(error)throw error;if(data?.finalized_at){ctx.gw.finalized_at=data.finalized_at;scheduleRolloverV1112(data.finalized_at)}
+  }catch(e){console.warn('Gameweek rollover anchor unavailable',e);rolloverAnchorReadV1112=false}
+}
+setInterval(ensureRolloverAnchorV1112,60000);
+setTimeout(()=>{scheduleRolloverV1112(window.prodCtxV1073?.gw?.finalized_at);ensureRolloverAnchorV1112()},1200);
+
+/* Keep the first render and any async next-gameweek hydration in sync. */
+setTimeout(()=>{if(state?.view==='predict')window.renderPredict?.();if(state?.view==='home')window.renderHome?.();if(state?.view==='admin')startFixtureMountWatchV1112()},900);
 })();
 </script>
 
