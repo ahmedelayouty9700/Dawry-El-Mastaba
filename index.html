@@ -17174,7 +17174,7 @@ html #view-admin .admin-workspace-v1100 .admin-empty-v1100{padding:18px;text-ali
 <script id="mastaba-v1100-admin-repair">
 (function mastabaV1100(){
 'use strict';
-window.MASTABA_BUILD_VERSION='11.19';
+window.MASTABA_BUILD_VERSION='11.20';
 
 const SCHEDULE_SYNC_V1101='https://bnwjtrtlwnlbldfhaggg.supabase.co/functions/v1/mastaba-schedule-sync';
 const scheduleV1100=window.adminScheduleV1100=window.adminScheduleV1100||{
@@ -17677,7 +17677,7 @@ if(state?.view==='admin')setTimeout(renderAdminV1100,0);
    Supabase schedule available exclusively inside Admin > Game Setup. */
 (function(){
 'use strict';
-window.MASTABA_BUILD_VERSION='11.19';
+window.MASTABA_BUILD_VERSION='11.20';
 
 const fixtureKeyV1102=f=>Number(f?.apiFixtureId)?`api:${Number(f.apiFixtureId)}`:`id:${String(f?.id||'')}`;
 function pinnedPoolV1102(){
@@ -18452,7 +18452,7 @@ body.auth-pending-v1064::after{top:53%!important}
 <script id="mastaba-v1108-runtime-fixes">
 (function(){
 'use strict';
-window.MASTABA_BUILD_VERSION='11.19';
+window.MASTABA_BUILD_VERSION='11.20';
 
 /* Hard-mount every fixture slot that exists after the catalogue finishes. */
 window.mountAllAdminFixtureBrowsersV1108=function(){
@@ -18662,7 +18662,7 @@ html[data-theme] body #app #view-admin .admin-v1094-panel :is(.admin-v1094-metri
 <script id="mastaba-v1109-admin-schedule-runtime">
 (function(){
 'use strict';
-window.MASTABA_BUILD_VERSION='11.19';
+window.MASTABA_BUILD_VERSION='11.20';
 
 /* Local fallback is intentionally name-based, never T123. The central
    abbreviation table remains authoritative when it has a row. */
@@ -18776,7 +18776,7 @@ html[data-theme] body #app #view-admin .fixture-league-title :is(strong,b,span,s
 <script id="mastaba-v1110-team-identity-guard">
 (function(){
 'use strict';
-window.MASTABA_BUILD_VERSION='11.19';
+window.MASTABA_BUILD_VERSION='11.20';
 /* Repair any already-loaded cached schedule objects from V11.09 without a
    provider/Supabase reload. Per-fixture payload is authoritative. */
 function repair(f){
@@ -18925,7 +18925,7 @@ html[data-theme] body #app #view-admin .fixture-day[aria-pressed="true"] :is(sma
 <script id="mastaba-v1112-runtime">
 (function(){
 'use strict';
-window.MASTABA_BUILD_VERSION='11.19';
+window.MASTABA_BUILD_VERSION='11.20';
 
 /* ---------------- Admin fixture browser ----------------
    V11.11's cosmetic day change called private lexical functions that were not
@@ -19199,7 +19199,7 @@ html[data-theme] body #app #view-admin .admin-zero-calls-v1101 *{
 <script id="mastaba-v1113-predict-and-context">
 (function(){
 'use strict';
-window.MASTABA_BUILD_VERSION='11.19';
+window.MASTABA_BUILD_VERSION='11.20';
 
 const nextPredV1113={
   loading:false,loaded:false,error:null,gw:null,fixtures:[],dbById:{},picks:{},meta:{draftSavedAt:null,submittedAt:null,editing:true}
@@ -19637,7 +19637,7 @@ setTimeout(()=>{if(state?.nextPublished&&nextIsSelectedV1113()){nextPredV1113.lo
 <script id="mastaba-v1114-home-next-predictions">
 (function(){
 'use strict';
-window.MASTABA_BUILD_VERSION='11.19';
+window.MASTABA_BUILD_VERSION='11.20';
 
 const homeSubmissionStatusBaseV1114=window.homeSubmissionStatus||homeSubmissionStatus;
 let homeNextHydrationQueuedV1114=false;
@@ -19954,7 +19954,7 @@ html[data-theme="barcelona"] body #app #view-admin .admin-workspace-v1100 :is(.a
 
 
 <script id="mastaba-v1115-version">
-window.MASTABA_BUILD_VERSION='11.19';
+window.MASTABA_BUILD_VERSION='11.20';
 </script>
 
 
@@ -20072,7 +20072,7 @@ html[data-theme] body #app #view-admin .admin-accounts-v1094 .admin-v1094-action
 <script id="mastaba-v1116-admin-interaction">
 (function(){
 'use strict';
-window.MASTABA_BUILD_VERSION='11.19';
+window.MASTABA_BUILD_VERSION='11.20';
 
 let roundCommitTimerV1116=0;
 let adminRoundObserverV1116=null;
@@ -20287,7 +20287,7 @@ html.mastaba-gw-started-v1117 #view-predict
 <script id="mastaba-v1117-runtime">
 (function(){
 'use strict';
-window.MASTABA_BUILD_VERSION='11.19';
+window.MASTABA_BUILD_VERSION='11.20';
 
 /* ---------- Shared publication helpers ---------- */
 function nextNumberV1117(){return Number(state.week)+1}
@@ -20625,7 +20625,7 @@ requestAnimationFrame(()=>{
 <script id="mastaba-v1119-route-and-autosave">
 (function(){
 'use strict';
-window.MASTABA_BUILD_VERSION='11.19';
+window.MASTABA_BUILD_VERSION='11.20';
 
 const goBaseV1119=window.go;
 if(typeof goBaseV1119==='function'){
@@ -20652,6 +20652,223 @@ window.addEventListener('pagehide',()=>{
     window.flushNextAutosaveV1119?.(true);
   }
 });
+})();
+</script>
+
+
+<style id="mastaba-v1120-player-and-gw-stability">
+/* V11.20 — player status clarity + durable next-GW context */
+.player-row .player-injury-reason-v1120{
+  display:block!important;margin-top:3px!important;font-size:.58rem!important;
+  font-weight:850!important;color:#a52833!important;
+}
+.player-row .availability-v1120{
+  min-width:44px;padding:5px 6px;border-radius:8px;font-size:.56rem;
+  font-weight:1000;line-height:1;text-align:center;
+}
+.player-row .availability-v1120.available{background:#d8f4e7;color:#08734b}
+.player-row .availability-v1120.doubtful{background:#fff0cb;color:#825d00}
+.player-row .availability-v1120.out,
+.player-row .availability-v1120.suspended{background:#fee0e2;color:#ae2c36}
+.player-stats-source-note-v1120{
+  margin-top:7px;font-size:.59rem;line-height:1.35;color:#727b87;font-weight:750;
+}
+</style>
+
+
+<script id="mastaba-v1120-player-and-gw-stability">
+(function(){
+'use strict';
+window.MASTABA_BUILD_VERSION='11.20';
+
+const LAST_WEEK_KEY_V1120='mastaba:last-predict-week:v1120';
+function rememberPredictWeekV1120(w){
+  try{localStorage.setItem(LAST_WEEK_KEY_V1120,String(Number(w)||Number(state.week)||1))}catch{}
+}
+function rememberedPredictWeekV1120(){
+  try{return Number(localStorage.getItem(LAST_WEEK_KEY_V1120)||state.selectedPredictWeek||state.week||1)}catch{return Number(state.selectedPredictWeek||state.week||1)}
+}
+
+/* ------------------------------------------------------------------
+   Initial production hydration:
+   load the published next Gameweek BEFORE the first post-login render.
+   This removes the old transient nextPublished=false race that could make
+   GW2 disappear on refresh and clamp the selected Predict week back to GW1.
+   ------------------------------------------------------------------ */
+const hydrateBaseV1120=window.hydrateProductionV1073;
+if(typeof hydrateBaseV1120==='function'){
+  window.hydrateProductionV1073=async function(profile,user,supa){
+    const desired=rememberedPredictWeekV1120();
+    const ok=await hydrateBaseV1120.apply(this,arguments);
+    try{
+      const current=Number(state.week);
+      const {data:gw,error:gwErr}=await supa.from('mastaba_gameweeks')
+        .select('id,gameweek_number,status,published_at,deadline_at,opens_at,finalized_at')
+        .eq('gameweek_number',current+1).maybeSingle();
+      if(gwErr)throw gwErr;
+      if(gw&&gw.published_at){
+        const {data:rows,error:fxErr}=await supa.from('mastaba_fixtures')
+          .select('*').eq('gameweek_id',gw.id).order('kickoff_at',{ascending:true});
+        if(fxErr)throw fxErr;
+        const reg=(id,name,logo)=>{
+          const tid=Number(id),code=`sched-${tid}`;
+          const ab=window.MASTABA_TEAM_ABBR_V1083?.[tid]||TEAM[code]?.short||String(name||'TM').replace(/[^A-Za-z0-9 ]+/g,' ').trim().split(/\s+/).filter(Boolean).slice(0,3).map(x=>x[0]).join('').slice(0,3).toUpperCase()||'TM';
+          TEAM[code]={...(TEAM[code]||{}),teamId:tid,name:name||TEAM[code]?.name||ab,short:String(ab).toUpperCase(),logo:logo||TEAM[code]?.logo||''};
+          return code;
+        };
+        state.nextFixtures=(rows||[]).map(f=>{
+          const home=reg(f.home_team_id,f.home_team_name,f.home_team_logo),away=reg(f.away_team_id,f.away_team_name,f.away_team_logo);
+          const st=String(f.fixture_status||'NS').toUpperCase();
+          const phase=['FT','AET','PEN'].includes(st)?'final':(!['NS','TBD','PST','CANC','ABD','AWD','WO'].includes(st)||Date.now()>=new Date(f.kickoff_at).getTime())?'live':'upcoming';
+          return{id:f.id,apiFixtureId:Number(f.api_fixture_id),apiLeagueId:f.api_league_id?Number(f.api_league_id):null,
+            competition:f.competition_name||'Competition',competitionCountry:f.competition_country||'',home,away,
+            homeTeamId:Number(f.home_team_id),awayTeamId:Number(f.away_team_id),stadium:f.venue_name||'',
+            kickoff:f.kickoff_at,phase,result:null,apiPayload:f.api_payload||{}};
+        });
+        state.nextPublished=state.nextFixtures.length>0;
+        state.nextDeadlineAt=gw.deadline_at||null;
+        if(desired===current+1&&state.nextPublished)state.selectedPredictWeek=current+1;
+        else state.selectedPredictWeek=Math.max(1,Math.min(current+(state.nextPublished?1:0),Number(state.selectedPredictWeek)||current));
+      }else{
+        state.nextPublished=false;state.nextFixtures=[];state.nextDeadlineAt=null;
+        state.selectedPredictWeek=Math.min(Number(state.selectedPredictWeek)||current,current);
+      }
+      state.fixturePool=[...(state.fixtures||[]),...(state.nextFixtures||[])];
+      rememberPredictWeekV1120(state.selectedPredictWeek);
+      try{save()}catch{}
+    }catch(e){console.error('Published next Gameweek hydration failed',e)}
+    return ok;
+  };
+}
+
+/* Persist the user's chosen Predict Gameweek independently from old state
+   migrations, so Home/Profile/League navigation never silently changes GW2. */
+const setPredictWeekBaseV1120=window.setPredictWeek;
+if(typeof setPredictWeekBaseV1120==='function'){
+  window.setPredictWeek=function(w){
+    const out=setPredictWeekBaseV1120.apply(this,arguments);
+    rememberPredictWeekV1120(state.selectedPredictWeek);
+    return out;
+  };
+}
+const openPredictionWeekBaseV1120=window.openPredictionWeek;
+if(typeof openPredictionWeekBaseV1120==='function'){
+  window.openPredictionWeek=function(w){
+    rememberPredictWeekV1120(w);
+    return openPredictionWeekBaseV1120.apply(this,arguments);
+  };
+}
+
+/* ------------------------------------------------------------------
+   Single authoritative player-picker read.
+   It combines the central squad, latest stored stats, observed final-match
+   goals/assists, and fixture-specific injury/suspension state in ONE DB RPC.
+   No football-provider request is made by the user's browser.
+   ------------------------------------------------------------------ */
+const playerContextCacheV1120=new Map();
+function posV1120(v){
+  const s=String(v||'MID').toUpperCase();
+  if(['ATTACKER','FORWARD','FWD'].includes(s))return'FW';
+  if(['MIDFIELDER'].includes(s))return'MID';
+  if(['DEFENDER'].includes(s))return'CB';
+  if(['GOALKEEPER'].includes(s))return'GK';
+  return s||'MID';
+}
+async function loadPlayerContextV1120(f,code,force=false){
+  const ctx=window.prodCtxV1073;if(!ctx?.supa)throw new Error(L('Production session is not ready.','جلسة الإنتاج غير جاهزة.'));
+  const tid=code===f.home?Number(f.homeTeamId):code===f.away?Number(f.awayTeamId):Number(String(code||'').replace(/^sched-/,'').replace(/^T/,''));
+  if(!tid||!f?.id)throw new Error(L('Player data is not ready for this match.','بيانات اللعيبة لسه مش جاهزة للماتش ده.'));
+  const key=`${f.id}:${tid}`,cached=playerContextCacheV1120.get(key);
+  if(!force&&cached&&Date.now()-cached.ts<30000){
+    players[code]=cached.players.map(x=>({...x,stats:structuredClone(x.stats||{})}));
+    return true;
+  }
+  const {data,error}=await ctx.supa.rpc('mastaba_player_picker_context',{p_fixture_id:f.id,p_team_id:tid});
+  if(error)throw error;
+  const old=new Map((players[code]||[]).map(p=>[String(p.id),p]));
+  const list=(data||[]).map(r=>{
+    const prior=old.get(String(r.player_id))||{};
+    return{id:String(r.player_id),name:r.player_name||prior.name||'Player',pos:posV1120(r.player_position||prior.pos),
+      number:r.squad_number??prior.number??null,photo:prior.photo||null,
+      status:r.availability_status||'available',availabilityReason:r.availability_reason||null,
+      availabilityRefreshedAt:r.availability_refreshed_at||null,statsRefreshedAt:r.stats_refreshed_at||null,
+      stats:r.stats&&Object.keys(r.stats).length?r.stats:{ALL:{apps:null,bench:null,goals:0,assists:0,xg:null,xa:null}}};
+  });
+  players[code]=list;
+  playerContextCacheV1120.set(key,{ts:Date.now(),players:list.map(x=>({...x,stats:structuredClone(x.stats||{})}))});
+  return list.length>0;
+}
+
+/* Current-GW and Upcoming-GW scorer drawers now share the same central source. */
+try{
+  ensureTeamPlayersV1081=window.ensureTeamPlayersV1081=async function(f,code){return loadPlayerContextV1120(f,code,false)};
+}catch{}
+try{
+  ensureNextPlayersV1113=async function(f,code){return loadPlayerContextV1120(f,code,false)};
+}catch{}
+
+/* Visible status on phone too — not a hover-only exclamation mark. */
+window.playerRow=function(p,comp,mid){
+  const fallback={apps:null,bench:null,goals:0,assists:0,xg:null,xa:null};
+  const st=p.stats?.[comp]||p.stats?.ALL||fallback;
+  const disabled=['out','suspended'].includes(p.status);
+  const label=p.status==='out'?L('OUT','غائب'):p.status==='suspended'?L('SUS','موقوف'):p.status==='doubtful'?L('DOUBT','مشكوك'):L('OK','متاح');
+  const stat=v=>v==null?`<span class="player-stat-na-v1077">—</span>`:v;
+  const reason=p.availabilityReason?`<small class="player-injury-reason-v1120">${escapeHTML(p.availabilityReason)}</small>`:'';
+  return`<button class="player-row ${disabled?'disabled':''}" ${disabled?'disabled':''} onclick="pickScorer('${mid}','${p.id}')">
+    <span class="player-name-cell"><span class="player-name-copy"><strong>${escapeHTML(p.name)}</strong><small>${comp==='ALL'?L('All Competitions','كل البطولات'):escapeHTML(comp)}</small>${reason}</span></span>
+    <span class="player-cell player-pos-cell">${playerPositionGroup(p.pos)}</span>
+    <span class="player-cell player-stat-cell">${stat(st.apps)}</span><span class="player-cell player-stat-cell">${stat(st.bench)}</span>
+    <span class="player-cell player-stat-cell">${stat(st.goals)}</span><span class="player-cell player-stat-cell">${stat(st.assists)}</span>
+    <span class="player-cell player-stat-cell">${stat(st.xg)}</span><span class="player-cell player-stat-cell">${stat(st.xa)}</span>
+    <span class="player-cell"><span class="availability-v1120 ${p.status||'available'}">${label}</span></span>
+  </button>`;
+};
+
+const openPlayerDrawerBaseV1120=window.openPlayerDrawer;
+if(typeof openPlayerDrawerBaseV1120==='function'){
+  window.openPlayerDrawer=function(){
+    const out=openPlayerDrawerBaseV1120.apply(this,arguments);
+    const note=document.querySelector('.player-drawer .player-table-note');
+    if(note&&!note.querySelector('.player-stats-source-note-v1120')){
+      note.insertAdjacentHTML('beforeend',`<div class="player-stats-source-note-v1120">${L(
+        'Goals and assists combine the central provider record with completed Mastaba match events. xG/xA are shown only when the data source supplies player-level values.',
+        'الأهداف والأسيستات بتجمع بين بيانات المصدر المركزي وأحداث ماتشات المصطبة المكتملة. xG/xA بيظهروا فقط لما مصدر البيانات يوفرهم على مستوى اللاعب.'
+      )}</div>`);
+    }
+    return out;
+  };
+}
+
+/* ------------------------------------------------------------------
+   Submit race fix.
+   A pending autosave is allowed to FINISH first; then Submit writes submitted
+   = true last and verifies all GW rows on the server before declaring success.
+   ------------------------------------------------------------------ */
+window.confirmNextSubmitV1113=async function(){
+  try{
+    if(typeof window.flushNextAutosaveV1119==='function')await window.flushNextAutosaveV1119(false);
+    await persistNextV1113(true);
+    const ctx=window.prodCtxV1073,gid=nextPredV1113.gw?.id;
+    if(ctx?.supa&&gid){
+      const {count,error}=await ctx.supa.from('mastaba_predictions').select('id',{count:'exact',head:true})
+        .eq('gameweek_id',gid).eq('user_id',ctx.user.id).eq('submitted',true);
+      if(error)throw error;
+      if(Number(count)!==Number(nextPredV1113.fixtures.length))throw new Error(L('Submission verification failed. Please try Submit again.','فشل تأكيد الإرسال. اضغط إرسال مرة تانية.'));
+    }
+    nextPredV1113.meta.draftSavedAt=new Date().toISOString();
+    nextPredV1113.meta.submittedAt=new Date().toISOString();
+    nextPredV1113.meta.editing=false;
+    state.validationMissing=[];
+    closeModal();window.renderPredict?.();
+    toast(L('Predictions Submitted','تم إرسال التوقعات'),'good');
+  }catch(e){
+    console.error(e);
+    toast(String(e?.message||L('Predictions could not be submitted.','تعذر إرسال التوقعات.')),'warn');
+  }
+};
+
+requestAnimationFrame(()=>rememberPredictWeekV1120(state.selectedPredictWeek));
 })();
 </script>
 
