@@ -13573,12 +13573,13 @@ function providerFixtureV1077(x){
   };
 }
 function dbRowForFixtureV1077(f,gameweekId){
+  const ph=f?.apiPayload?.teams?.home||{},pa=f?.apiPayload?.teams?.away||{};
   return{
     api_fixture_id:Number(f.apiFixtureId),gameweek_id:gameweekId,
     api_league_id:f.apiLeagueId==null?null:Number(f.apiLeagueId),
     competition_name:f.competition||'Competition',competition_country:f.competitionCountry||null,
-    home_team_id:Number(f.homeTeamId),home_team_name:TEAM[f.home]?.name||f.home,home_team_logo:TEAM[f.home]?.logo||null,
-    away_team_id:Number(f.awayTeamId),away_team_name:TEAM[f.away]?.name||f.away,away_team_logo:TEAM[f.away]?.logo||null,
+    home_team_id:Number(f.homeTeamId),home_team_name:ph.name||f.homeTeamName||TEAM[f.home]?.name||f.home,home_team_logo:ph.logo||f.homeTeamLogo||TEAM[f.home]?.logo||null,
+    away_team_id:Number(f.awayTeamId),away_team_name:pa.name||f.awayTeamName||TEAM[f.away]?.name||f.away,away_team_logo:pa.logo||f.awayTeamLogo||TEAM[f.away]?.logo||null,
     kickoff_at:new Date(f.kickoff).toISOString(),venue_name:f.stadium||null,
     fixture_status:f.phase==='final'?'FT':f.phase==='live'?'1H':'NS',
     api_payload:f.apiPayload||{},updated_at:new Date().toISOString()
@@ -17168,7 +17169,7 @@ html #view-admin .admin-workspace-v1100 .admin-empty-v1100{padding:18px;text-ali
 <script id="mastaba-v1100-admin-repair">
 (function mastabaV1100(){
 'use strict';
-window.MASTABA_BUILD_VERSION='11.09';
+window.MASTABA_BUILD_VERSION='11.10';
 
 const SCHEDULE_SYNC_V1101='https://bnwjtrtlwnlbldfhaggg.supabase.co/functions/v1/mastaba-schedule-sync';
 const scheduleV1100=window.adminScheduleV1100=window.adminScheduleV1100||{
@@ -17242,9 +17243,16 @@ function catalogFixtureV1101(row,existingByApi){
   const apiId=Number(row?.api_fixture_id),homeId=Number(row?.home_team_id),awayId=Number(row?.away_team_id);
   if(!apiId||!homeId||!awayId||!row?.kickoff_at)return null;
   const existing=existingByApi.get(apiId);if(existing)return existing;
-  if(row.home_abbreviation){window.MASTABA_TEAM_ABBR_V1083=window.MASTABA_TEAM_ABBR_V1083||{};window.MASTABA_TEAM_ABBR_V1083[homeId]=String(row.home_abbreviation).toUpperCase()}if(row.away_abbreviation){window.MASTABA_TEAM_ABBR_V1083=window.MASTABA_TEAM_ABBR_V1083||{};window.MASTABA_TEAM_ABBR_V1083[awayId]=String(row.away_abbreviation).toUpperCase()}const home=fallbackTeamKeyV1100(homeId,row.home_team_name),away=fallbackTeamKeyV1100(awayId,row.away_team_name);
-  TEAM[home]={name:row.home_team_name||home,short:home,logo:row.home_team_logo||''};
-  TEAM[away]={name:row.away_team_name||away,short:away,logo:row.away_team_logo||''};
+  if(row.home_abbreviation){window.MASTABA_TEAM_ABBR_V1083=window.MASTABA_TEAM_ABBR_V1083||{};window.MASTABA_TEAM_ABBR_V1083[homeId]=String(row.home_abbreviation).toUpperCase()}
+  if(row.away_abbreviation){window.MASTABA_TEAM_ABBR_V1083=window.MASTABA_TEAM_ABBR_V1083||{};window.MASTABA_TEAM_ABBR_V1083[awayId]=String(row.away_abbreviation).toUpperCase()}
+  const homeShort=fallbackTeamKeyV1100(homeId,row.home_team_name),awayShort=fallbackTeamKeyV1100(awayId,row.away_team_name);
+  /* V11.10: abbreviations are labels, never identity keys. BAR can mean
+     Barcelona or Barnsley; MIL can mean AC Milan or Millwall; CRE can mean
+     Cremonese or Crewe. A stable team-id key prevents one cached fixture from
+     overwriting another team's name/logo in the shared TEAM dictionary. */
+  const home=`sched-${homeId}`,away=`sched-${awayId}`;
+  TEAM[home]={teamId:homeId,name:row.home_team_name||homeShort,short:homeShort,logo:row.home_team_logo||''};
+  TEAM[away]={teamId:awayId,name:row.away_team_name||awayShort,short:awayShort,logo:row.away_team_logo||''};
   const payload={
     fixture:{id:apiId,date:row.kickoff_at,status:{short:row.fixture_status||'NS'},venue:{name:row.venue_name||''}},
     league:{id:Number(row.api_league_id)||null,name:row.competition_name||row.canonical_name||'Competition',country:row.competition_country||'',season:Number(row.season)||new Date(row.kickoff_at).getUTCFullYear()},
@@ -17254,7 +17262,10 @@ function catalogFixtureV1101(row,existingByApi){
     id:`api-${apiId}`,apiFixtureId:apiId,apiLeagueId:Number(row.api_league_id)||null,
     season:Number(row.season)||new Date(row.kickoff_at).getUTCFullYear(),
     competition:row.competition_name||row.canonical_name||'Competition',competitionCountry:row.competition_country||'',
-    home,away,homeTeamId:homeId,awayTeamId:awayId,stadium:row.venue_name||'',kickoff:row.kickoff_at,
+    home,away,homeTeamId:homeId,awayTeamId:awayId,
+    homeTeamName:row.home_team_name||'',awayTeamName:row.away_team_name||'',
+    homeTeamLogo:row.home_team_logo||'',awayTeamLogo:row.away_team_logo||'',
+    stadium:row.venue_name||'',kickoff:row.kickoff_at,
     phase:phaseV1100(row.fixture_status,row.kickoff_at),result:null,apiPayload:payload
   };
 }
@@ -17661,7 +17672,7 @@ if(state?.view==='admin')setTimeout(renderAdminV1100,0);
    Supabase schedule available exclusively inside Admin > Game Setup. */
 (function(){
 'use strict';
-window.MASTABA_BUILD_VERSION='11.09';
+window.MASTABA_BUILD_VERSION='11.10';
 
 const fixtureKeyV1102=f=>Number(f?.apiFixtureId)?`api:${Number(f.apiFixtureId)}`:`id:${String(f?.id||'')}`;
 function pinnedPoolV1102(){
@@ -17687,8 +17698,10 @@ function schedulePoolV1102(){
 }
 function competitionV1102(f){return typeof window.canonicalCompetitionV1080==='function'?window.canonicalCompetitionV1080(f):String(f?.competition||'Competition')}
 function teamV1102(f,side){
-  const code=side==='home'?f.home:f.away,teamMap=typeof TEAM!=='undefined'?TEAM:{},known=teamMap?.[code]||{},payload=f?.apiPayload?.teams?.[side]||{};
-  return{name:known.name||payload.name||code||L('Team','فريق'),short:known.short||code||'TM',logo:known.logo||payload.logo||''};
+  const isHome=side==='home',code=isHome?f.home:f.away,teamMap=typeof TEAM!=='undefined'?TEAM:{},known=teamMap?.[code]||{},payload=f?.apiPayload?.teams?.[side]||{};
+  const id=Number(isHome?f?.homeTeamId:f?.awayTeamId),explicitName=isHome?f?.homeTeamName:f?.awayTeamName,explicitLogo=isHome?f?.homeTeamLogo:f?.awayTeamLogo;
+  const short=known.short||window.MASTABA_TEAM_ABBR_V1083?.[id]||window.mastabaDerivedTeamAbbrV1109?.(payload.name||explicitName||known.name||'',id)||code||'TM';
+  return{name:payload.name||explicitName||known.name||code||L('Team','فريق'),short,logo:payload.logo||explicitLogo||known.logo||''};
 }
 function searchTextV1102(f){const h=teamV1102(f,'home'),a=teamV1102(f,'away');return[h.name,h.short,a.name,a.short,competitionV1102(f),f?.competitionCountry||'',f?.stadium||''].join(' ')}
 function searchMatchV1102(q,f){if(typeof window.smartFixtureSearchV1080==='function')return window.smartFixtureSearchV1080(q,searchTextV1102(f));return normalizeSearchText(searchTextV1102(f)).includes(normalizeSearchText(q))}
@@ -18430,7 +18443,7 @@ body.auth-pending-v1064::after{top:53%!important}
 <script id="mastaba-v1108-runtime-fixes">
 (function(){
 'use strict';
-window.MASTABA_BUILD_VERSION='11.09';
+window.MASTABA_BUILD_VERSION='11.10';
 
 /* Hard-mount every fixture slot that exists after the catalogue finishes. */
 window.mountAllAdminFixtureBrowsersV1108=function(){
@@ -18640,7 +18653,7 @@ html[data-theme] body #app #view-admin .admin-v1094-panel :is(.admin-v1094-metri
 <script id="mastaba-v1109-admin-schedule-runtime">
 (function(){
 'use strict';
-window.MASTABA_BUILD_VERSION='11.09';
+window.MASTABA_BUILD_VERSION='11.10';
 
 /* Local fallback is intentionally name-based, never T123. The central
    abbreviation table remains authoritative when it has a row. */
@@ -18702,6 +18715,80 @@ window.selectedFixtureSummary=selectedFixtureSummary=function(target){
 requestAnimationFrame(()=>{
   if(state?.view==='admin'&&String(state.adminWorkspaceTabV1095||'game')==='game'){
     try{window.refreshAdminGameSetupV1095?.();window.refreshAdminFixtureBrowserV1104?.();window.mountAllAdminFixtureBrowsersV1108?.()}catch(e){console.warn('V11.09 Admin repaint',e)}
+  }
+});
+})();
+</script>
+
+
+<style id="mastaba-v1110-league-separators-and-team-identity">
+/* V11.10 — League separators use the third approved club colour.
+   These are existing palette colours only; no new shades are introduced. */
+html[data-theme] body #app #view-admin{
+  --admin-third:var(--home-btn3,var(--club-outline,var(--theme-accent)));
+  --admin-third-text:var(--home-btn3-text,var(--club-inner-text,var(--theme-text)));
+  --admin-third-line:color-mix(in srgb,var(--admin-third-text) 30%,transparent);
+}
+html[data-theme="mastaba"] body #app #view-admin{
+  --admin-third:var(--gold,#d8ae43);--admin-third-text:#151922;
+}
+html[data-theme="barcelona"] body #app #view-admin{
+  --admin-third:#d9b82e;--admin-third-text:#171147;
+}
+html[data-theme="realmadrid"] body #app #view-admin{
+  --admin-third:#edc130;--admin-third-text:#20345f;
+}
+html[data-theme="acmilan"] body #app #view-admin{
+  --admin-third:#f7f7f7;--admin-third-text:#12171f;
+}
+html[data-theme="arsenal"] body #app #view-admin{
+  --admin-third:#1b3272;--admin-third-text:#ffffff;
+}
+html[data-theme="liverpool"] body #app #view-admin{
+  --admin-third:#f3f4f2;--admin-third-text:#5d0c10;
+}
+html[data-theme="manunited"] body #app #view-admin{
+  --admin-third:#fcff40;--admin-third-text:#171717;
+}
+
+html[data-theme] body #app #view-admin .fixture-league-title{
+  background:var(--admin-third)!important;
+  color:var(--admin-third-text)!important;
+  -webkit-text-fill-color:var(--admin-third-text)!important;
+  border:1px solid var(--admin-third-line)!important;
+  box-shadow:none!important;
+}
+html[data-theme] body #app #view-admin .fixture-league-title :is(strong,b,span,small){
+  color:var(--admin-third-text)!important;
+  -webkit-text-fill-color:var(--admin-third-text)!important;
+}
+</style>
+
+<script id="mastaba-v1110-team-identity-guard">
+(function(){
+'use strict';
+window.MASTABA_BUILD_VERSION='11.10';
+/* Repair any already-loaded cached schedule objects from V11.09 without a
+   provider/Supabase reload. Per-fixture payload is authoritative. */
+function repair(f){
+  if(!f?.apiPayload?.teams)return f;
+  for(const side of ['home','away']){
+    const t=f.apiPayload.teams[side]||{},id=Number(t.id||f[side+'TeamId']);
+    if(!id)continue;
+    const oldKey=f[side],short=window.MASTABA_TEAM_ABBR_V1083?.[id]||window.mastabaDerivedTeamAbbrV1109?.(t.name,id)||TEAM?.[oldKey]?.short||'TM';
+    const key=`sched-${id}`;
+    TEAM[key]={teamId:id,name:t.name||TEAM?.[oldKey]?.name||short,short:String(short).toUpperCase(),logo:t.logo||TEAM?.[oldKey]?.logo||''};
+    f[side]=key;f[side+'TeamId']=id;f[side+'TeamName']=t.name||f[side+'TeamName']||'';f[side+'TeamLogo']=t.logo||f[side+'TeamLogo']||'';
+  }
+  return f;
+}
+if(Array.isArray(window.adminSchedulePoolV1102))window.adminSchedulePoolV1102.forEach(repair);
+/* Do not mutate current locked Gameweek identity here. Only cached Admin
+   schedule and unpersisted Upcoming rows are repaired. */
+if(Array.isArray(state?.nextFixtures)&&!state.nextPublished)state.nextFixtures.forEach(repair);
+requestAnimationFrame(()=>{
+  if(state?.view==='admin'&&String(state.adminWorkspaceTabV1095||'game')==='game'){
+    try{window.refreshAdminFixtureBrowserV1104?.();window.mountAllAdminFixtureBrowsersV1108?.()}catch(e){console.warn('V11.10 schedule identity repaint',e)}
   }
 });
 })();
