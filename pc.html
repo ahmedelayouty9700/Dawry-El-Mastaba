@@ -17174,7 +17174,7 @@ html #view-admin .admin-workspace-v1100 .admin-empty-v1100{padding:18px;text-ali
 <script id="mastaba-v1100-admin-repair">
 (function mastabaV1100(){
 'use strict';
-window.MASTABA_BUILD_VERSION='11.20';
+window.MASTABA_BUILD_VERSION='11.22';
 
 const SCHEDULE_SYNC_V1101='https://bnwjtrtlwnlbldfhaggg.supabase.co/functions/v1/mastaba-schedule-sync';
 const scheduleV1100=window.adminScheduleV1100=window.adminScheduleV1100||{
@@ -17677,7 +17677,7 @@ if(state?.view==='admin')setTimeout(renderAdminV1100,0);
    Supabase schedule available exclusively inside Admin > Game Setup. */
 (function(){
 'use strict';
-window.MASTABA_BUILD_VERSION='11.20';
+window.MASTABA_BUILD_VERSION='11.22';
 
 const fixtureKeyV1102=f=>Number(f?.apiFixtureId)?`api:${Number(f.apiFixtureId)}`:`id:${String(f?.id||'')}`;
 function pinnedPoolV1102(){
@@ -18452,7 +18452,7 @@ body.auth-pending-v1064::after{top:53%!important}
 <script id="mastaba-v1108-runtime-fixes">
 (function(){
 'use strict';
-window.MASTABA_BUILD_VERSION='11.20';
+window.MASTABA_BUILD_VERSION='11.22';
 
 /* Hard-mount every fixture slot that exists after the catalogue finishes. */
 window.mountAllAdminFixtureBrowsersV1108=function(){
@@ -18662,7 +18662,7 @@ html[data-theme] body #app #view-admin .admin-v1094-panel :is(.admin-v1094-metri
 <script id="mastaba-v1109-admin-schedule-runtime">
 (function(){
 'use strict';
-window.MASTABA_BUILD_VERSION='11.20';
+window.MASTABA_BUILD_VERSION='11.22';
 
 /* Local fallback is intentionally name-based, never T123. The central
    abbreviation table remains authoritative when it has a row. */
@@ -18776,7 +18776,7 @@ html[data-theme] body #app #view-admin .fixture-league-title :is(strong,b,span,s
 <script id="mastaba-v1110-team-identity-guard">
 (function(){
 'use strict';
-window.MASTABA_BUILD_VERSION='11.20';
+window.MASTABA_BUILD_VERSION='11.22';
 /* Repair any already-loaded cached schedule objects from V11.09 without a
    provider/Supabase reload. Per-fixture payload is authoritative. */
 function repair(f){
@@ -18925,7 +18925,7 @@ html[data-theme] body #app #view-admin .fixture-day[aria-pressed="true"] :is(sma
 <script id="mastaba-v1112-runtime">
 (function(){
 'use strict';
-window.MASTABA_BUILD_VERSION='11.20';
+window.MASTABA_BUILD_VERSION='11.22';
 
 /* ---------------- Admin fixture browser ----------------
    V11.11's cosmetic day change called private lexical functions that were not
@@ -19199,7 +19199,7 @@ html[data-theme] body #app #view-admin .admin-zero-calls-v1101 *{
 <script id="mastaba-v1113-predict-and-context">
 (function(){
 'use strict';
-window.MASTABA_BUILD_VERSION='11.20';
+window.MASTABA_BUILD_VERSION='11.22';
 
 const nextPredV1113={
   loading:false,loaded:false,error:null,gw:null,fixtures:[],dbById:{},picks:{},meta:{draftSavedAt:null,submittedAt:null,editing:true}
@@ -19425,21 +19425,22 @@ window.chooseNextFirstTeamV1113=function(mid){
   if(Number(p.away)>0&&Number(p.home)===0){p.firstTeam=f.away;p.firstScorer='none';markNextDirtyV1113();refreshNextCardV1113(mid);return}
   openChoiceModal(L('First Team to Score','أول فريق يسجل'),[f.home,f.away].map(c=>({label:TEAM[c]?.name||c,value:c,logo:TEAM[c]?.logo||''})),v=>{p.firstTeam=v;p.firstScorer='none';markNextDirtyV1113();refreshNextCardV1113(mid)});
 };
-const nextPlayerReadAtV1119=window.nextPlayerReadAtV1119||(window.nextPlayerReadAtV1119={});
+const nextPlayerReadAtV1122=window.nextPlayerReadAtV1122||(window.nextPlayerReadAtV1122={});
 async function ensureNextPlayersV1113(f,team){
-  const cachedAt=Number(nextPlayerReadAtV1119[team]||0);
-  if((players[team]||[]).length&&Date.now()-cachedAt<2*60*1000)return true;
   const ctx=window.prodCtxV1073;if(!ctx?.supa)throw new Error(L('Production session is not ready.','جلسة الإنتاج غير جاهزة.'));
   const tid=team===f.home?Number(f.homeTeamId):Number(f.awayTeamId);
-  const [poolR,avR]=await Promise.all([
-    ctx.supa.from('mastaba_team_player_pool').select('team_id,player_id,player_name,position,squad_number,stats,stats_refreshed_at').eq('team_id',tid).eq('active',true).order('player_name',{ascending:true}),
-    ctx.supa.from('mastaba_fixture_player_availability').select('player_id,status,reason').eq('fixture_id',f.id)
-  ]);
-  if(poolR.error)throw poolR.error;
-  const av=Object.fromEntries((avR.data||[]).map(x=>[String(x.player_id),x]));
-  const pos=x=>{const s=String(x||'MID').toUpperCase();if(s==='DEF')return'CB';if(s==='ATTACKER'||s==='FWD'||s==='FORWARD')return'FW';if(s==='MIDFIELDER')return'MID';if(s==='GOALKEEPER')return'GK';return s};
-  players[team]=(poolR.data||[]).map(r=>({id:String(r.player_id),name:r.player_name||'Player',pos:pos(r.position),number:r.squad_number??null,status:av[String(r.player_id)]?.status||'available',availabilityReason:av[String(r.player_id)]?.reason||null,statsRefreshedAt:r.stats_refreshed_at||null,stats:r.stats&&Object.keys(r.stats).length?r.stats:{ALL:{apps:0,bench:0,goals:0,assists:0,xg:null,xa:null}}}));
-  nextPlayerReadAtV1119[team]=Date.now();
+  const cacheKey=`${f.id}:${tid}`,last=Number(nextPlayerReadAtV1122[cacheKey]||0);
+  if((players[team]||[]).length&&Date.now()-last<30000)return true;
+  const {data,error}=await ctx.supa.rpc('mastaba_player_picker_context',{p_fixture_id:f.id,p_team_id:tid});
+  if(error)throw error;
+  const pos=x=>{const s=String(x||'MID').toUpperCase();if(s==='DEF'||s==='DEFENDER')return'CB';if(['ATTACKER','FWD','FORWARD'].includes(s))return'FW';if(s==='MIDFIELDER')return'MID';if(s==='GOALKEEPER')return'GK';return s};
+  players[team]=(data||[]).map(r=>({
+    id:String(r.player_id),name:r.player_name||'Player',pos:pos(r.player_position),number:r.squad_number??null,
+    status:r.availability_status||'available',availabilityReason:r.availability_reason||null,
+    availabilityRefreshedAt:r.availability_refreshed_at||null,statsRefreshedAt:r.stats_refreshed_at||null,
+    stats:r.stats&&Object.keys(r.stats).length?r.stats:{ALL:{apps:0,bench:0,goals:0,assists:0,xg:null,xa:null}}
+  }));
+  nextPlayerReadAtV1122[cacheKey]=Date.now();
   return players[team].length>0;
 }
 window.openNextScorersV1113=async function(mid){
@@ -19637,7 +19638,7 @@ setTimeout(()=>{if(state?.nextPublished&&nextIsSelectedV1113()){nextPredV1113.lo
 <script id="mastaba-v1114-home-next-predictions">
 (function(){
 'use strict';
-window.MASTABA_BUILD_VERSION='11.20';
+window.MASTABA_BUILD_VERSION='11.22';
 
 const homeSubmissionStatusBaseV1114=window.homeSubmissionStatus||homeSubmissionStatus;
 let homeNextHydrationQueuedV1114=false;
@@ -19954,7 +19955,7 @@ html[data-theme="barcelona"] body #app #view-admin .admin-workspace-v1100 :is(.a
 
 
 <script id="mastaba-v1115-version">
-window.MASTABA_BUILD_VERSION='11.20';
+window.MASTABA_BUILD_VERSION='11.22';
 </script>
 
 
@@ -20072,7 +20073,7 @@ html[data-theme] body #app #view-admin .admin-accounts-v1094 .admin-v1094-action
 <script id="mastaba-v1116-admin-interaction">
 (function(){
 'use strict';
-window.MASTABA_BUILD_VERSION='11.20';
+window.MASTABA_BUILD_VERSION='11.22';
 
 let roundCommitTimerV1116=0;
 let adminRoundObserverV1116=null;
@@ -20287,7 +20288,7 @@ html.mastaba-gw-started-v1117 #view-predict
 <script id="mastaba-v1117-runtime">
 (function(){
 'use strict';
-window.MASTABA_BUILD_VERSION='11.20';
+window.MASTABA_BUILD_VERSION='11.22';
 
 /* ---------- Shared publication helpers ---------- */
 function nextNumberV1117(){return Number(state.week)+1}
@@ -20625,7 +20626,7 @@ requestAnimationFrame(()=>{
 <script id="mastaba-v1119-route-and-autosave">
 (function(){
 'use strict';
-window.MASTABA_BUILD_VERSION='11.20';
+window.MASTABA_BUILD_VERSION='11.22';
 
 const goBaseV1119=window.go;
 if(typeof goBaseV1119==='function'){
@@ -20679,7 +20680,7 @@ window.addEventListener('pagehide',()=>{
 <script id="mastaba-v1120-player-and-gw-stability">
 (function(){
 'use strict';
-window.MASTABA_BUILD_VERSION='11.20';
+window.MASTABA_BUILD_VERSION='11.22';
 
 const LAST_WEEK_KEY_V1120='mastaba:last-predict-week:v1120';
 function rememberPredictWeekV1120(w){
@@ -20869,6 +20870,103 @@ window.confirmNextSubmitV1113=async function(){
 };
 
 requestAnimationFrame(()=>rememberPredictWeekV1120(state.selectedPredictWeek));
+})();
+</script>
+
+
+<script id="mastaba-v1121-competition-stats">
+(function(){
+'use strict';
+window.MASTABA_BUILD_VERSION='11.22';
+
+/* V11.21
+   Player stats in the scorer drawer must be for the competition being
+   predicted. Never fall back to ALL competitions when that competition has
+   no row yet, because doing so mixes e.g. Spanish Super Cup totals into La Liga.
+*/
+window.playerRow=function(p,comp,mid){
+  const isAll=String(comp||'ALL')==='ALL';
+  const zeroCompetition={apps:0,bench:0,goals:0,assists:0,xg:null,xa:null};
+  const st=isAll
+    ? (p.stats?.ALL||zeroCompetition)
+    : (p.stats?.[comp]||zeroCompetition);
+
+  const disabled=['out','suspended'].includes(p.status);
+  const label=p.status==='out'?L('OUT','غائب'):p.status==='suspended'?L('SUS','موقوف'):p.status==='doubtful'?L('DOUBT','مشكوك'):L('OK','متاح');
+  const stat=v=>v==null?`<span class="player-stat-na-v1077">—</span>`:v;
+  const reason=p.availabilityReason?`<small class="player-injury-reason-v1120">${escapeHTML(p.availabilityReason)}</small>`:'';
+
+  return`<button class="player-row ${disabled?'disabled':''}" ${disabled?'disabled':''} onclick="pickScorer('${mid}','${p.id}')">
+    <span class="player-name-cell"><span class="player-name-copy"><strong>${escapeHTML(p.name)}</strong><small>${isAll?L('All Competitions','كل البطولات'):escapeHTML(comp)}</small>${reason}</span></span>
+    <span class="player-cell player-pos-cell">${playerPositionGroup(p.pos)}</span>
+    <span class="player-cell player-stat-cell">${stat(st.apps)}</span>
+    <span class="player-cell player-stat-cell">${stat(st.bench)}</span>
+    <span class="player-cell player-stat-cell">${stat(st.goals)}</span>
+    <span class="player-cell player-stat-cell">${stat(st.assists)}</span>
+    <span class="player-cell player-stat-cell">${stat(st.xg)}</span>
+    <span class="player-cell player-stat-cell">${stat(st.xa)}</span>
+    <span class="player-cell"><span class="availability-v1120 ${p.status||'available'}">${label}</span></span>
+  </button>`;
+};
+})();
+</script>
+
+
+<script id="mastaba-v1122-season-competition-integrity">
+(function(){
+'use strict';
+window.MASTABA_BUILD_VERSION='11.22';
+
+/* fixtureById originally searched only the active Gameweek. That made every
+   published-next-GW player drawer lose its competition identity and fall back
+   to the literal label "Competition". */
+const fixtureByIdBaseV1122=window.fixtureById;
+window.fixtureById=fixtureById=function(id){
+  const sid=String(id);
+  const pools=[
+    state.fixtures||[],
+    state.nextFixtures||[],
+    window.nextPredV1113?.fixtures||[],
+    state.fixturePool||[],
+    window.adminSchedulePoolV1102||[]
+  ];
+  for(const pool of pools){
+    const f=(pool||[]).find(x=>String(x?.id)===sid||String(x?.apiFixtureId||'')===sid);
+    if(f){
+      if((!f.competition||f.competition==='Competition')&&f.apiPayload?.league?.name){
+        f.competition=f.apiPayload.league.name;
+      }
+      return f;
+    }
+  }
+  return typeof fixtureByIdBaseV1122==='function'?fixtureByIdBaseV1122(id):null;
+};
+
+/* Final player-row authority:
+   - Competition tab is strict.
+   - ALL means current 2026/27 season competitions only (sanitized server-side).
+   - Never borrow ALL into a missing competition.
+   - Keep the visible injury/suspension treatment from V11.20. */
+window.playerRow=function(p,comp,mid){
+  const zero={apps:0,bench:0,goals:0,assists:0,xg:null,xa:null};
+  const isAll=String(comp||'ALL')==='ALL';
+  const st=isAll?(p.stats?.ALL||zero):(p.stats?.[comp]||zero);
+  const disabled=['out','suspended'].includes(p.status);
+  const label=p.status==='out'?L('OUT','غائب'):p.status==='suspended'?L('SUS','موقوف'):p.status==='doubtful'?L('DOUBT','مشكوك'):L('OK','متاح');
+  const stat=v=>v==null?`<span class="player-stat-na-v1077">—</span>`:v;
+  const reason=p.availabilityReason?`<small class="player-injury-reason-v1120">${escapeHTML(p.availabilityReason)}</small>`:'';
+  return`<button class="player-row ${disabled?'disabled':''}" ${disabled?'disabled':''} onclick="pickScorer('${mid}','${p.id}')">
+    <span class="player-name-cell"><span class="player-name-copy"><strong>${escapeHTML(p.name)}</strong><small>${isAll?L('All Competitions','كل البطولات'):escapeHTML(comp)}</small>${reason}</span></span>
+    <span class="player-cell player-pos-cell">${playerPositionGroup(p.pos)}</span>
+    <span class="player-cell player-stat-cell">${stat(st.apps)}</span>
+    <span class="player-cell player-stat-cell">${stat(st.bench)}</span>
+    <span class="player-cell player-stat-cell">${stat(st.goals)}</span>
+    <span class="player-cell player-stat-cell">${stat(st.assists)}</span>
+    <span class="player-cell player-stat-cell">${stat(st.xg)}</span>
+    <span class="player-cell player-stat-cell">${stat(st.xa)}</span>
+    <span class="player-cell"><span class="availability-v1120 ${p.status||'available'}">${label}</span></span>
+  </button>`;
+};
 })();
 </script>
 
