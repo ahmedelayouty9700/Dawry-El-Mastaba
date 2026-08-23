@@ -13663,12 +13663,12 @@ window.hydrateProductionV1073=async function(profile,user,supa){
       const relevantProfileIdsV1083=(state.users||[]).map(u=>u.authUserId).filter(Boolean);
       const [{data:activeRows},{data:nextRow}]=await Promise.all([
         relevantProfileIdsV1083.length?supa.from('mastaba_profiles').select('id,active').in('id',relevantProfileIdsV1083):Promise.resolve({data:[]}),
-        supa.from('mastaba_gameweeks').select('id,gameweek_number,name_en,name_ar,status,opens_at,deadline_at,finalized_at').eq('gameweek_number',Number(state.week)+1).maybeSingle()
+        supa.from('mastaba_gameweeks').select('id,gameweek_number,name_en,name_ar,status,published_at,opens_at,deadline_at,finalized_at').eq('gameweek_number',Number(state.week)+1).maybeSingle()
       ]);
       const activeById=Object.fromEntries((activeRows||[]).map(x=>[x.id,x.active!==false]));
       state.users.forEach(u=>u.active=activeById[u.authUserId]!==false);
       if(nextRow){
-        nextGwV1077=nextRow;state.nextDeadlineAt=nextRow.deadline_at||null;
+        nextGwV1077=nextRow;const nextPublishedDbV1117=!!nextRow.published_at||['open','locked','scoring','final'].includes(String(nextRow.status||''));state.nextDeadlineAt=nextPublishedDbV1117?(nextRow.deadline_at||null):null;
         const {data:nfx,error:nfxErr}=await supa.from('mastaba_fixtures').select('*').eq('gameweek_id',nextRow.id).order('kickoff_at',{ascending:true});
         if(nfxErr)throw nfxErr;
         state.nextFixtures=(nfx||[]).map(f=>{
@@ -13676,7 +13676,7 @@ window.hydrateProductionV1073=async function(profile,user,supa){
           const away=registerTeamV1077(f.away_team_id,f.away_team_name,f.away_team_logo);
           return{id:f.id,apiFixtureId:Number(f.api_fixture_id),apiLeagueId:f.api_league_id?Number(f.api_league_id):null,competition:f.competition_name,competitionCountry:f.competition_country||'',home,away,homeTeamId:Number(f.home_team_id),awayTeamId:Number(f.away_team_id),stadium:f.venue_name||'',kickoff:f.kickoff_at,phase:phaseV1077(f.fixture_status,f.kickoff_at),result:null,apiPayload:f.api_payload||{}};
         });
-        state.nextPublished=state.nextFixtures.length>0;
+        state.nextPublished=nextPublishedDbV1117&&state.nextFixtures.length>0;
         if(!state.nextDeadlineAt&&state.nextFixtures.length){const first=Math.min(...state.nextFixtures.map(f=>new Date(f.kickoff).getTime()).filter(Number.isFinite));if(Number.isFinite(first))state.nextDeadlineAt=new Date(first-60000).toISOString()}
       }
       state.fixturePool=[...(state.fixtures||[]),...(state.nextFixtures||[])];
@@ -17174,7 +17174,7 @@ html #view-admin .admin-workspace-v1100 .admin-empty-v1100{padding:18px;text-ali
 <script id="mastaba-v1100-admin-repair">
 (function mastabaV1100(){
 'use strict';
-window.MASTABA_BUILD_VERSION='11.15';
+window.MASTABA_BUILD_VERSION='11.17';
 
 const SCHEDULE_SYNC_V1101='https://bnwjtrtlwnlbldfhaggg.supabase.co/functions/v1/mastaba-schedule-sync';
 const scheduleV1100=window.adminScheduleV1100=window.adminScheduleV1100||{
@@ -17677,7 +17677,7 @@ if(state?.view==='admin')setTimeout(renderAdminV1100,0);
    Supabase schedule available exclusively inside Admin > Game Setup. */
 (function(){
 'use strict';
-window.MASTABA_BUILD_VERSION='11.15';
+window.MASTABA_BUILD_VERSION='11.17';
 
 const fixtureKeyV1102=f=>Number(f?.apiFixtureId)?`api:${Number(f.apiFixtureId)}`:`id:${String(f?.id||'')}`;
 function pinnedPoolV1102(){
@@ -18452,7 +18452,7 @@ body.auth-pending-v1064::after{top:53%!important}
 <script id="mastaba-v1108-runtime-fixes">
 (function(){
 'use strict';
-window.MASTABA_BUILD_VERSION='11.15';
+window.MASTABA_BUILD_VERSION='11.17';
 
 /* Hard-mount every fixture slot that exists after the catalogue finishes. */
 window.mountAllAdminFixtureBrowsersV1108=function(){
@@ -18662,7 +18662,7 @@ html[data-theme] body #app #view-admin .admin-v1094-panel :is(.admin-v1094-metri
 <script id="mastaba-v1109-admin-schedule-runtime">
 (function(){
 'use strict';
-window.MASTABA_BUILD_VERSION='11.15';
+window.MASTABA_BUILD_VERSION='11.17';
 
 /* Local fallback is intentionally name-based, never T123. The central
    abbreviation table remains authoritative when it has a row. */
@@ -18776,7 +18776,7 @@ html[data-theme] body #app #view-admin .fixture-league-title :is(strong,b,span,s
 <script id="mastaba-v1110-team-identity-guard">
 (function(){
 'use strict';
-window.MASTABA_BUILD_VERSION='11.15';
+window.MASTABA_BUILD_VERSION='11.17';
 /* Repair any already-loaded cached schedule objects from V11.09 without a
    provider/Supabase reload. Per-fixture payload is authoritative. */
 function repair(f){
@@ -18925,7 +18925,7 @@ html[data-theme] body #app #view-admin .fixture-day[aria-pressed="true"] :is(sma
 <script id="mastaba-v1112-runtime">
 (function(){
 'use strict';
-window.MASTABA_BUILD_VERSION='11.15';
+window.MASTABA_BUILD_VERSION='11.17';
 
 /* ---------------- Admin fixture browser ----------------
    V11.11's cosmetic day change called private lexical functions that were not
@@ -19199,11 +19199,12 @@ html[data-theme] body #app #view-admin .admin-zero-calls-v1101 *{
 <script id="mastaba-v1113-predict-and-context">
 (function(){
 'use strict';
-window.MASTABA_BUILD_VERSION='11.15';
+window.MASTABA_BUILD_VERSION='11.17';
 
 const nextPredV1113={
   loading:false,loaded:false,error:null,gw:null,fixtures:[],dbById:{},picks:{},meta:{draftSavedAt:null,submittedAt:null,editing:true}
 };
+window.nextPredV1113=nextPredV1113;
 let nextPredLoadPromiseV1113=null;
 
 /* -------------------- Helpers -------------------- */
@@ -19217,6 +19218,7 @@ function nextDeadlineDateV1113(){
   const times=(nextPredV1113.fixtures.length?nextPredV1113.fixtures:(state.nextFixtures||[])).map(f=>new Date(f.kickoff).getTime()).filter(Number.isFinite);
   return times.length?new Date(Math.min(...times)-60000):null;
 }
+window.nextDeadlineDateV1113=nextDeadlineDateV1113;
 function nextLockedV1113(){const d=nextDeadlineDateV1113();return !!d&&Date.now()>=d.getTime()}
 function nextSubmittedV1113(){return !!nextPredV1113.meta.submittedAt&&!nextPredV1113.meta.editing}
 function scorerByIdV1113(pid){
@@ -19280,7 +19282,7 @@ async function loadNextPredictionContextV1113(force=false){
   nextPredLoadPromiseV1113=(async()=>{
     try{
       const no=nextWeekNoV1113();
-      const {data:gw,error:gwErr}=await ctx.supa.from('mastaba_gameweeks').select('id,gameweek_number,status,opens_at,deadline_at,finalized_at,updated_at').eq('gameweek_number',no).maybeSingle();
+      const {data:gw,error:gwErr}=await ctx.supa.from('mastaba_gameweeks').select('id,gameweek_number,status,published_at,opens_at,deadline_at,finalized_at,updated_at').eq('gameweek_number',no).maybeSingle();
       if(gwErr)throw gwErr;
       if(!gw){nextPredV1113.loaded=true;nextPredV1113.gw=null;nextPredV1113.fixtures=[];return nextPredV1113}
       const [fxR,pR]=await Promise.all([
@@ -19297,7 +19299,7 @@ async function loadNextPredictionContextV1113(force=false){
       const lastSubmit=rows.filter(r=>r.submitted&&r.submitted_at).map(r=>r.submitted_at).sort().at(-1)||null;
       Object.assign(nextPredV1113,{gw,fixtures,dbById:byId,picks,loaded:true,error:null,meta:{draftSavedAt:lastDraft,submittedAt:allSubmitted?lastSubmit:null,editing:!allSubmitted}});
       /* Keep the already-hydrated bulletin/admin representation aligned with the DB. */
-      state.nextFixtures=fixtures.map(f=>({...f}));state.nextPublished=fixtures.length>0;state.nextDeadlineAt=gw.deadline_at||state.nextDeadlineAt;
+      state.nextFixtures=fixtures.map(f=>({...f}));state.nextPublished=(!!gw.published_at||['open','locked','scoring','final'].includes(String(gw.status||'')))&&fixtures.length>0;state.nextDeadlineAt=state.nextPublished?(gw.deadline_at||state.nextDeadlineAt):null;
       try{save()}catch{}
       return nextPredV1113;
     }catch(e){
@@ -19593,7 +19595,7 @@ setTimeout(()=>{if(state?.nextPublished&&nextIsSelectedV1113()){nextPredV1113.lo
 <script id="mastaba-v1114-home-next-predictions">
 (function(){
 'use strict';
-window.MASTABA_BUILD_VERSION='11.15';
+window.MASTABA_BUILD_VERSION='11.17';
 
 const homeSubmissionStatusBaseV1114=window.homeSubmissionStatus||homeSubmissionStatus;
 let homeNextHydrationQueuedV1114=false;
@@ -19604,10 +19606,10 @@ function publishedNextPlayableV1114(){
 function nextHomeWeekV1114(){return Number(state.week)+1}
 
 function queueNextHomePredictionHydrationV1114(){
-  if(homeNextHydrationQueuedV1114||nextPredV1113.loading||nextPredV1113.loaded||!publishedNextPlayableV1114())return;
+  if(homeNextHydrationQueuedV1114||window.nextPredV1113.loading||window.nextPredV1113.loaded||!publishedNextPlayableV1114())return;
   if(!window.prodCtxV1073?.supa||!window.prodCtxV1073?.user?.id)return;
   homeNextHydrationQueuedV1114=true;
-  Promise.resolve(loadNextPredictionContextV1113()).finally(()=>{
+  Promise.resolve(window.loadNextPredictionContextV1113()).finally(()=>{
     homeNextHydrationQueuedV1114=false;
     if(state.view==='home'&&typeof window.renderHome==='function')window.renderHome();
   });
@@ -19616,7 +19618,7 @@ function queueNextHomePredictionHydrationV1114(){
 window.homeSubmissionStatus=homeSubmissionStatus=function(){
   if(!publishedNextPlayableV1114())return homeSubmissionStatusBaseV1114();
 
-  const week=nextHomeWeekV1114(),deadline=nextDeadlineDateV1113();
+  const week=nextHomeWeekV1114(),deadline=window.nextDeadlineDateV1113();
   queueNextHomePredictionHydrationV1114();
 
   if(deadline&&Date.now()>=deadline.getTime()){
@@ -19628,8 +19630,8 @@ window.homeSubmissionStatus=homeSubmissionStatus=function(){
     };
   }
 
-  const meta=nextPredV1113.meta||{};
-  if(nextPredV1113.loaded&&meta.submittedAt&&!meta.editing){
+  const meta=window.nextPredV1113.meta||{};
+  if(window.nextPredV1113.loaded&&meta.submittedAt&&!meta.editing){
     return{
       week,state:'next-submitted',
       title:L(`Gameweek ${week} Predictions Submitted`,`تم إرسال توقعات الجولة ${week}`),
@@ -19637,7 +19639,7 @@ window.homeSubmissionStatus=homeSubmissionStatus=function(){
       cta:L('View Predictions','شوف توقعاتك')
     };
   }
-  if(nextPredV1113.loaded&&meta.draftSavedAt){
+  if(window.nextPredV1113.loaded&&meta.draftSavedAt){
     return{
       week,state:'next-draft',
       title:L(`Gameweek ${week} Draft Saved — Not Submitted`,`Draft الجولة ${week} محفوظ — لسه متبعتش`),
@@ -19662,9 +19664,9 @@ window.openPredictionWeek=function(week){
   state.view='predict';
   try{save()}catch{}
   if(target===nextHomeWeekV1114()){
-    nextPredV1113.loaded=false;
+    window.nextPredV1113.loaded=false;
     if(typeof window.render==='function')window.render();
-    loadNextPredictionContextV1113(true).then(()=>{
+    window.loadNextPredictionContextV1113(true).then(()=>{
       if(state.view==='predict'&&Number(state.selectedPredictWeek)===target)window.renderPredict?.();
     });
     return;
@@ -19678,8 +19680,8 @@ if(typeof publishBaseV1114==='function'){
   window.publishNextGameweek=async function(){
     const out=await publishBaseV1114.apply(this,arguments);
     if(publishedNextPlayableV1114()){
-      nextPredV1113.loaded=false;
-      try{await loadNextPredictionContextV1113(true)}catch{}
+      window.nextPredV1113.loaded=false;
+      try{await window.loadNextPredictionContextV1113(true)}catch{}
       if(state.view==='home')window.renderHome?.();
     }
     return out;
@@ -19910,7 +19912,645 @@ html[data-theme="barcelona"] body #app #view-admin .admin-workspace-v1100 :is(.a
 
 
 <script id="mastaba-v1115-version">
-window.MASTABA_BUILD_VERSION='11.15';
+window.MASTABA_BUILD_VERSION='11.17';
+</script>
+
+
+<style id="mastaba-v1116-admin-interaction-finish">
+/* =========================================================
+   V11.16 — Admin progress, round-tab motion, semantic actions
+   ========================================================= */
+
+/* ---- Most Supported Teams: unmistakable percentage bars ----
+   Track = faint tint of the existing card text.
+   Fill = an existing club-theme color chosen to contrast with the ATS outer card.
+   No new club colors are introduced. */
+html[data-theme] body #app #view-admin{
+  --admin-bar-fill:var(--admin-inner);
+}
+html[data-theme="barcelona"] body #app #view-admin{--admin-bar-fill:#d9b82e}
+html:is([data-theme="realmadrid"],[data-theme="real-madrid"]) body #app #view-admin{--admin-bar-fill:#274793}
+html:is([data-theme="acmilan"],[data-theme="ac-milan"]) body #app #view-admin{--admin-bar-fill:#bf1b2d}
+html[data-theme="arsenal"] body #app #view-admin{--admin-bar-fill:#1b3272}
+html[data-theme="liverpool"] body #app #view-admin{--admin-bar-fill:#f3f4f2}
+html[data-theme="manunited"] body #app #view-admin{--admin-bar-fill:#9f160b}
+
+html[data-theme] body #app #view-admin .admin-v1094-panel .admin-v1094-box .admin-v1094-bar{
+  position:relative!important;
+  box-sizing:border-box!important;
+  height:10px!important;
+  padding:0!important;
+  overflow:hidden!important;
+  background:color-mix(in srgb,var(--admin-outer-text) 18%,transparent)!important;
+  border:0!important;
+  border-radius:999px!important;
+  box-shadow:inset 0 0 0 1px color-mix(in srgb,var(--admin-outer-text) 15%,transparent)!important;
+}
+html[data-theme] body #app #view-admin .admin-v1094-panel .admin-v1094-box .admin-v1094-bar>span{
+  display:block!important;
+  width:var(--w)!important;
+  height:100%!important;
+  min-width:3px!important;
+  margin:0!important;
+  background:var(--admin-bar-fill)!important;
+  border:0!important;
+  border-radius:999px!important;
+  box-shadow:none!important;
+  transition:width .32s ease!important;
+}
+
+/* ---- Current / Upcoming: one actual glider that moves between tabs ---- */
+html[data-theme] body #app #view-admin .admin-round-tabs,
+html[data-theme] body #app #view-admin .league-admin-round-tabs-v19{
+  position:relative!important;
+  overflow:visible!important;
+}
+html[data-theme] body #app #view-admin .admin-round-tabs:after,
+html[data-theme] body #app #view-admin .admin-round-tab.active:after,
+html[data-theme] body #app #view-admin .league-admin-round-tabs-v19 button.active:after,
+html[data-theme] body #app #view-admin .admin-round-tabs .admin-tab-glider-v26,
+html[data-theme] body #app #view-admin .league-admin-round-tabs-v19 .admin-tab-glider-v26{
+  display:none!important;
+}
+html[data-theme] body #app #view-admin .admin-round-glider-v1116{
+  position:absolute!important;
+  bottom:-2px!important;
+  left:0;
+  width:0;
+  height:4px!important;
+  border-radius:999px!important;
+  background:var(--admin-third)!important;
+  box-shadow:0 2px 9px color-mix(in srgb,var(--admin-third) 30%,transparent)!important;
+  transition:left .28s cubic-bezier(.16,1,.3,1),width .28s cubic-bezier(.16,1,.3,1)!important;
+  pointer-events:none!important;
+  z-index:3!important;
+}
+
+/* ---- Account actions are semantic controls, deliberately standard across themes ----
+   View = blue, Deactivate = amber, Reactivate = green, Delete = red. */
+html[data-theme] body #app #view-admin .admin-accounts-v1094 .admin-v1094-actions button{
+  color:#fff!important;
+  -webkit-text-fill-color:#fff!important;
+  border:1px solid rgba(255,255,255,.34)!important;
+  box-shadow:0 2px 8px rgba(0,0,0,.12)!important;
+}
+html[data-theme] body #app #view-admin .admin-accounts-v1094 .admin-v1094-actions button *{
+  color:#fff!important;
+  -webkit-text-fill-color:#fff!important;
+}
+html[data-theme] body #app #view-admin .admin-accounts-v1094 .admin-v1094-actions button[onclick*="adminViewAsAccountV1100"]{
+  background:#1d4ed8!important;
+}
+html[data-theme] body #app #view-admin .admin-accounts-v1094 .admin-v1094-actions button[onclick*="deactivate"]{
+  background:#a84e05!important;
+}
+html[data-theme] body #app #view-admin .admin-accounts-v1094 .admin-v1094-actions button[onclick*="reactivate"]{
+  background:#167249!important;
+}
+html[data-theme] body #app #view-admin .admin-accounts-v1094 .admin-v1094-actions button[onclick*="delete_spam"]{
+  background:#b4232e!important;
+}
+html[data-theme] body #app #view-admin .admin-accounts-v1094 .admin-v1094-actions button:hover:not(:disabled){
+  filter:brightness(1.08)!important;
+}
+html[data-theme] body #app #view-admin .admin-accounts-v1094 .admin-v1094-actions button:focus-visible{
+  outline:3px solid color-mix(in srgb,#fff 72%,transparent)!important;
+  outline-offset:2px!important;
+}
+
+@media(prefers-reduced-motion:reduce){
+  html[data-theme] body #app #view-admin .admin-round-glider-v1116,
+  html[data-theme] body #app #view-admin .admin-v1094-bar>span{
+    transition:none!important;
+  }
+}
+</style>
+
+
+<script id="mastaba-v1116-admin-interaction">
+(function(){
+'use strict';
+window.MASTABA_BUILD_VERSION='11.17';
+
+let roundCommitTimerV1116=0;
+let adminRoundObserverV1116=null;
+
+function roundButtonsV1116(tabs){
+  return tabs?[...tabs.querySelectorAll(':scope > button')]:[];
+}
+function installOneRoundGliderV1116(tabs){
+  if(!tabs)return null;
+  let line=tabs.querySelector(':scope > .admin-round-glider-v1116');
+  if(!line){
+    line=document.createElement('span');
+    line.className='admin-round-glider-v1116';
+    tabs.appendChild(line);
+  }
+  const active=roundButtonsV1116(tabs).find(b=>b.classList.contains('active'));
+  if(active){
+    line.style.left=`${active.offsetLeft}px`;
+    line.style.width=`${active.offsetWidth}px`;
+  }
+  return line;
+}
+function installRoundGlidersV1116(){
+  document.querySelectorAll('#view-admin .admin-round-tabs,#view-admin .league-admin-round-tabs-v19').forEach(installOneRoundGliderV1116);
+}
+function animateRoundTabsV1116(tabs,target,commit){
+  if(!tabs){commit();return}
+  const buttons=roundButtonsV1116(tabs),idx=target==='next'?1:0,btn=buttons[idx];
+  if(!btn){commit();return}
+  const line=installOneRoundGliderV1116(tabs);
+  buttons.forEach((b,i)=>{
+    const active=i===idx;
+    b.classList.toggle('active',active);
+    b.setAttribute('aria-selected',active?'true':'false');
+  });
+  if(line){
+    /* Two RAFs guarantee the browser has a painted starting position before
+       we move it, so this is a real slide rather than a reappearing underline. */
+    requestAnimationFrame(()=>requestAnimationFrame(()=>{
+      line.style.left=`${btn.offsetLeft}px`;
+      line.style.width=`${btn.offsetWidth}px`;
+    }));
+  }
+  clearTimeout(roundCommitTimerV1116);
+  roundCommitTimerV1116=setTimeout(commit,285);
+}
+
+/* Final platform Admin Current / Upcoming handler. */
+const setupTargetBaseV1116=window.setAdminSetupTargetV1100||window.setAdminSetupTarget;
+window.setAdminSetupTargetV1100=function(target){
+  const next=target==='next'?'next':'current';
+  const tabs=document.querySelector('#view-admin .admin-workspace-v1100 .admin-round-tabs');
+  animateRoundTabsV1116(tabs,next,()=>{
+    adminSetupTarget=next;
+    if(typeof refreshGameSetupV1100==='function')refreshGameSetupV1100();
+    else if(typeof window.refreshAdminGameSetupV1095==='function')window.refreshAdminGameSetupV1095();
+    else if(typeof setupTargetBaseV1116==='function')setupTargetBaseV1116(next);
+    requestAnimationFrame(installRoundGlidersV1116);
+  });
+};
+window.setAdminSetupTarget=window.setAdminSetupTargetV1100;
+
+/* League-Admin Current / Upcoming gets identical motion where present. */
+const leagueTargetBaseV1116=window.setLeagueAdminTargetV21;
+if(typeof leagueTargetBaseV1116==='function'){
+  window.setLeagueAdminTargetV21=function(target){
+    const next=target==='next'?'next':'current';
+    const tabs=document.querySelector('#view-admin .league-admin-round-tabs-v19,#view-admin .admin-round-tabs');
+    animateRoundTabsV1116(tabs,next,()=>{
+      leagueTargetBaseV1116(next);
+      requestAnimationFrame(installRoundGlidersV1116);
+    });
+  };
+}
+
+/* Admin subsections are rebuilt independently. Observe only the Admin root and
+   reposition the glider after those existing renders; no data/network call. */
+const adminRootV1116=document.getElementById('view-admin');
+if(adminRootV1116&&typeof MutationObserver!=='undefined'){
+  adminRoundObserverV1116=new MutationObserver(()=>{
+    requestAnimationFrame(installRoundGlidersV1116);
+  });
+  adminRoundObserverV1116.observe(adminRootV1116,{childList:true,subtree:true});
+}
+requestAnimationFrame(installRoundGlidersV1116);
+})();
+</script>
+
+
+<style id="mastaba-v1117-state-and-theme-finish">
+/* =========================================================
+   V11.17 — durable Gameweek publishing + accurate performance
+   + final Admin account contrast
+   ========================================================= */
+
+/* Account Directory follows the actual ATS nesting rule:
+   section (outer) -> user/search (inner) -> pills/details (outer). */
+html[data-theme] body #app #view-admin
+.admin-section-v1100 .admin-accounts-slot-v1100 .admin-v1094-user{
+  background:var(--admin-inner-surface,var(--admin-inner))!important;
+  color:var(--admin-inner-text)!important;
+  -webkit-text-fill-color:var(--admin-inner-text)!important;
+  border-color:var(--admin-inner-line)!important;
+}
+html[data-theme] body #app #view-admin
+.admin-section-v1100 .admin-accounts-slot-v1100 .admin-v1094-user
+:is(.admin-v1094-user-name,.admin-v1094-email){
+  color:var(--admin-inner-text)!important;
+  -webkit-text-fill-color:var(--admin-inner-text)!important;
+}
+html[data-theme] body #app #view-admin
+.admin-section-v1100 .admin-accounts-slot-v1100 .admin-v1094-search{
+  background:var(--admin-inner-surface,var(--admin-inner))!important;
+  color:var(--admin-inner-text)!important;
+  -webkit-text-fill-color:var(--admin-inner-text)!important;
+  border-color:var(--admin-inner-line)!important;
+}
+html[data-theme] body #app #view-admin
+.admin-section-v1100 .admin-accounts-slot-v1100 .admin-v1094-search::placeholder{
+  color:var(--admin-inner-text)!important;
+  -webkit-text-fill-color:var(--admin-inner-text)!important;
+  opacity:.62!important;
+}
+html[data-theme] body #app #view-admin
+.admin-section-v1100 .admin-accounts-slot-v1100 .admin-v1094-user
+:is(.admin-v1094-meta .admin-v1094-pill,.admin-v1094-user-top>.admin-v1094-pill,.admin-v1094-detail),
+html[data-theme] body #app #view-admin
+.admin-section-v1100 .admin-accounts-slot-v1100 .admin-v1094-user
+:is(.admin-v1094-meta .admin-v1094-pill.good,.admin-v1094-meta .admin-v1094-pill.warn,.admin-v1094-meta .admin-v1094-pill.bad,
+.admin-v1094-user-top>.admin-v1094-pill.good,.admin-v1094-user-top>.admin-v1094-pill.warn,.admin-v1094-user-top>.admin-v1094-pill.bad){
+  background:var(--admin-outer-surface)!important;
+  color:var(--admin-outer-text)!important;
+  -webkit-text-fill-color:var(--admin-outer-text)!important;
+  border-color:var(--admin-outer-line)!important;
+  box-shadow:none!important;
+}
+html[data-theme] body #app #view-admin
+.admin-section-v1100 .admin-accounts-slot-v1100 .admin-v1094-user
+:is(.admin-v1094-meta .admin-v1094-pill,.admin-v1094-user-top>.admin-v1094-pill,.admin-v1094-detail) *{
+  color:var(--admin-outer-text)!important;
+  -webkit-text-fill-color:var(--admin-outer-text)!important;
+}
+
+/* The semantic account ACTION buttons from V11.16 stay intentionally standard. */
+html[data-theme] body #app #view-admin
+.admin-section-v1100 .admin-accounts-slot-v1100 .admin-v1094-actions
+button[onclick*="adminViewAsAccountV1100"]{background:#1d4ed8!important;color:#fff!important;-webkit-text-fill-color:#fff!important}
+html[data-theme] body #app #view-admin
+.admin-section-v1100 .admin-accounts-slot-v1100 .admin-v1094-actions
+button[onclick*="deactivate"]{background:#a84e05!important;color:#fff!important;-webkit-text-fill-color:#fff!important}
+html[data-theme] body #app #view-admin
+.admin-section-v1100 .admin-accounts-slot-v1100 .admin-v1094-actions
+button[onclick*="reactivate"]{background:#167249!important;color:#fff!important;-webkit-text-fill-color:#fff!important}
+html[data-theme] body #app #view-admin
+.admin-section-v1100 .admin-accounts-slot-v1100 .admin-v1094-actions
+button[onclick*="delete_spam"]{background:#b4232e!important;color:#fff!important;-webkit-text-fill-color:#fff!important}
+
+/* Accurate Gameweek Performance occupies the exact Power Chip position. */
+#view-predict .predict-gw-performance-v1117{
+  width:100%;overflow:hidden;
+  border-radius:var(--mastaba-box-radius,12px 12px 3px 12px);
+  border:1px solid var(--theme-border);
+  background:var(--paper);color:var(--dark);box-shadow:var(--shadow);
+}
+html[dir="rtl"] #view-predict .predict-gw-performance-v1117{
+  border-radius:var(--mastaba-box-radius-rtl,12px 12px 12px 3px);
+}
+#view-predict .predict-gw-performance-head-v1117{
+  display:flex;align-items:center;justify-content:space-between;gap:12px;
+  padding:13px 16px;background:linear-gradient(132deg,var(--theme-head-a),var(--theme-head-b));
+  color:var(--theme-head-text);
+}
+#view-predict .predict-gw-performance-head-v1117 strong,
+#view-predict .predict-gw-performance-head-v1117 span{
+  color:inherit!important;-webkit-text-fill-color:currentColor!important;
+}
+#view-predict .predict-gw-performance-head-v1117 strong{font-size:.92rem;font-weight:1000}
+#view-predict .predict-gw-performance-head-v1117 span{font-size:.65rem;font-weight:900;opacity:.82}
+#view-predict .predict-gw-performance-grid-v1117{
+  display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:1px;background:var(--theme-border);
+}
+#view-predict .predict-gw-performance-stat-v1117{
+  min-width:0;padding:14px 8px;text-align:center;background:var(--paper);color:var(--dark);
+}
+#view-predict .predict-gw-performance-stat-v1117 strong{
+  display:block;font-size:1.42rem;line-height:1;font-weight:1000;color:inherit!important;
+  -webkit-text-fill-color:currentColor!important;
+}
+#view-predict .predict-gw-performance-stat-v1117 span{
+  display:block;margin-top:6px;font-size:.62rem;font-weight:900;line-height:1.2;
+  color:inherit!important;-webkit-text-fill-color:currentColor!important;opacity:.72;
+}
+#view-predict .predict-gw-performance-v1117[data-loading="true"] .predict-gw-performance-stat-v1117 strong{
+  opacity:.42;
+}
+
+/* Once the selected/current Gameweek has started, Power Chips are gone. */
+html.mastaba-gw-started-v1117 #view-predict
+:is(.power-chip-shell-v1048,.mastaba-wildcards-v1043,.wc-personal-alert-v1043){
+  display:none!important;
+}
+
+@media(max-width:620px){
+  #view-predict .predict-gw-performance-head-v1117{padding:11px 12px}
+  #view-predict .predict-gw-performance-stat-v1117{padding:12px 4px}
+  #view-predict .predict-gw-performance-stat-v1117 strong{font-size:1.12rem}
+  #view-predict .predict-gw-performance-stat-v1117 span{font-size:.54rem}
+}
+</style>
+
+
+<script id="mastaba-v1117-runtime">
+(function(){
+'use strict';
+window.MASTABA_BUILD_VERSION='11.17';
+
+/* ---------- Shared publication helpers ---------- */
+function nextNumberV1117(){return Number(state.week)+1}
+function nextPublishedFlagV1117(gw){
+  return !!gw?.published_at || ['open','locked','scoring','final'].includes(String(gw?.status||''));
+}
+function nextFirstKickoffV1117(fixtures=state.nextFixtures||[]){
+  const times=(fixtures||[]).map(f=>new Date(f.kickoff).getTime()).filter(Number.isFinite);
+  return times.length?Math.min(...times):null;
+}
+function nextDeadlineIsoV1117(fixtures=state.nextFixtures||[]){
+  const first=nextFirstKickoffV1117(fixtures);
+  return Number.isFinite(first)?new Date(first-60000).toISOString():null;
+}
+async function ensureNextDraftGameweekV1117(){
+  const ctx=window.prodCtxV1073;if(!ctx?.supa)throw new Error('Production session unavailable');
+  const number=nextNumberV1117();
+  let {data:gw,error}=await ctx.supa.from('mastaba_gameweeks')
+    .select('id,gameweek_number,status,published_at,opens_at,deadline_at,finalized_at,updated_at')
+    .eq('gameweek_number',number).maybeSingle();
+  if(error)throw error;
+  if(!gw){
+    const r=await ctx.supa.from('mastaba_gameweeks').insert({
+      gameweek_number:number,name_en:`Gameweek ${number}`,name_ar:`الجولة ${number}`,
+      status:'draft',published_at:null,deadline_at:null,updated_at:new Date().toISOString()
+    }).select('*').single();
+    if(r.error)throw r.error;gw=r.data;
+  }else if(gw.status==='setup'&&!gw.published_at){
+    const r=await ctx.supa.from('mastaba_gameweeks').update({status:'draft',updated_at:new Date().toISOString()})
+      .eq('id',gw.id).select('*').single();
+    if(r.error)throw r.error;gw=r.data;
+  }
+  window.nextGwV1117=gw;
+  try{nextGwV1077=gw}catch{}
+  return gw;
+}
+function schedulePoolV1117(){return [...(window.adminSchedulePoolV1102||[]),...(state.fixturePool||[])]}
+function selectedNextByV1117(mid){
+  const s=String(mid);
+  return (state.nextFixtures||[]).find(f=>String(f.id)===s||String(f.apiFixtureId)===s)||null;
+}
+function poolForNextV1117(mid,selected){
+  const s=String(mid),api=Number(selected?.apiFixtureId||0);
+  return schedulePoolV1117().find(f=>String(f.id)===s||(api>0&&Number(f.apiFixtureId)===api))||selected||null;
+}
+function mapPersistedNextV1117(pool,row){
+  return {...pool,id:row.id,apiFixtureId:Number(row.api_fixture_id),apiPayload:row.api_payload||pool.apiPayload};
+}
+async function syncPublishedDeadlineV1117(gw){
+  if(!nextPublishedFlagV1117(gw))return gw;
+  const remaining=state.nextFixtures||[];
+  if(!remaining.length){
+    const {data,error}=await window.prodCtxV1073.supa.from('mastaba_gameweeks')
+      .update({status:'draft',published_at:null,deadline_at:null,opens_at:null,updated_at:new Date().toISOString()})
+      .eq('id',gw.id).select('*').single();
+    if(error)throw error;return data;
+  }
+  const deadline_at=nextDeadlineIsoV1117(remaining);
+  const {data,error}=await window.prodCtxV1073.supa.from('mastaba_gameweeks')
+    .update({deadline_at,updated_at:new Date().toISOString()}).eq('id',gw.id).select('*').single();
+  if(error)throw error;return data;
+}
+
+/* ---------- Durable Upcoming selections ----------
+   A checkbox click is now a DB write. Unpublished selections live under a
+   Gameweek status='draft', so mastaba-sync does NOT spend provider calls on
+   them and users do NOT see them until Publish is pressed. */
+const toggleAdminFixtureBaseV1117=window.toggleAdminFixture;
+window.toggleAdminFixture=async function(mid,target,checked){
+  if(target!=='next')return toggleAdminFixtureBaseV1117?.apply(this,arguments);
+  const ctx=window.prodCtxV1073;if(!ctx?.supa||!currentUser()?.admin)return;
+  const selected=selectedNextByV1117(mid),pool=poolForNextV1117(mid,selected);
+  if(!pool)return;
+  const api=Number(pool.apiFixtureId||selected?.apiFixtureId||0);
+  if(checked&&(state.fixtures||[]).some(f=>(api>0&&Number(f.apiFixtureId)===api)||String(f.id)===String(pool.id))){
+    toast(L('This match is already in the Current Gameweek and cannot be reused in Upcoming.','الماتش ده موجود بالفعل في الجولة الحالية ومينفعش يتكرر في الجولة الجاية.'),'warn');
+    return;
+  }
+  try{
+    let gw=await ensureNextDraftGameweekV1117();
+    const wasPublished=nextPublishedFlagV1117(gw);
+
+    if(checked){
+      if(!(state.nextFixtures||[]).some(f=>Number(f.apiFixtureId)===api)){
+        const {data,error}=await ctx.supa.from('mastaba_fixtures')
+          .upsert(dbRowForFixtureV1077(pool,gw.id),{onConflict:'api_fixture_id'}).select('*').single();
+        if(error)throw error;
+        const persisted=mapPersistedNextV1117(pool,data);
+        state.nextFixtures=[...(state.nextFixtures||[]),persisted].sort((a,b)=>new Date(a.kickoff)-new Date(b.kickoff));
+      }
+    }else{
+      if(!selected)return;
+      if(Date.now()>=new Date(selected.kickoff).getTime())
+        return toast(L('This match has already started and can no longer be removed.','الماتش بدأ بالفعل ومينفعش يتشال.'),'warn');
+      if(wasPublished&&!confirm(L('Remove this published match? Saved predictions for this match will also be removed.','تشيل الماتش المنشور؟ توقعات المستخدمين المحفوظة للماتش ده هتتمسح كمان.')))return;
+      if(!String(selected.id).startsWith('api-')&&!String(selected.id).startsWith('sched-')){
+        const {error}=await ctx.supa.from('mastaba_fixtures').delete().eq('id',selected.id);
+        if(error)throw error;
+      }else if(api>0){
+        const {error}=await ctx.supa.from('mastaba_fixtures').delete().eq('gameweek_id',gw.id).eq('api_fixture_id',api);
+        if(error)throw error;
+      }
+      state.nextFixtures=(state.nextFixtures||[]).filter(f=>String(f.id)!==String(selected.id)&&Number(f.apiFixtureId)!==api);
+    }
+
+    if(wasPublished)gw=await syncPublishedDeadlineV1117(gw);
+    window.nextGwV1117=gw;try{nextGwV1077=gw}catch{}
+    state.nextPublished=nextPublishedFlagV1117(gw)&&(state.nextFixtures||[]).length>0;
+    state.nextDeadlineAt=state.nextPublished?(gw.deadline_at||nextDeadlineIsoV1117()):null;
+    if(window.nextPredV1113)window.nextPredV1113.loaded=false;
+    try{save()}catch{}
+    if(typeof render==='function')render();
+  }catch(e){
+    console.error('Upcoming selection save failed',e);
+    toast(L('This Gameweek selection could not be saved.','تعذر حفظ اختيار الجولة.'),'warn');
+    if(typeof render==='function')render();
+  }
+};
+
+/* Publish = visibility/playability switch. Fixtures are already safely stored. */
+const publishNextBaseV1117=window.publishNextGameweek;
+window.publishNextGameweek=async function(){
+  const ctx=window.prodCtxV1073;if(!ctx?.supa||!currentUser()?.admin)return;
+  if(!(state.nextFixtures||[]).length)return toast(L('Select at least one upcoming match first.','اختار ماتش واحد على الأقل للجولة الجاية.'),'warn');
+  await publishNextBaseV1117?.apply(this,arguments);
+  if(!(state.nextFixtures||[]).length)return;
+  try{
+    const number=nextNumberV1117(),now=new Date().toISOString(),deadline_at=nextDeadlineIsoV1117();
+    const {data:gw,error}=await ctx.supa.from('mastaba_gameweeks')
+      .update({status:'setup',published_at:now,deadline_at,updated_at:now})
+      .eq('gameweek_number',number).select('*').single();
+    if(error)throw error;
+    window.nextGwV1117=gw;try{nextGwV1077=gw}catch{}
+    state.nextPublished=true;state.nextDeadlineAt=deadline_at;
+    if(window.nextPredV1113)window.nextPredV1113.loaded=false;
+    try{save()}catch{}
+    if(typeof render==='function')render();
+  }catch(e){
+    console.error('Publish visibility flag failed',e);
+    toast(L('Fixtures were saved, but publishing did not finish. Press Publish again.','الماتشات اتحفظت، لكن النشر مكمّلش. اضغط نشر تاني.'),'warn');
+  }
+};
+
+/* ---------- Accurate Performance + Power Chip replacement ---------- */
+const perfCacheV1117=new Map();
+let perfFinalCountV1117=-1,perfLastUpdateV1117=String(state.lastUpdate||''),perfKickTimerV1117=0;
+function selectedPredictWeekV1117(){return Number(state.selectedPredictWeek)||Number(state.week)}
+function currentFirstKickV1117(){
+  const ts=(state.fixtures||[]).map(f=>new Date(f.kickoff).getTime()).filter(Number.isFinite);
+  return ts.length?Math.min(...ts):null;
+}
+function weekStartedV1117(week){
+  if(Number(week)<Number(state.week))return true;
+  if(Number(week)>Number(state.week))return false;
+  const first=currentFirstKickV1117();return Number.isFinite(first)&&Date.now()>=first;
+}
+function privateMemberV1117(){
+  try{if(typeof isPrivateMemberV1043==='function')return !!isPrivateMemberV1043()}catch{}
+  return !!leagueById?.('mastaba')?.members?.includes(state.currentUser);
+}
+function perfLeagueV1117(){return privateMemberV1117()?'mastaba':'mastaba-public'}
+function ordinalV1117(n){
+  n=Number(n)||0;const m=n%100;if(m>=11&&m<=13)return`${n}th`;
+  return`${n}${n%10===1?'st':n%10===2?'nd':n%10===3?'rd':'th'}`;
+}
+function perfHTMLV1117(week,league,data=null){
+  const label=league==='mastaba'?L('Mastaba League','دوري المصطبة'):L('Mastaba Public League','دوري المصطبة العام');
+  const loading=!data,v=data||{gw:'—',overall:'—',rank:'—',total:'—'};
+  const pos=loading?'—':(state.lang==='ar'?`${v.rank}/${v.total}`:ordinalV1117(v.rank));
+  return`<section class="predict-gw-performance-v1117" data-week="${week}" data-league="${league}" data-loading="${loading?'true':'false'}">
+    <div class="predict-gw-performance-head-v1117"><strong>${L(`Gameweek ${week} Performance`,`أداء الجولة ${week}`)}</strong><span>${label}</span></div>
+    <div class="predict-gw-performance-grid-v1117">
+      <div class="predict-gw-performance-stat-v1117"><strong>${v.gw}</strong><span>${L('Gameweek Points','نقاط الجولة')}</span></div>
+      <div class="predict-gw-performance-stat-v1117"><strong>${v.overall}</strong><span>${L('Overall Points','إجمالي النقاط')}</span></div>
+      <div class="predict-gw-performance-stat-v1117"><strong>${pos}</strong><span>${L('Your Position','مركزك')}</span></div>
+    </div>
+  </section>`;
+}
+function setStartedClassV1117(){
+  const started=weekStartedV1117(selectedPredictWeekV1117());
+  document.documentElement.classList.toggle('mastaba-gw-started-v1117',started);
+  if(perfKickTimerV1117)clearTimeout(perfKickTimerV1117);
+  const first=currentFirstKickV1117();
+  if(Number(selectedPredictWeekV1117())===Number(state.week)&&Number.isFinite(first)&&first>Date.now()){
+    perfKickTimerV1117=setTimeout(()=>{setStartedClassV1117();if(state.view==='predict')window.renderPredict?.()},Math.min(first-Date.now()+1000,2147483000));
+  }
+  return started;
+}
+async function fetchPerformanceV1117(week,league,force=false){
+  const ctx=window.prodCtxV1073;if(!ctx?.supa)return null;
+  const key=`${league}:${week}`,cached=perfCacheV1117.get(key);
+  if(!force&&cached&&Date.now()-cached.ts<30000)return cached.data;
+  try{
+    const {data,error}=await ctx.supa.rpc('mastaba_my_predict_metrics',{p_gameweek_number:Number(week),p_league_slug:league});
+    if(error)throw error;
+    const row=Array.isArray(data)?data[0]:data;if(!row)return null;
+    const metric={gw:Number(row.gameweek_points||0),overall:Number(row.overall_points||0),rank:Number(row.rank_position||1),total:Number(row.member_count||1)};
+    perfCacheV1117.set(key,{ts:Date.now(),data:metric});return metric;
+  }catch(e){console.warn('Performance metrics unavailable',e);return null}
+}
+async function mountPerformanceV1117(force=false){
+  if(state.view!=='predict')return;
+  const view=document.querySelector('#view-predict'),list=view?.querySelector('.match-list');if(!view||!list)return;
+  const week=selectedPredictWeekV1117(),started=setStartedClassV1117();
+  view.querySelectorAll('.predict-gw-performance-v1113,.predict-gw-performance-v1117').forEach(el=>el.remove());
+  if(!started)return;
+  view.querySelectorAll('.power-chip-shell-v1048,.mastaba-wildcards-v1043,.wc-personal-alert-v1043').forEach(el=>el.remove());
+  if(Number(week)>Number(state.week))return;
+  const league=perfLeagueV1117(),key=`${league}:${week}`,cached=perfCacheV1117.get(key)?.data||null;
+  list.insertAdjacentHTML('afterbegin',perfHTMLV1117(week,league,cached));
+  const metric=await fetchPerformanceV1117(week,league,force);
+  if(state.view!=='predict'||selectedPredictWeekV1117()!==week)return;
+  const old=view.querySelector(`.predict-gw-performance-v1117[data-week="${week}"][data-league="${league}"]`);
+  if(old&&metric)old.outerHTML=perfHTMLV1117(week,league,metric);
+}
+const renderPredictBaseV1117=window.renderPredict;
+window.renderPredict=renderPredict=function(){
+  const out=renderPredictBaseV1117?.apply(this,arguments);
+  requestAnimationFrame(()=>mountPerformanceV1117(false));
+  return out;
+};
+
+/* After kickoff the UI and the chip actions are both locked out. */
+for(const name of ['togglePowerChipPanelV1048','openPowerChipMenuV1047','requestWildcardV1048']){
+  const base=window[name];
+  if(typeof base==='function')window[name]=function(){
+    if(weekStartedV1117(Number(state.week))){
+      state.powerChipPanelOpenV1048=false;try{save()}catch{}
+      toast(L('Power Chips close when the Gameweek starts.','كروت المصطبة بتتقفل مع بداية الجولة.'),'warn');
+      return;
+    }
+    return base.apply(this,arguments);
+  };
+}
+
+/* Points only change when another fixture becomes FINAL (including the +15
+   all-outcomes bonus at the end), so refresh the one user-metric RPC only then.
+   That is at most one tiny DB read per completed match, not a polling loop. */
+setInterval(()=>{
+  const now=String(state.lastUpdate||''),finals=(state.fixtures||[]).filter(f=>f.phase==='final').length;
+  if(now!==perfLastUpdateV1117){
+    perfLastUpdateV1117=now;
+    if(finals!==perfFinalCountV1117){
+      perfFinalCountV1117=finals;
+      if(state.view==='predict'&&weekStartedV1117(selectedPredictWeekV1117()))mountPerformanceV1117(true);
+    }
+  }
+},1000);
+
+/* ---------- Bulletin: current + published next, then 12-hour handoff ---------- */
+let bulletinFinalizedAtV1117=window.prodCtxV1073?.gw?.finalized_at||null;
+let bulletinAnchorRequestedV1117=false,bulletinHandoffTimerV1117=0;
+function currentAllFinalV1117(){return !!(state.fixtures||[]).length&&(state.fixtures||[]).every(f=>f.phase==='final')}
+async function ensureBulletinAnchorV1117(){
+  if(!currentAllFinalV1117()||bulletinAnchorRequestedV1117||bulletinFinalizedAtV1117)return;
+  bulletinAnchorRequestedV1117=true;
+  bulletinFinalizedAtV1117=state.lastUpdate||new Date().toISOString();
+  try{
+    const ctx=window.prodCtxV1073;
+    if(ctx?.supa&&ctx?.gw?.id){
+      const {data}=await ctx.supa.from('mastaba_gameweeks').select('finalized_at').eq('id',ctx.gw.id).maybeSingle();
+      if(data?.finalized_at)bulletinFinalizedAtV1117=data.finalized_at;
+    }
+  }catch{}
+  scheduleBulletinHandoffV1117();
+}
+function graceExpiredV1117(){
+  if(!state.nextPublished||!(state.nextFixtures||[]).length||!currentAllFinalV1117())return false;
+  if(!bulletinFinalizedAtV1117)return false;
+  const t=new Date(bulletinFinalizedAtV1117).getTime()+12*3600000;
+  return Number.isFinite(t)&&Date.now()>=t;
+}
+function scheduleBulletinHandoffV1117(){
+  if(bulletinHandoffTimerV1117)clearTimeout(bulletinHandoffTimerV1117);
+  if(!bulletinFinalizedAtV1117||!state.nextPublished)return;
+  const t=new Date(bulletinFinalizedAtV1117).getTime()+12*3600000,wait=t-Date.now();
+  if(wait>0)bulletinHandoffTimerV1117=setTimeout(()=>{if(state.view==='home'||state.view==='predict')render()},Math.min(wait+500,2147483000));
+}
+function bulletinCombinedCoreV1117(){
+  const keepCurrent=!graceExpiredV1117(),parts=[];
+  if(keepCurrent&&(state.fixtures||[]).length)parts.push(tickerGroups(state.fixtures,L(`GW ${state.week}`,`ج ${state.week}`)));
+  if(state.nextPublished&&(state.nextFixtures||[]).length)parts.push(tickerGroups(state.nextFixtures,L(`GW ${Number(state.week)+1}`,`ج ${Number(state.week)+1}`)));
+  if(!parts.length&&(state.fixtures||[]).length)parts.push(tickerGroups(state.fixtures,L(`GW ${state.week}`,`ج ${state.week}`)));
+  return parts.join('');
+}
+const homeBulletinTickerBaseV1117=window.homeBulletinTickerHTML||homeBulletinTickerHTML;
+window.homeBulletinTickerHTML=homeBulletinTickerHTML=function(selected){
+  const current=String(selected??state.selectedHomeWeek??'overall');
+  if(current!=='overall')return homeBulletinTickerBaseV1117(selected);
+  if(currentAllFinalV1117())ensureBulletinAnchorV1117();
+  const core=bulletinCombinedCoreV1117();
+  return`<div class="bulletin-ticker" aria-label="Gameweek bulletin"><div class="ticker-track">${core}${core}</div></div>`;
+};
+window.bulletinTickerHTML=bulletinTickerHTML=function(){
+  if(currentAllFinalV1117())ensureBulletinAnchorV1117();
+  const core=bulletinCombinedCoreV1117();
+  return`<div class="bulletin-ticker" aria-label="Gameweek bulletin"><div class="ticker-track">${core}${core}</div></div>`;
+};
+
+requestAnimationFrame(()=>{
+  setStartedClassV1117();
+  if(state.view==='predict')mountPerformanceV1117(true);
+  if(currentAllFinalV1117())ensureBulletinAnchorV1117();
+});
+})();
 </script>
 
 </body>
