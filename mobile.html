@@ -17174,7 +17174,7 @@ html #view-admin .admin-workspace-v1100 .admin-empty-v1100{padding:18px;text-ali
 <script id="mastaba-v1100-admin-repair">
 (function mastabaV1100(){
 'use strict';
-window.MASTABA_BUILD_VERSION='11.22';
+window.MASTABA_BUILD_VERSION='11.23';
 
 const SCHEDULE_SYNC_V1101='https://bnwjtrtlwnlbldfhaggg.supabase.co/functions/v1/mastaba-schedule-sync';
 const scheduleV1100=window.adminScheduleV1100=window.adminScheduleV1100||{
@@ -17677,7 +17677,7 @@ if(state?.view==='admin')setTimeout(renderAdminV1100,0);
    Supabase schedule available exclusively inside Admin > Game Setup. */
 (function(){
 'use strict';
-window.MASTABA_BUILD_VERSION='11.22';
+window.MASTABA_BUILD_VERSION='11.23';
 
 const fixtureKeyV1102=f=>Number(f?.apiFixtureId)?`api:${Number(f.apiFixtureId)}`:`id:${String(f?.id||'')}`;
 function pinnedPoolV1102(){
@@ -18452,7 +18452,7 @@ body.auth-pending-v1064::after{top:53%!important}
 <script id="mastaba-v1108-runtime-fixes">
 (function(){
 'use strict';
-window.MASTABA_BUILD_VERSION='11.22';
+window.MASTABA_BUILD_VERSION='11.23';
 
 /* Hard-mount every fixture slot that exists after the catalogue finishes. */
 window.mountAllAdminFixtureBrowsersV1108=function(){
@@ -18662,7 +18662,7 @@ html[data-theme] body #app #view-admin .admin-v1094-panel :is(.admin-v1094-metri
 <script id="mastaba-v1109-admin-schedule-runtime">
 (function(){
 'use strict';
-window.MASTABA_BUILD_VERSION='11.22';
+window.MASTABA_BUILD_VERSION='11.23';
 
 /* Local fallback is intentionally name-based, never T123. The central
    abbreviation table remains authoritative when it has a row. */
@@ -18776,7 +18776,7 @@ html[data-theme] body #app #view-admin .fixture-league-title :is(strong,b,span,s
 <script id="mastaba-v1110-team-identity-guard">
 (function(){
 'use strict';
-window.MASTABA_BUILD_VERSION='11.22';
+window.MASTABA_BUILD_VERSION='11.23';
 /* Repair any already-loaded cached schedule objects from V11.09 without a
    provider/Supabase reload. Per-fixture payload is authoritative. */
 function repair(f){
@@ -18925,7 +18925,7 @@ html[data-theme] body #app #view-admin .fixture-day[aria-pressed="true"] :is(sma
 <script id="mastaba-v1112-runtime">
 (function(){
 'use strict';
-window.MASTABA_BUILD_VERSION='11.22';
+window.MASTABA_BUILD_VERSION='11.23';
 
 /* ---------------- Admin fixture browser ----------------
    V11.11's cosmetic day change called private lexical functions that were not
@@ -19199,7 +19199,7 @@ html[data-theme] body #app #view-admin .admin-zero-calls-v1101 *{
 <script id="mastaba-v1113-predict-and-context">
 (function(){
 'use strict';
-window.MASTABA_BUILD_VERSION='11.22';
+window.MASTABA_BUILD_VERSION='11.23';
 
 const nextPredV1113={
   loading:false,loaded:false,error:null,gw:null,fixtures:[],dbById:{},picks:{},meta:{draftSavedAt:null,submittedAt:null,editing:true}
@@ -19638,7 +19638,7 @@ setTimeout(()=>{if(state?.nextPublished&&nextIsSelectedV1113()){nextPredV1113.lo
 <script id="mastaba-v1114-home-next-predictions">
 (function(){
 'use strict';
-window.MASTABA_BUILD_VERSION='11.22';
+window.MASTABA_BUILD_VERSION='11.23';
 
 const homeSubmissionStatusBaseV1114=window.homeSubmissionStatus||homeSubmissionStatus;
 let homeNextHydrationQueuedV1114=false;
@@ -19955,7 +19955,7 @@ html[data-theme="barcelona"] body #app #view-admin .admin-workspace-v1100 :is(.a
 
 
 <script id="mastaba-v1115-version">
-window.MASTABA_BUILD_VERSION='11.22';
+window.MASTABA_BUILD_VERSION='11.23';
 </script>
 
 
@@ -20073,7 +20073,7 @@ html[data-theme] body #app #view-admin .admin-accounts-v1094 .admin-v1094-action
 <script id="mastaba-v1116-admin-interaction">
 (function(){
 'use strict';
-window.MASTABA_BUILD_VERSION='11.22';
+window.MASTABA_BUILD_VERSION='11.23';
 
 let roundCommitTimerV1116=0;
 let adminRoundObserverV1116=null;
@@ -20288,7 +20288,7 @@ html.mastaba-gw-started-v1117 #view-predict
 <script id="mastaba-v1117-runtime">
 (function(){
 'use strict';
-window.MASTABA_BUILD_VERSION='11.22';
+window.MASTABA_BUILD_VERSION='11.23';
 
 /* ---------- Shared publication helpers ---------- */
 function nextNumberV1117(){return Number(state.week)+1}
@@ -20626,7 +20626,7 @@ requestAnimationFrame(()=>{
 <script id="mastaba-v1119-route-and-autosave">
 (function(){
 'use strict';
-window.MASTABA_BUILD_VERSION='11.22';
+window.MASTABA_BUILD_VERSION='11.23';
 
 const goBaseV1119=window.go;
 if(typeof goBaseV1119==='function'){
@@ -20680,7 +20680,7 @@ window.addEventListener('pagehide',()=>{
 <script id="mastaba-v1120-player-and-gw-stability">
 (function(){
 'use strict';
-window.MASTABA_BUILD_VERSION='11.22';
+window.MASTABA_BUILD_VERSION='11.23';
 
 const LAST_WEEK_KEY_V1120='mastaba:last-predict-week:v1120';
 function rememberPredictWeekV1120(w){
@@ -20877,7 +20877,7 @@ requestAnimationFrame(()=>rememberPredictWeekV1120(state.selectedPredictWeek));
 <script id="mastaba-v1121-competition-stats">
 (function(){
 'use strict';
-window.MASTABA_BUILD_VERSION='11.22';
+window.MASTABA_BUILD_VERSION='11.23';
 
 /* V11.21
    Player stats in the scorer drawer must be for the competition being
@@ -20915,7 +20915,7 @@ window.playerRow=function(p,comp,mid){
 <script id="mastaba-v1122-season-competition-integrity">
 (function(){
 'use strict';
-window.MASTABA_BUILD_VERSION='11.22';
+window.MASTABA_BUILD_VERSION='11.23';
 
 /* fixtureById originally searched only the active Gameweek. That made every
    published-next-GW player drawer lose its competition identity and fall back
@@ -20967,6 +20967,507 @@ window.playerRow=function(p,comp,mid){
     <span class="player-cell"><span class="availability-v1120 ${p.status||'available'}">${label}</span></span>
   </button>`;
 };
+})();
+</script>
+
+
+<style id="mastaba-v1123-authoritative-player-ui">
+/* =========================================================
+   V11.23 — authoritative scorer table + safe live clock
+   ========================================================= */
+
+/* The new visible status badge needs a real column, not the old icon-sized slot. */
+#modalRoot .player-table-head,
+#modalRoot .player-row{
+  grid-template-columns:minmax(220px,2fr) 52px 56px 56px 48px 48px 54px 54px 64px!important;
+  min-width:720px!important;
+}
+#modalRoot .player-table-head>span:last-child{
+  display:flex;align-items:center;justify-content:center;
+  color:#536072;font-size:.58rem;font-weight:1000;text-transform:uppercase;
+}
+#modalRoot .availability-v1120{
+  box-sizing:border-box!important;
+  min-width:40px!important;
+  max-width:54px!important;
+  padding:5px 4px!important;
+  white-space:nowrap!important;
+}
+#modalRoot .player-row .player-cell:last-child{
+  padding-inline:4px!important;
+  overflow:visible!important;
+}
+#modalRoot .player-comp-tab{
+  white-space:nowrap;
+}
+#modalRoot .player-authoritative-loading-v1123{
+  min-height:190px;display:grid;place-items:center;text-align:center;padding:24px;
+}
+#modalRoot .player-authoritative-loading-v1123>div{
+  display:grid;gap:8px;justify-items:center;
+}
+#modalRoot .player-authoritative-source-v1123{
+  margin-top:6px;font-size:.59rem;line-height:1.35;color:#727b87;font-weight:750;
+}
+#modalRoot .player-row .player-injury-reason-v1120{
+  max-width:180px;white-space:normal;
+}
+#modalRoot .player-table-head button.sort-active{
+  background:#dfe5ec!important;color:#172b55!important;
+}
+#modalRoot .player-table-head button.sort-active:after{
+  content:attr(data-arrow);margin-inline-start:3px;
+}
+@media(max-width:720px){
+  #modalRoot .player-table-head,
+  #modalRoot .player-row{
+    grid-template-columns:minmax(175px,1.8fr) 45px 48px 48px 42px 42px 48px 48px 58px!important;
+    min-width:620px!important;
+  }
+  #modalRoot .availability-v1120{
+    min-width:38px!important;max-width:48px!important;font-size:.52rem!important;
+  }
+}
+</style>
+
+
+<script id="mastaba-v1123-authoritative-runtime">
+(function(){
+'use strict';
+window.MASTABA_BUILD_VERSION='11.23';
+
+/* -------------------------------------------------------------------------
+   1) PLAYER DATA: never allow demo/local-storage season stats to win in
+      Production. The scorer drawer reads one authoritative Supabase RPC.
+   ------------------------------------------------------------------------- */
+function purgeLegacyPlayerCacheV1123(){
+  try{
+    const doomed=[];
+    for(let i=0;i<localStorage.length;i++){
+      const k=localStorage.key(i);
+      if(k&&/^mastaba_central_players_v1084_/.test(k))doomed.push(k);
+    }
+    doomed.forEach(k=>localStorage.removeItem(k));
+  }catch{}
+}
+purgeLegacyPlayerCacheV1123();
+
+const hydrateBaseV1123=window.hydrateProductionV1073;
+if(typeof hydrateBaseV1123==='function'){
+  window.hydrateProductionV1073=async function(){
+    const out=await hydrateBaseV1123.apply(this,arguments);
+    purgeLegacyPlayerCacheV1123();
+    return out;
+  };
+}
+
+function resolveFixtureV1123(mid){
+  const sid=String(mid);
+  const pools=[
+    window.nextPredV1113?.fixtures||[],
+    state.nextFixtures||[],
+    state.fixtures||[],
+    state.fixturePool||[],
+    window.adminSchedulePoolV1102||[]
+  ];
+  for(const pool of pools){
+    const f=(pool||[]).find(x=>String(x?.id)===sid||String(x?.apiFixtureId||'')===sid);
+    if(f)return f;
+  }
+  const db=window.prodCtxV1073?.fxById?.[sid];
+  if(db){
+    const home=`sched-${Number(db.home_team_id)}`,away=`sched-${Number(db.away_team_id)}`;
+    return{
+      id:db.id,apiFixtureId:Number(db.api_fixture_id),apiLeagueId:Number(db.api_league_id)||null,
+      competition:db.competition_name||'Competition',competitionCountry:db.competition_country||'',
+      home,away,homeTeamId:Number(db.home_team_id),awayTeamId:Number(db.away_team_id),
+      kickoff:db.kickoff_at,stadium:db.venue_name||'',apiPayload:db.api_payload||{}
+    };
+  }
+  return null;
+}
+window.resolveFixtureV1123=resolveFixtureV1123;
+
+function competitionInfoV1123(f){
+  const db=window.prodCtxV1073?.fxById?.[f?.id]||null;
+  const leagueId=Number(f?.apiLeagueId||f?.apiPayload?.league?.id||db?.api_league_id||db?.api_payload?.league?.id||0);
+  let raw=String(
+    (f?.competition&&f.competition!=='Competition'?f.competition:'')
+    ||f?.apiPayload?.league?.name
+    ||db?.competition_name
+    ||db?.api_payload?.league?.name
+    ||''
+  ).trim();
+  const country=String(f?.competitionCountry||f?.apiPayload?.league?.country||db?.competition_country||db?.api_payload?.league?.country||'').trim();
+
+  /* Last-resort IDs for the competitions currently supported by the platform. */
+  if(!raw||raw==='Competition'){
+    if(leagueId===39)raw='Premier League';
+    else if(leagueId===140)raw='La Liga';
+    else if(leagueId===135)raw='Serie A';
+    else if(leagueId===233)raw='Premier League';
+  }
+
+  let key=raw||'Competition',display=raw||'Competition';
+  if(country==='England'&&raw==='Premier League'){key='English Premier League';display='Premier League'}
+  else if(country==='Egypt'&&(raw==='Premier League'||raw==='Egyptian Premier League')){key='Egyptian Premier League';display='Egyptian Premier League'}
+  else if(country==='Spain'&&(raw==='La Liga'||raw==='LaLiga')){key='La Liga';display='La Liga'}
+  else if(country==='Italy'&&raw==='Serie A'){key='Serie A';display='Serie A'}
+  return{key,display,country,leagueId};
+}
+window.competitionInfoV1123=competitionInfoV1123;
+
+function teamIdFromFixtureV1123(f,team){
+  if(team===f?.home)return Number(f.homeTeamId);
+  if(team===f?.away)return Number(f.awayTeamId);
+  const n=Number(String(team||'').replace(/^sched-/,'').replace(/^T/,''));
+  return Number.isFinite(n)&&n>0?n:null;
+}
+function posV1123(v){
+  const s=String(v||'MID').toUpperCase();
+  if(['ATTACKER','FORWARD','FWD'].includes(s))return'FW';
+  if(s==='MIDFIELDER')return'MID';
+  if(s==='DEFENDER'||s==='DEF')return'CB';
+  if(s==='GOALKEEPER')return'GK';
+  return s||'MID';
+}
+function copyStatsV1123(stats){
+  try{return structuredClone(stats||{})}catch{return JSON.parse(JSON.stringify(stats||{}))}
+}
+
+/* Proof cache is deliberately tiny. It only avoids a duplicate RPC when the
+   V11.13 upcoming handler has just made the exact same authoritative read. */
+const authoritativeProofV1123=new Map();
+async function authoritativePlayersV1123(f,team){
+  const ctx=window.prodCtxV1073;
+  if(!ctx?.supa)throw new Error(L('Production player data is not ready yet.','بيانات اللعيبة في الإنتاج لسه مش جاهزة.'));
+  const tid=teamIdFromFixtureV1123(f,team);
+  if(!tid||!f?.id)throw new Error(L('This match is missing its player-data identity.','الماتش ده ناقص بيانات تعريف الفريق.'));
+  const cacheKey=`${f.id}:${tid}`;
+  const proof=authoritativeProofV1123.get(cacheKey);
+  if(proof&&Date.now()-proof.ts<5000)return proof.rows.map(x=>({...x,stats:copyStatsV1123(x.stats)}));
+
+  /* If the upcoming-GW loader literally just completed the same central RPC,
+     that result is also safe to reuse for five seconds. */
+  const nextProof=Number(window.nextPlayerReadAtV1122?.[cacheKey]||0);
+  if(nextProof&&Date.now()-nextProof<5000&&(players[team]||[]).length){
+    const rows=(players[team]||[]).map(x=>({...x,stats:copyStatsV1123(x.stats)}));
+    authoritativeProofV1123.set(cacheKey,{ts:Date.now(),rows});
+    return rows;
+  }
+
+  const {data,error}=await ctx.supa.rpc('mastaba_player_picker_context',{
+    p_fixture_id:f.id,p_team_id:tid
+  });
+  if(error)throw error;
+  const rows=(data||[]).map(r=>({
+    id:String(r.player_id),name:r.player_name||'Player',pos:posV1123(r.player_position),
+    number:r.squad_number??null,
+    status:r.availability_status||'available',
+    availabilityReason:r.availability_reason||null,
+    availabilityRefreshedAt:r.availability_refreshed_at||null,
+    statsRefreshedAt:r.stats_refreshed_at||null,
+    stats:r.stats&&Object.keys(r.stats).length?r.stats:{ALL:{apps:0,bench:0,goals:0,assists:0,xg:null,xa:null}}
+  }));
+  players[team]=rows.map(x=>({...x,stats:copyStatsV1123(x.stats)}));
+  authoritativeProofV1123.set(cacheKey,{ts:Date.now(),rows:rows.map(x=>({...x,stats:copyStatsV1123(x.stats)}))});
+  return rows;
+}
+
+function playerPositionRankV1123(p){
+  const g=typeof playerPositionGroup==='function'?playerPositionGroup(p?.pos):posV1123(p?.pos);
+  return g==='FW'?1:g==='MID'?2:['CB','RB','LB','DEF'].includes(g)?3:g==='GK'?4:5;
+}
+function statsForV1123(p,key){
+  const zero={apps:0,bench:0,goals:0,assists:0,xg:null,xa:null};
+  return key==='ALL'?(p?.stats?.ALL||zero):(p?.stats?.[key]||zero);
+}
+function nOrNullV1123(v){return v==null||v===''||!Number.isFinite(Number(v))?null:Number(v)}
+function statCellV1123(v){return v==null?`<span class="player-stat-na-v1077">—</span>`:String(v)}
+function statusInfoV1123(p){
+  if(p.status==='out')return{cls:'out',label:L('OUT','غائب')};
+  if(p.status==='suspended')return{cls:'suspended',label:L('SUS','موقوف')};
+  if(p.status==='doubtful')return{cls:'doubtful',label:L('DOUBT','مشكوك')};
+  return{cls:'available',label:L('OK','متاح')};
+}
+function rowHTMLV1123(p,key,label){
+  const st=statsForV1123(p,key),disabled=['out','suspended'].includes(p.status),si=statusInfoV1123(p);
+  const reason=p.availabilityReason?`<small class="player-injury-reason-v1120">${escapeHTML(p.availabilityReason)}</small>`:'';
+  return`<button type="button" class="player-row ${disabled?'disabled':''}" data-player-id="${escapeHTML(p.id)}" ${disabled?'disabled':''}>
+    <span class="player-name-cell"><span class="player-name-copy"><strong>${escapeHTML(p.name)}</strong><small>${escapeHTML(label)}</small>${reason}</span></span>
+    <span class="player-cell player-pos-cell">${escapeHTML(typeof playerPositionGroup==='function'?playerPositionGroup(p.pos):p.pos)}</span>
+    <span class="player-cell player-stat-cell">${statCellV1123(nOrNullV1123(st.apps))}</span>
+    <span class="player-cell player-stat-cell">${statCellV1123(nOrNullV1123(st.bench))}</span>
+    <span class="player-cell player-stat-cell">${statCellV1123(nOrNullV1123(st.goals))}</span>
+    <span class="player-cell player-stat-cell">${statCellV1123(nOrNullV1123(st.assists))}</span>
+    <span class="player-cell player-stat-cell">${statCellV1123(nOrNullV1123(st.xg))}</span>
+    <span class="player-cell player-stat-cell">${statCellV1123(nOrNullV1123(st.xa))}</span>
+    <span class="player-cell"><span class="availability-v1120 ${si.cls}">${si.label}</span></span>
+  </button>`;
+}
+
+let playerDrawerTokenV1123=0;
+window.openPlayerDrawer=async function(mid,team){
+  const token=++playerDrawerTokenV1123;
+  const f=resolveFixtureV1123(mid);
+  if(!f)return toast(L('This match could not be identified.','تعذر تحديد الماتش ده.'),'warn');
+  const ci=competitionInfoV1123(f),root=document.querySelector('#modalRoot');
+  if(!root)return;
+  root.innerHTML=`<div class="player-drawer" data-player-drawer-v1123>
+    <div class="drawer-card"><div class="drawer-handle"></div>
+      <div class="panel-head"><div><h3>${L('First Goalscorer','أول لاعب يسجل')} — ${escapeHTML(TEAM[team]?.name||team)}</h3>
+      <div class="stat-context">${L(`Loading current ${ci.display} player records…`,`جاري تحميل أحدث بيانات ${ci.display}…`)}</div></div>
+      <button class="icon-button" onclick="closeModal()">×</button></div>
+      <div class="player-authoritative-loading-v1123"><div><div class="player-loading-spinner-v1081"></div>
+      <strong>${L('Loading verified player data…','جاري تحميل بيانات اللعيبة الموثقة…')}</strong>
+      <span>${L('Central Mastaba database — no football-provider request from your device.','قاعدة بيانات المصطبة المركزية — من غير أي طلب لمصدر الكورة من جهازك.')}</span></div></div>
+    </div></div>`;
+
+  let rows;
+  try{rows=await authoritativePlayersV1123(f,team)}
+  catch(e){
+    console.error('Authoritative player drawer failed',e);
+    if(token!==playerDrawerTokenV1123)return;
+    root.innerHTML=`<div class="player-drawer"><div class="drawer-card"><div class="drawer-handle"></div>
+      <div class="panel-head"><h3>${L('First Goalscorer','أول لاعب يسجل')}</h3><button class="icon-button" onclick="closeModal()">×</button></div>
+      <div class="player-load-error-v1081"><strong>${escapeHTML(String(e?.message||e))}</strong><br>
+      <button class="btn btn-primary" id="retry-authoritative-player-v1123">${L('Retry','حاول تاني')}</button></div></div></div>`;
+    root.querySelector('#retry-authoritative-player-v1123')?.addEventListener('click',()=>window.openPlayerDrawer(mid,team));
+    return;
+  }
+  if(token!==playerDrawerTokenV1123||!document.querySelector('[data-player-drawer-v1123]'))return;
+  if(!rows.length){
+    root.innerHTML=`<div class="player-drawer"><div class="drawer-card"><div class="panel-head"><h3>${L('First Goalscorer','أول لاعب يسجل')}</h3><button class="icon-button" onclick="closeModal()">×</button></div><div class="notice">${L('No active squad records are available for this team yet.','مفيش بيانات قائمة نشطة متاحة للفريق ده لسه.')}</div></div></div>`;
+    return;
+  }
+
+  root.innerHTML=`<div class="player-drawer" data-player-drawer-v1123>
+    <div class="drawer-card"><div class="drawer-handle"></div>
+      <div class="panel-head"><div><h3>${L('First Goalscorer','أول لاعب يسجل')} — ${escapeHTML(TEAM[team]?.name||team)}</h3>
+      <div class="stat-context">${L('Tap a table header to sort. The competition tab never borrows totals from another competition.','اضغط على عنوان العمود للترتيب. تبويب البطولة مش بياخد أرقام من بطولة تانية.')}</div></div>
+      <button class="icon-button" onclick="closeModal()">×</button></div>
+      <div class="player-comp-tabs">
+        <button type="button" class="player-comp-tab active" data-pcomp-key="${escapeHTML(ci.key)}">${escapeHTML(ci.display)}</button>
+        <button type="button" class="player-comp-tab" data-pcomp-key="ALL">${L('All Competitions','كل البطولات')}</button>
+      </div>
+      <div class="player-filterbar">
+        <input class="player-search" placeholder="${L('Search player…','ابحث عن لاعب…')}">
+        <select class="player-pos-filter-v1123"><option value="ALL">${L('All Positions','كل المراكز')}</option><option value="FW">FW</option><option value="MID">MID</option><option value="CB">CB</option><option value="RB">RB</option><option value="LB">LB</option><option value="GK">GK</option></select>
+        <select class="player-availability-filter-v1123"><option value="ALL">${L('All Players','كل اللاعبين')}</option><option value="available">${L('Available','متاح')}</option><option value="doubtful">${L('Doubtful','مشكوك فيه')}</option><option value="unavailable">${L('Unavailable','غائب/موقوف')}</option></select>
+      </div>
+      <div class="player-table-shell">
+        <div class="player-table-head">
+          <button type="button" data-psort="name">${L('Player','اللاعب')}</button>
+          <button type="button" data-psort="pos">${L('Pos','مركز')}</button>
+          <button type="button" data-psort="apps">${L('Apps','لعب')}</button>
+          <button type="button" data-psort="bench">SUB</button>
+          <button type="button" data-psort="goals">G</button>
+          <button type="button" data-psort="assists">A</button>
+          <button type="button" data-psort="xg">xG</button>
+          <button type="button" data-psort="xa">xA</button>
+          <span>${L('Status','حالة')}</span>
+        </div>
+        <div class="player-list"></div>
+        <div class="player-table-note">${L(
+          'Stats are current 2026/27 records for the selected competition. All Competitions combines only this season. Injured and suspended players cannot be selected.',
+          'الإحصائيات للموسم الحالي 2026/27 وللبطولة المختارة. كل البطولات بيجمع الموسم الحالي فقط. المصاب والموقوف لا يمكن اختيارهم.'
+        )}<div class="player-authoritative-source-v1123">${L(
+          'Goals/assists are cross-checked against completed Mastaba match events. xG/xA stay blank when the source does not provide player-level values.',
+          'الأهداف والأسيستات بيتم مطابقتها مع أحداث ماتشات المصطبة المكتملة. xG/xA بتفضل فاضية لو المصدر مش بيوفرها لكل لاعب.'
+        )}</div></div>
+      </div>
+    </div></div>`;
+
+  const drawer=root.querySelector('[data-player-drawer-v1123]');
+  if(!drawer)return;
+  const listEl=drawer.querySelector('.player-list');
+  const searchEl=drawer.querySelector('.player-search');
+  const posEl=drawer.querySelector('.player-pos-filter-v1123');
+  const avEl=drawer.querySelector('.player-availability-filter-v1123');
+  let compKey=ci.key,compLabel=ci.display,sortKey='goals',sortDir='desc';
+
+  function valueFor(p,key){
+    if(key==='name')return String(p.name||'').toLocaleLowerCase();
+    if(key==='pos')return playerPositionRankV1123(p);
+    const st=statsForV1123(p,compKey);
+    return nOrNullV1123(st[key]);
+  }
+  function compare(a,b){
+    if(sortKey==='name'){
+      const d=String(a.name||'').localeCompare(String(b.name||''),undefined,{sensitivity:'base'});
+      return sortDir==='asc'?d:-d;
+    }
+    const av=valueFor(a,sortKey),bv=valueFor(b,sortKey);
+    /* Missing values always go last. They are not zero. */
+    if(av==null&&bv!=null)return 1;
+    if(av!=null&&bv==null)return -1;
+    if(av!=null&&bv!=null&&av!==bv)return sortDir==='asc'?av-bv:bv-av;
+
+    /* For the default goal sort, assists are the first meaningful tie-break. */
+    if(sortKey==='goals'){
+      const aa=nOrNullV1123(statsForV1123(a,compKey).assists)??0;
+      const ba=nOrNullV1123(statsForV1123(b,compKey).assists)??0;
+      if(aa!==ba)return ba-aa;
+    }
+    const pr=playerPositionRankV1123(a)-playerPositionRankV1123(b);
+    if(pr)return pr;
+    return String(a.name||'').localeCompare(String(b.name||''),undefined,{sensitivity:'base'});
+  }
+  function draw(){
+    const q=typeof normalizeSearchText==='function'?normalizeSearchText(searchEl.value||''):String(searchEl.value||'').toLowerCase();
+    const position=posEl.value,availability=avEl.value;
+    const view=rows.filter(p=>{
+      const name=typeof normalizeSearchText==='function'?normalizeSearchText(p.name||''):String(p.name||'').toLowerCase();
+      if(q&&!name.includes(q))return false;
+      const pg=typeof playerPositionGroup==='function'?playerPositionGroup(p.pos):posV1123(p.pos);
+      if(position!=='ALL'&&pg!==position)return false;
+      if(availability==='unavailable'&&!['out','suspended'].includes(p.status))return false;
+      if(availability!=='ALL'&&availability!=='unavailable'&&p.status!==availability)return false;
+      return true;
+    }).sort(compare);
+
+    listEl.innerHTML=view.map(p=>rowHTMLV1123(p,compKey,compKey==='ALL'?L('All Competitions','كل البطولات'):compLabel)).join('')
+      ||`<div class="notice" style="margin:10px">${L('No players match these filters.','مفيش لعيبة مطابقة للفلاتر دي.')}</div>`;
+
+    listEl.querySelectorAll('.player-row[data-player-id]:not(:disabled)').forEach(btn=>{
+      btn.addEventListener('click',()=>window.pickScorer?.(mid,btn.dataset.playerId));
+    });
+    drawer.querySelectorAll('.player-table-head [data-psort]').forEach(btn=>{
+      const active=btn.dataset.psort===sortKey;
+      btn.classList.toggle('sort-active',active);
+      btn.dataset.arrow=active?(sortDir==='asc'?'↑':'↓'):'';
+    });
+  }
+
+  searchEl.addEventListener('input',draw);
+  posEl.addEventListener('change',draw);
+  avEl.addEventListener('change',draw);
+  drawer.querySelectorAll('.player-comp-tab').forEach(btn=>{
+    btn.addEventListener('click',()=>{
+      drawer.querySelectorAll('.player-comp-tab').forEach(x=>x.classList.remove('active'));
+      btn.classList.add('active');
+      compKey=btn.dataset.pcompKey;
+      compLabel=compKey==='ALL'?L('All Competitions','كل البطولات'):ci.display;
+      sortKey='goals';sortDir='desc';
+      draw();
+    });
+  });
+  drawer.querySelectorAll('.player-table-head [data-psort]').forEach(btn=>{
+    btn.addEventListener('click',()=>{
+      const key=btn.dataset.psort;
+      if(sortKey===key)sortDir=sortDir==='asc'?'desc':'asc';
+      else{sortKey=key;sortDir=['name','pos'].includes(key)?'asc':'desc'}
+      draw();
+    });
+  });
+  draw();
+};
+
+/* Current Gameweek scorer flow must never short-circuit on a preloaded demo
+   array. It always enters the authoritative drawer. */
+window.openScorers=async function(mid){
+  if(typeof isRoundLocked==='function'&&isRoundLocked())return;
+  if(typeof userSubmittedLocked==='function'&&userSubmittedLocked())return;
+  const f=resolveFixtureV1123(mid);
+  if(!f)return toast(L('This match could not be identified.','تعذر تحديد الماتش ده.'),'warn');
+  const p=typeof getWorking==='function'?(getWorking(state.currentUser,mid)||{}):(state.predictions?.[state.currentUser]?.[mid]||{});
+  p.touched=true;
+  if(p.home===''||p.away===''||p.home==null||p.away==null)return toast(L('Enter the score first.','اكتب النتيجة الأول.'),'warn');
+  if(Number(p.home)===0&&Number(p.away)===0){
+    p.firstTeam='none';p.firstScorer='none';
+    state.predictions[state.currentUser][mid]=p;
+    try{markDirty(mid)}catch{};try{save()}catch{};try{refreshPredictionCard(mid)}catch{}
+    return;
+  }
+  const previous=p.firstTeam;
+  if(Number(p.home)>0&&Number(p.away)===0)p.firstTeam=f.home;
+  if(Number(p.away)>0&&Number(p.home)===0)p.firstTeam=f.away;
+  if(previous&&previous!=='none'&&p.firstTeam!==previous)p.firstScorer='none';
+  if(!p.firstTeam||p.firstTeam==='none')return toast(L('Choose the first team to score first.','اختار أول فريق هيسجل الأول.'),'warn');
+  state.predictions[state.currentUser][mid]=p;
+  try{save()}catch{}
+  return window.openPlayerDrawer(mid,p.firstTeam);
+};
+
+/* -------------------------------------------------------------------------
+   2) LIVE CLOCK: do not invent precise stoppage time from a local timer.
+      If the provider has not yet finalized a match, show 45+ / 90+.
+   ------------------------------------------------------------------------- */
+function safeClockV1123(f){
+  const status=String(f?.liveClockStatusV1091||'').toUpperCase();
+  if(status==='HT')return{state:'pause',text:'HT'};
+  if(status==='BT')return{state:'pause',text:L('ET BREAK','استراحة إضافي')};
+  if(status==='P'||(status==='PEN'&&f?.phase==='live'))return{state:'pause',text:L('PENS','ركلات ترجيح')};
+  if(status==='SUSP'||status==='INT')return{state:'pause',text:L('PAUSED','متوقف')};
+
+  const elapsed=nOrNullV1123(f?.liveClockElapsedV1091);
+  const base=nOrNullV1123(f?.livePeriodBaseMinuteV1091);
+  const started=Date.parse(f?.livePeriodStartedAtV1091||'');
+  let estimated=elapsed;
+
+  if(base!=null&&Number.isFinite(started)){
+    const whole=Math.max(0,Math.floor((Date.now()-started)/60000));
+    const first=base===0?1:base===45?46:base===90?91:106;
+    estimated=Math.max(elapsed??0,first+whole);
+  }
+
+  if(status==='1H'||base===0){
+    if((estimated??0)>=45)return{state:'live',text:'45+'};
+    return{state:'live',text:`${Math.max(1,Math.floor(estimated??1))}′`};
+  }
+  if(status==='2H'||base===45){
+    if((estimated??0)>=90)return{state:'live',text:'90+'};
+    return{state:'live',text:`${Math.max(46,Math.floor(estimated??46))}′`};
+  }
+  if(status==='ET'||base===90||base===105){
+    const cap=base===90?105:120;
+    if((estimated??0)>=cap)return{state:'live',text:`${cap}+`};
+    return{state:'live',text:`${Math.floor(estimated??(base===90?91:106))}′`};
+  }
+  if(elapsed!=null){
+    if(elapsed>=90)return{state:'live',text:'90+'};
+    if(elapsed>=45)return{state:'live',text:'45+'};
+    return{state:'live',text:`${Math.max(1,Math.floor(elapsed))}′`};
+  }
+  return{state:'live',text:L('LIVE','مباشر')};
+}
+window.safeClockV1123=safeClockV1123;
+
+/* Replace the old local extrapolator interval. Snapshot/render changes still
+   control scores and phases; this one only owns the visible clock and the
+   live/upcoming/final story selection. */
+try{clearInterval(window.__atsNativeClockV1091)}catch{}
+let phaseSigV1123='';
+function safeATSSyncV1123(){
+  try{
+    const fs=typeof window.homeStoryFixturesV21==='function'?window.homeStoryFixturesV21():(state.fixtures||[]);
+    if(!fs.length)return;
+    const sig=fs.map(f=>`${f.id}:${f.phase}`).join('|');
+    if(sig!==phaseSigV1123){
+      phaseSigV1123=sig;
+      const preferred=fs.find(f=>f.phase==='live')||fs.find(f=>f.phase==='upcoming')||[...fs].reverse().find(f=>f.phase==='final')||fs[0];
+      const idx=fs.findIndex(f=>f.id===preferred?.id);
+      if(idx>=0){
+        const key=String(state.selectedHomeWeek??'overall');
+        state.homeStoryIndexV21=state.homeStoryIndexV21||{};
+        state.homeStoryIndexV21[key]=idx;
+        if(state.view==='home'&&typeof window.insertHomeStoryV25==='function')window.insertHomeStoryV25();
+      }
+    }
+    const key=String(state.selectedHomeWeek??'overall');
+    const idx=Math.max(0,Math.min(fs.length-1,Number(state.homeStoryIndexV21?.[key]||0)));
+    const f=fs[idx],el=document.querySelector('#view-home .ats-section-v25 .ats-date-v25 strong');
+    if(el&&f?.phase==='live'){
+      const c=safeClockV1123(f);el.textContent=c.text;el.classList.add('ats-live-clock-v1091');el.dataset.state=c.state;
+    }else if(el){el.classList.remove('ats-live-clock-v1091');delete el.dataset.state}
+  }catch{}
+}
+window.safeATSSyncV1123=safeATSSyncV1123;
+window.__atsNativeClockV1091=setInterval(safeATSSyncV1123,1000);
+document.addEventListener('visibilitychange',()=>{if(!document.hidden)setTimeout(safeATSSyncV1123,30)});
+window.addEventListener('focus',()=>setTimeout(safeATSSyncV1123,30));
+window.addEventListener('pageshow',()=>setTimeout(safeATSSyncV1123,30));
+setTimeout(safeATSSyncV1123,120);
 })();
 </script>
 
