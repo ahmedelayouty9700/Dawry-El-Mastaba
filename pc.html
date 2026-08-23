@@ -17174,7 +17174,7 @@ html #view-admin .admin-workspace-v1100 .admin-empty-v1100{padding:18px;text-ali
 <script id="mastaba-v1100-admin-repair">
 (function mastabaV1100(){
 'use strict';
-window.MASTABA_BUILD_VERSION='11.17';
+window.MASTABA_BUILD_VERSION='11.18';
 
 const SCHEDULE_SYNC_V1101='https://bnwjtrtlwnlbldfhaggg.supabase.co/functions/v1/mastaba-schedule-sync';
 const scheduleV1100=window.adminScheduleV1100=window.adminScheduleV1100||{
@@ -17677,7 +17677,7 @@ if(state?.view==='admin')setTimeout(renderAdminV1100,0);
    Supabase schedule available exclusively inside Admin > Game Setup. */
 (function(){
 'use strict';
-window.MASTABA_BUILD_VERSION='11.17';
+window.MASTABA_BUILD_VERSION='11.18';
 
 const fixtureKeyV1102=f=>Number(f?.apiFixtureId)?`api:${Number(f.apiFixtureId)}`:`id:${String(f?.id||'')}`;
 function pinnedPoolV1102(){
@@ -18452,7 +18452,7 @@ body.auth-pending-v1064::after{top:53%!important}
 <script id="mastaba-v1108-runtime-fixes">
 (function(){
 'use strict';
-window.MASTABA_BUILD_VERSION='11.17';
+window.MASTABA_BUILD_VERSION='11.18';
 
 /* Hard-mount every fixture slot that exists after the catalogue finishes. */
 window.mountAllAdminFixtureBrowsersV1108=function(){
@@ -18662,7 +18662,7 @@ html[data-theme] body #app #view-admin .admin-v1094-panel :is(.admin-v1094-metri
 <script id="mastaba-v1109-admin-schedule-runtime">
 (function(){
 'use strict';
-window.MASTABA_BUILD_VERSION='11.17';
+window.MASTABA_BUILD_VERSION='11.18';
 
 /* Local fallback is intentionally name-based, never T123. The central
    abbreviation table remains authoritative when it has a row. */
@@ -18776,7 +18776,7 @@ html[data-theme] body #app #view-admin .fixture-league-title :is(strong,b,span,s
 <script id="mastaba-v1110-team-identity-guard">
 (function(){
 'use strict';
-window.MASTABA_BUILD_VERSION='11.17';
+window.MASTABA_BUILD_VERSION='11.18';
 /* Repair any already-loaded cached schedule objects from V11.09 without a
    provider/Supabase reload. Per-fixture payload is authoritative. */
 function repair(f){
@@ -18925,7 +18925,7 @@ html[data-theme] body #app #view-admin .fixture-day[aria-pressed="true"] :is(sma
 <script id="mastaba-v1112-runtime">
 (function(){
 'use strict';
-window.MASTABA_BUILD_VERSION='11.17';
+window.MASTABA_BUILD_VERSION='11.18';
 
 /* ---------------- Admin fixture browser ----------------
    V11.11's cosmetic day change called private lexical functions that were not
@@ -19199,7 +19199,7 @@ html[data-theme] body #app #view-admin .admin-zero-calls-v1101 *{
 <script id="mastaba-v1113-predict-and-context">
 (function(){
 'use strict';
-window.MASTABA_BUILD_VERSION='11.17';
+window.MASTABA_BUILD_VERSION='11.18';
 
 const nextPredV1113={
   loading:false,loaded:false,error:null,gw:null,fixtures:[],dbById:{},picks:{},meta:{draftSavedAt:null,submittedAt:null,editing:true}
@@ -19595,7 +19595,7 @@ setTimeout(()=>{if(state?.nextPublished&&nextIsSelectedV1113()){nextPredV1113.lo
 <script id="mastaba-v1114-home-next-predictions">
 (function(){
 'use strict';
-window.MASTABA_BUILD_VERSION='11.17';
+window.MASTABA_BUILD_VERSION='11.18';
 
 const homeSubmissionStatusBaseV1114=window.homeSubmissionStatus||homeSubmissionStatus;
 let homeNextHydrationQueuedV1114=false;
@@ -19912,7 +19912,7 @@ html[data-theme="barcelona"] body #app #view-admin .admin-workspace-v1100 :is(.a
 
 
 <script id="mastaba-v1115-version">
-window.MASTABA_BUILD_VERSION='11.17';
+window.MASTABA_BUILD_VERSION='11.18';
 </script>
 
 
@@ -20030,7 +20030,7 @@ html[data-theme] body #app #view-admin .admin-accounts-v1094 .admin-v1094-action
 <script id="mastaba-v1116-admin-interaction">
 (function(){
 'use strict';
-window.MASTABA_BUILD_VERSION='11.17';
+window.MASTABA_BUILD_VERSION='11.18';
 
 let roundCommitTimerV1116=0;
 let adminRoundObserverV1116=null;
@@ -20245,7 +20245,7 @@ html.mastaba-gw-started-v1117 #view-predict
 <script id="mastaba-v1117-runtime">
 (function(){
 'use strict';
-window.MASTABA_BUILD_VERSION='11.17';
+window.MASTABA_BUILD_VERSION='11.18';
 
 /* ---------- Shared publication helpers ---------- */
 function nextNumberV1117(){return Number(state.week)+1}
@@ -20294,6 +20294,19 @@ function poolForNextV1117(mid,selected){
 function mapPersistedNextV1117(pool,row){
   return {...pool,id:row.id,apiFixtureId:Number(row.api_fixture_id),apiPayload:row.api_payload||pool.apiPayload};
 }
+function dbRowForFixtureV1118(f,gameweekId){
+  const ph=f?.apiPayload?.teams?.home||{},pa=f?.apiPayload?.teams?.away||{};
+  return{
+    api_fixture_id:Number(f.apiFixtureId),gameweek_id:gameweekId,
+    api_league_id:f.apiLeagueId==null?null:Number(f.apiLeagueId),
+    competition_name:f.competition||'Competition',competition_country:f.competitionCountry||null,
+    home_team_id:Number(f.homeTeamId),home_team_name:ph.name||f.homeTeamName||TEAM[f.home]?.name||f.home,home_team_logo:ph.logo||f.homeTeamLogo||TEAM[f.home]?.logo||null,
+    away_team_id:Number(f.awayTeamId),away_team_name:pa.name||f.awayTeamName||TEAM[f.away]?.name||f.away,away_team_logo:pa.logo||f.awayTeamLogo||TEAM[f.away]?.logo||null,
+    kickoff_at:new Date(f.kickoff).toISOString(),venue_name:f.stadium||null,
+    fixture_status:f.phase==='final'?'FT':f.phase==='live'?'1H':'NS',
+    api_payload:f.apiPayload||{},updated_at:new Date().toISOString()
+  };
+}
 async function syncPublishedDeadlineV1117(gw){
   if(!nextPublishedFlagV1117(gw))return gw;
   const remaining=state.nextFixtures||[];
@@ -20331,7 +20344,7 @@ window.toggleAdminFixture=async function(mid,target,checked){
     if(checked){
       if(!(state.nextFixtures||[]).some(f=>Number(f.apiFixtureId)===api)){
         const {data,error}=await ctx.supa.from('mastaba_fixtures')
-          .upsert(dbRowForFixtureV1077(pool,gw.id),{onConflict:'api_fixture_id'}).select('*').single();
+          .upsert(dbRowForFixtureV1118(pool,gw.id),{onConflict:'api_fixture_id'}).select('*').single();
         if(error)throw error;
         const persisted=mapPersistedNextV1117(pool,data);
         state.nextFixtures=[...(state.nextFixtures||[]),persisted].sort((a,b)=>new Date(a.kickoff)-new Date(b.kickoff));
@@ -20360,7 +20373,9 @@ window.toggleAdminFixture=async function(mid,target,checked){
     if(typeof render==='function')render();
   }catch(e){
     console.error('Upcoming selection save failed',e);
-    toast(L('This Gameweek selection could not be saved.','تعذر حفظ اختيار الجولة.'),'warn');
+    const msg=String(e?.message||'');
+    toast(L(msg?`Gameweek selection could not be saved: ${msg}`:'This Gameweek selection could not be saved.',
+      msg?`تعذر حفظ اختيار الجولة: ${msg}`:'تعذر حفظ اختيار الجولة.'),'warn');
     if(typeof render==='function')render();
   }
 };
