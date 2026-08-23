@@ -7607,7 +7607,7 @@ function adminFixtureSelector(target){
    <div class="fixture-browser-search"><input class="fixture-search-box" value="${escapeHTML(ui.q||'')}" placeholder="${L('Search team, league or stadium…','ابحث باسم فريق، بطولة أو ملعب…')}" oninput="setAdminFixtureQuery('${target}',this.value)"><select class="fixture-league-filter" onchange="setAdminFixtureLeague('${target}',this.value)"><option value="all">${L('All Leagues','كل البطولات')}</option>${leagues.map(x=>`<option value="${x}" ${ui.league===x?'selected':''}>${x}</option>`).join('')}</select></div>
    <div class="fixture-day-strip">${dates.map(d=>`<button class="fixture-day ${ui.date===d&&!query?'active':''}" onclick="setAdminFixtureDay('${target}','${d}')"><small>${adminFixtureDateLabel(d).split(' ')[0]}</small><b>${adminFixtureDateLabel(d).replace(/^\S+\s*/,'')}</b></button>`).join('')}</div>
    ${query?`<div class="fixture-search-mode">${L('Searching across all available dates','البحث في كل الأيام المتاحة')} · “${escapeHTML(ui.q)}”</div>`:''}
-   <div class="fixture-selector grouped">${Object.keys(grouped).length?Object.entries(grouped).sort((a,b)=>fixtureCompetitionSort(a[0],b[0])).map(([league,fs])=>`<div class="fixture-league-group"><div class="fixture-league-title"><strong>${league}</strong><span>${fs.length} ${L('fixtures','ماتش')}</span></div>${fs.sort((a,b)=>new Date(a.kickoff)-new Date(b.kickoff)).map(f=>{const checked=selected.some(x=>x.id===f.id);const disabled=target==='current'&&isRoundLocked();return`<label class="fixture-choice fixture-choice-livescore ${checked?'selected':''} ${disabled?'disabled':''}"><span class="fixture-kickoff">${formatFixtureClock(f.kickoff)}</span><span class="fixture-team-stack"><span class="fixture-team-line"><span class="fixture-team-logo"><img src="${TEAM[f.home].logo}" alt=""></span><b>${TEAM[f.home].name}</b></span><span class="fixture-team-line"><span class="fixture-team-logo"><img src="${TEAM[f.away].logo}" alt=""></span><b>${TEAM[f.away].name}</b></span><small class="fixture-stadium">${f.stadium}</small></span><span class="fixture-checkbox-wrap"><input type="checkbox" ${checked?'checked':''} ${disabled?'disabled':''} onchange="toggleAdminFixture('${f.id}','${target}',this.checked)"><span class="fixture-check-label">${checked?L('Selected','مختار'):L('Add','إضافة')}</span></span></label>`}).join('')}</div>`).join(''):`<div class="fixture-empty">${L('No fixtures match these filters.','مفيش ماتشات مطابقة للبحث ده.')}</div>`}</div>
+   <div class="fixture-selector grouped">${Object.keys(grouped).length?Object.entries(grouped).sort((a,b)=>fixtureCompetitionSort(a[0],b[0])).map(([league,fs])=>`<div class="fixture-league-group"><div class="fixture-league-title"><strong>${league}</strong><span>${fs.length} ${L('fixtures','ماتش')}</span></div>${fs.sort((a,b)=>new Date(a.kickoff)-new Date(b.kickoff)).map(f=>{const checked=selected.some(x=>x.id===f.id);const disabled=target==='current'&&isRoundLocked()&&(!checked||!window.adminFixtureCanRemoveV1109?.(picked||f));return`<label class="fixture-choice fixture-choice-livescore ${checked?'selected':''} ${disabled?'disabled':''}"><span class="fixture-kickoff">${formatFixtureClock(f.kickoff)}</span><span class="fixture-team-stack"><span class="fixture-team-line"><span class="fixture-team-logo"><img src="${TEAM[f.home].logo}" alt=""></span><b>${TEAM[f.home].name}</b></span><span class="fixture-team-line"><span class="fixture-team-logo"><img src="${TEAM[f.away].logo}" alt=""></span><b>${TEAM[f.away].name}</b></span><small class="fixture-stadium">${f.stadium}</small></span><span class="fixture-checkbox-wrap"><input type="checkbox" ${checked?'checked':''} ${disabled?'disabled':''} onchange="toggleAdminFixture('${f.id}','${target}',this.checked)"><span class="fixture-check-label">${checked?L('Selected','مختار'):L('Add','إضافة')}</span></span></label>`}).join('')}</div>`).join(''):`<div class="fixture-empty">${L('No fixtures match these filters.','مفيش ماتشات مطابقة للبحث ده.')}</div>`}</div>
   </div>`
 }
 let adminFixtureQueryTimerV1079=null;
@@ -7629,7 +7629,7 @@ window.setAdminFixtureQuery=function(target,value){
 }
 window.setAdminFixtureLeague=function(target,value){adminBrowserState[target].league=value;renderAdmin()}
 window.setAdminFixtureDay=function(target,value){adminBrowserState[target].date=value;adminBrowserState[target].q='';renderAdmin()}
-window.toggleAdminFixture=function(mid,target,checked){const pool=(state.fixturePool||sandboxFixturePool()).find(f=>f.id===mid);if(!pool)return;if(target==='current'&&isRoundLocked())return toast(L('The current Gameweek is locked.','الجولة الحالية مقفولة.'),'warn');const key=target==='current'?'fixtures':'nextFixtures';state[key]=state[key]||[];if(checked&&!state[key].some(f=>f.id===mid)){state[key].push(clone(pool));state[key].sort((a,b)=>new Date(a.kickoff)-new Date(b.kickoff));if(target==='current'){state.users.forEach(u=>{state.predictions[u.id]=state.predictions[u.id]||{};state.predictions[u.id][mid]={home:0,away:0,firstTeam:'none',firstScorer:'none',double:false,touched:false}})}}else if(!checked){state[key]=state[key].filter(f=>f.id!==mid);if(target==='current')state.users.forEach(u=>{delete state.predictions[u.id]?.[mid];delete state.savedDrafts[u.id]?.[mid];delete state.officialPredictions[u.id]?.[mid]})}if(target==='next')state.nextPublished=false;save();render()}
+window.toggleAdminFixture=function(mid,target,checked){const pool=(state.fixturePool||sandboxFixturePool()).find(f=>f.id===mid);if(!pool)return;if(target==='current'&&isRoundLocked()&&checked)return toast(L('The current Gameweek is locked. You can still remove an unstarted selected match.','الجولة الحالية مقفولة. تقدر فقط تشيل ماتش مختار لسه مبدأش.'),'warn');if(target==='current'&&!checked){const selectedNow=(state.fixtures||[]).find(x=>String(x.id)===String(mid));if(selectedNow&&!(Date.now()<new Date(selectedNow.kickoff).getTime()&&selectedNow.phase==='upcoming'))return toast(L('This match has already started and can no longer be removed.','الماتش بدأ بالفعل ومينفعش يتشال.'),'warn')}const key=target==='current'?'fixtures':'nextFixtures';state[key]=state[key]||[];if(checked&&!state[key].some(f=>f.id===mid)){state[key].push(clone(pool));state[key].sort((a,b)=>new Date(a.kickoff)-new Date(b.kickoff));if(target==='current'){state.users.forEach(u=>{state.predictions[u.id]=state.predictions[u.id]||{};state.predictions[u.id][mid]={home:0,away:0,firstTeam:'none',firstScorer:'none',double:false,touched:false}})}}else if(!checked){state[key]=state[key].filter(f=>f.id!==mid);if(target==='current')state.users.forEach(u=>{delete state.predictions[u.id]?.[mid];delete state.savedDrafts[u.id]?.[mid];delete state.officialPredictions[u.id]?.[mid]})}if(target==='next')state.nextPublished=false;save();render()}
 window.publishNextGameweek=function(){if(!(state.nextFixtures||[]).length)return toast(L('Select at least one upcoming match first.','اختار ماتش واحد على الأقل للجولة الجاية.'),'warn');state.nextPublished=true;save();render();toast(L('Upcoming Gameweek published to the bulletin.','الجولة الجاية ظهرت في لوحة الجولة.'),'good')}
 function adminMatch(f){const eligible=[...(players[f.home]||[]),...(players[f.away]||[])].filter(p=>!['out','suspended'].includes(p.status));return`<div class="admin-match"><h4>${TEAM[f.home].name} vs ${TEAM[f.away].name} <span class="status-chip ${f.phase}">${phaseLabel(f.phase)}</span></h4><div class="muted" style="font-size:.75rem">${f.stadium} · ${formatTime(f.kickoff)}</div><div class="admin-controls"><input id="rh-${f.id}" type="number" min="0" value="${f.result?.home??0}"><input id="ra-${f.id}" type="number" min="0" value="${f.result?.away??0}"><select id="rt-${f.id}"><option value="none">${L('No Team to Score','لا يوجد فريق')}</option><option value="${f.home}">${TEAM[f.home].name}</option><option value="${f.away}">${TEAM[f.away].name}</option></select><select id="rs-${f.id}"><option value="none">${L('No Goalscorer','لا يوجد هداف')}</option>${eligible.map(p=>`<option value="${p.id}">${p.name}</option>`).join('')}</select></div><div class="admin-buttons"><button class="btn btn-secondary" onclick="startMatch('${f.id}')">${L('Start Match','ابدأ الماتش')}</button><button class="btn btn-primary" onclick="finalizeMatch('${f.id}')">${L('Finalize Result','ثبت النتيجة')}</button></div></div>`}
 window.generatePicks=function(){toast(L('Demo controls are disabled on Production.','أدوات التجربة مقفولة على النسخة الحية.'),'warn')}
@@ -13740,7 +13740,7 @@ window.toggleAdminFixture=async function(mid,target,checked){
   const ctx=window.prodCtxV1073;if(!ctx||!currentUser()?.admin)return;
   const availablePool=[...(window.adminSchedulePoolV1102||[]),...(state.fixturePool||[])];
   const pool=availablePool.find(f=>String(f.id)===String(mid));if(!pool)return;
-  if(target==='current'&&isRoundLocked())return toast(L('The current Gameweek is locked.','الجولة الحالية مقفولة.'),'warn');
+  if(target==='current'&&isRoundLocked()&&checked)return toast(L('The current Gameweek is locked. You can still remove an unstarted selected match.','الجولة الحالية مقفولة. تقدر فقط تشيل ماتش مختار لسه مبدأش.'),'warn');if(target==='current'&&!checked){const selectedNow=(state.fixtures||[]).find(x=>String(x.id)===String(mid));if(selectedNow&&!(Date.now()<new Date(selectedNow.kickoff).getTime()&&selectedNow.phase==='upcoming'))return toast(L('This match has already started and can no longer be removed.','الماتش بدأ بالفعل ومينفعش يتشال.'),'warn')}
   try{
     if(target==='current'){
       if(checked){
@@ -14136,7 +14136,7 @@ adminFixtureSelector=function(target){
     <div class="fixture-browser-search"><input class="fixture-search-box" value="${escapeHTML(ui.q||'')}" placeholder="${L('Search team, alias, league or stadium…','ابحث باسم فريق أو اختصار أو بطولة أو ملعب…')}" autocomplete="off" spellcheck="false" oninput="setAdminFixtureQueryV1080('${target}',this.value)"><select class="fixture-league-filter" onchange="setAdminFixtureLeague('${target}',this.value)"><option value="all">${L('All Leagues','كل البطولات')}</option>${leagues.map(x=>`<option value="${x}" ${ui.league===x?'selected':''}>${x}</option>`).join('')}</select></div>
     <div class="fixture-day-strip">${dates.map(d=>`<button class="fixture-day ${ui.date===d&&!query?'active':''}" onclick="setAdminFixtureDay('${target}','${d}')"><small>${adminFixtureDateLabel(d).split(' ')[0]}</small><b>${adminFixtureDateLabel(d).replace(/^\S+\s*/,'')}</b></button>`).join('')}</div>
     <div class="fixture-search-mode-v1080" data-search-status-v1080>${status}${limited}</div>
-    <div class="fixture-selector grouped">${Object.keys(grouped).length?Object.entries(grouped).sort((a,b)=>fixtureCompetitionSort(a[0],b[0])).map(([league,fs])=>`<div class="fixture-league-group" data-league-group-v1080="${escapeHTML(league)}"><div class="fixture-league-title"><strong>${league}</strong><span data-group-count-v1080>${fs.length} ${L('fixtures','ماتش')}</span></div>${fs.map(f=>{const checked=selected.some(x=>Number(x.apiFixtureId)&&Number(x.apiFixtureId)===Number(f.apiFixtureId)||String(x.id)===String(f.id)),disabled=target==='current'&&isRoundLocked();return`<label class="fixture-choice fixture-choice-livescore ${checked?'selected':''} ${disabled?'disabled':''}" data-fixture-row-v1080 data-fixture-date-v1080="${adminFixtureDateKey(f.kickoff)}" data-fixture-league-v1080="${escapeHTML(league)}" data-fixture-search-v1080="${escapeHTML(fixtureSearchTextV1080(f))}"><span class="fixture-kickoff">${formatFixtureClock(f.kickoff)}</span><span class="fixture-team-stack"><span class="fixture-team-line"><span class="fixture-team-logo"><img loading="lazy" decoding="async" src="${TEAM[f.home].logo}" alt=""></span><b>${TEAM[f.home].name}</b></span><span class="fixture-team-line"><span class="fixture-team-logo"><img loading="lazy" decoding="async" src="${TEAM[f.away].logo}" alt=""></span><b>${TEAM[f.away].name}</b></span><small class="fixture-stadium">${f.stadium}</small></span><span class="fixture-checkbox-wrap"><input type="checkbox" ${checked?'checked':''} ${disabled?'disabled':''} onchange="toggleAdminFixture('${f.id}','${target}',this.checked)"><span class="fixture-check-label">${checked?L('Selected','مختار'):L('Add','إضافة')}</span></span></label>`}).join('')}</div>`).join(''):`<div class="fixture-empty">${L('No fixtures match these filters.','مفيش ماتشات مطابقة للبحث ده.')}</div>`}</div>
+    <div class="fixture-selector grouped">${Object.keys(grouped).length?Object.entries(grouped).sort((a,b)=>fixtureCompetitionSort(a[0],b[0])).map(([league,fs])=>`<div class="fixture-league-group" data-league-group-v1080="${escapeHTML(league)}"><div class="fixture-league-title"><strong>${league}</strong><span data-group-count-v1080>${fs.length} ${L('fixtures','ماتش')}</span></div>${fs.map(f=>{const checked=selected.some(x=>Number(x.apiFixtureId)&&Number(x.apiFixtureId)===Number(f.apiFixtureId)||String(x.id)===String(f.id)),disabled=target==='current'&&isRoundLocked()&&(!checked||!window.adminFixtureCanRemoveV1109?.(picked||f));return`<label class="fixture-choice fixture-choice-livescore ${checked?'selected':''} ${disabled?'disabled':''}" data-fixture-row-v1080 data-fixture-date-v1080="${adminFixtureDateKey(f.kickoff)}" data-fixture-league-v1080="${escapeHTML(league)}" data-fixture-search-v1080="${escapeHTML(fixtureSearchTextV1080(f))}"><span class="fixture-kickoff">${formatFixtureClock(f.kickoff)}</span><span class="fixture-team-stack"><span class="fixture-team-line"><span class="fixture-team-logo"><img loading="lazy" decoding="async" src="${TEAM[f.home].logo}" alt=""></span><b>${TEAM[f.home].name}</b></span><span class="fixture-team-line"><span class="fixture-team-logo"><img loading="lazy" decoding="async" src="${TEAM[f.away].logo}" alt=""></span><b>${TEAM[f.away].name}</b></span><small class="fixture-stadium">${f.stadium}</small></span><span class="fixture-checkbox-wrap"><input type="checkbox" ${checked?'checked':''} ${disabled?'disabled':''} onchange="toggleAdminFixture('${f.id}','${target}',this.checked)"><span class="fixture-check-label">${checked?L('Selected','مختار'):L('Add','إضافة')}</span></span></label>`}).join('')}</div>`).join(''):`<div class="fixture-empty">${L('No fixtures match these filters.','مفيش ماتشات مطابقة للبحث ده.')}</div>`}</div>
   </div>`;
 };
 
@@ -17168,7 +17168,7 @@ html #view-admin .admin-workspace-v1100 .admin-empty-v1100{padding:18px;text-ali
 <script id="mastaba-v1100-admin-repair">
 (function mastabaV1100(){
 'use strict';
-window.MASTABA_BUILD_VERSION='11.08';
+window.MASTABA_BUILD_VERSION='11.09';
 
 const SCHEDULE_SYNC_V1101='https://bnwjtrtlwnlbldfhaggg.supabase.co/functions/v1/mastaba-schedule-sync';
 const scheduleV1100=window.adminScheduleV1100=window.adminScheduleV1100||{
@@ -17196,14 +17196,14 @@ function addAdminCalendarDaysV1106(key,days){
 }
 function adminSevenDayKeysV1106(now=new Date()){
   const first=adminFixtureDateKey(now.toISOString());
-  return Array.from({length:8},(_,index)=>addAdminCalendarDaysV1106(first,index));
+  return Array.from({length:10},(_,index)=>addAdminCalendarDaysV1106(first,index));
 }
 function adminCatalogBoundsV1106(keys){
   const list=Array.isArray(keys)&&keys.length?keys:adminSevenDayKeysV1106();
   const start=new Date(`${list[0]}T00:00:00.000Z`);
   const afterLast=new Date(`${addAdminCalendarDaysV1106(list[list.length-1],1)}T00:00:00.000Z`);
   /* Widen only the Supabase timestamp bounds so every IANA timezone is safe;
-     the returned rows are then reduced to the exact eight calendar keys. */
+     the returned rows are then reduced to the exact ten calendar keys. */
   start.setUTCHours(start.getUTCHours()-15);
   afterLast.setUTCHours(afterLast.getUTCHours()+15);
   return{start:start.toISOString(),end:afterLast.toISOString()};
@@ -17224,8 +17224,13 @@ async function accessTokenV1100(){
   const token=data?.session?.access_token;if(!token)throw new Error(L('Admin session expired. Sign in again.','جلسة الأدمن انتهت. سجل دخول من جديد.'));
   return token;
 }
-function fallbackTeamKeyV1100(id){
-  return window.MASTABA_TEAM_ABBR_V1083?.[Number(id)]||`T${Number(id)}`;
+function fallbackTeamKeyV1100(id,name=''){
+  const known=window.MASTABA_TEAM_ABBR_V1083?.[Number(id)];if(known)return String(known).toUpperCase();
+  const raw=String(name||'').normalize('NFD').replace(/[\u0300-\u036f]/g,'').replace(/[^A-Za-z0-9 ]+/g,' ').trim();
+  const stop=new Set(['FC','SC','CF','AFC','CLUB','FOOTBALL','CALCIO']);
+  const words=raw.split(/\s+/).filter(Boolean).filter(w=>!stop.has(w.toUpperCase()));
+  let code='TM';if(words.length===1)code=words[0].slice(0,3);else if(words.length===2)code=words[0].slice(0,1)+words[1].slice(0,2);else if(words.length>2)code=words.slice(0,3).map(w=>w[0]).join('');
+  code=String(code||'TM').toUpperCase();if(Number(id)&&code!=='TM'){window.MASTABA_TEAM_ABBR_V1083=window.MASTABA_TEAM_ABBR_V1083||{};window.MASTABA_TEAM_ABBR_V1083[Number(id)]=code}return code;
 }
 function phaseV1100(status,kickoff){
   const s=String(status||'NS').toUpperCase();
@@ -17237,7 +17242,7 @@ function catalogFixtureV1101(row,existingByApi){
   const apiId=Number(row?.api_fixture_id),homeId=Number(row?.home_team_id),awayId=Number(row?.away_team_id);
   if(!apiId||!homeId||!awayId||!row?.kickoff_at)return null;
   const existing=existingByApi.get(apiId);if(existing)return existing;
-  const home=fallbackTeamKeyV1100(homeId),away=fallbackTeamKeyV1100(awayId);
+  if(row.home_abbreviation){window.MASTABA_TEAM_ABBR_V1083=window.MASTABA_TEAM_ABBR_V1083||{};window.MASTABA_TEAM_ABBR_V1083[homeId]=String(row.home_abbreviation).toUpperCase()}if(row.away_abbreviation){window.MASTABA_TEAM_ABBR_V1083=window.MASTABA_TEAM_ABBR_V1083||{};window.MASTABA_TEAM_ABBR_V1083[awayId]=String(row.away_abbreviation).toUpperCase()}const home=fallbackTeamKeyV1100(homeId,row.home_team_name),away=fallbackTeamKeyV1100(awayId,row.away_team_name);
   TEAM[home]={name:row.home_team_name||home,short:home,logo:row.home_team_logo||''};
   TEAM[away]={name:row.away_team_name||away,short:away,logo:row.away_team_logo||''};
   const payload={
@@ -17271,7 +17276,7 @@ async function loadFullScheduleV1100(force=false){
     const catalogBounds=adminCatalogBoundsV1106(dateKeys);
     const [catalogR,sourcesR]=await Promise.all([
       ctx.supa.from('mastaba_schedule_catalog')
-        .select('api_fixture_id,api_league_id,season,competition_name,competition_country,canonical_name,home_team_id,home_team_name,home_team_logo,away_team_id,away_team_name,away_team_logo,kickoff_at,venue_name,fixture_status,source_refreshed_at')
+        .select('api_fixture_id,api_league_id,season,competition_name,competition_country,canonical_name,home_team_id,home_team_name,home_team_logo,home_abbreviation,away_team_id,away_team_name,away_team_logo,away_abbreviation,kickoff_at,venue_name,fixture_status,source_refreshed_at')
         .gte('kickoff_at',catalogBounds.start).lt('kickoff_at',catalogBounds.end)
         .order('kickoff_at',{ascending:true}).limit(500).abortSignal(controller.signal),
       ctx.supa.from('mastaba_schedule_sources')
@@ -17523,7 +17528,7 @@ function gameSetupHTMLV1100(){
   const subtitle=isCurrent?L('Edit the active round before it locks.','عدّل الجولة الحالية قبل القفل.'):L('Select any centrally cached match, then publish the next Gameweek.','اختار أي ماتش محفوظ مركزياً وبعدين انشر الجولة الجاية.');
   return `<div class="admin-section-v1100">
     <div class="admin-block-title-v1100"><span>${L('Gameweek Fixture Setup','إعداد ماتشات الجولة')}</span><small>${L('Central Supabase schedule catalogue','دليل جدول Supabase المركزي')}</small></div>
-    <div class="admin-live-note"><strong>${L('Central Fixture Catalogue','دليل الماتشات المركزي')}</strong><span>${L('This page reads only the next 8 days from Supabase. League schedules refresh about every 72 hours; cup and UEFA schedules about every 24 hours. Opening Game Setup makes zero provider calls.','الصفحة دي بتقرأ الـ8 أيام الجاية فقط من Supabase. جداول الدوري بتتحدث تقريباً كل 72 ساعة، والكؤوس وبطولات أوروبا كل 24 ساعة. فتح إعداد الجولة لا يطلب أي بيانات من المصدر.')}</span>${scheduleStatusHTMLV1100()}</div>
+    <div class="admin-live-note"><strong>${L('Central Fixture Catalogue','دليل الماتشات المركزي')}</strong><span>${L('This page reads only the next 10 days from Supabase. League schedules refresh about every 72 hours; cup and UEFA schedules about every 24 hours. Opening Game Setup makes zero provider calls.','الصفحة دي بتقرأ الـ10 أيام الجاية فقط من Supabase. جداول الدوري بتتحدث تقريباً كل 72 ساعة، والكؤوس وبطولات أوروبا كل 24 ساعة. فتح إعداد الجولة لا يطلب أي بيانات من المصدر.')}</span>${scheduleStatusHTMLV1100()}</div>
     <div class="admin-round-tabs">
       <button class="admin-round-tab ${isCurrent?'active':''}" onclick="setAdminSetupTargetV1100('current')">${L('Current Gameweek','الجولة الحالية')}<small>GW ${state.week} · ${(state.fixtures||[]).length} ${L('matches','ماتش')}</small></button>
       <button class="admin-round-tab ${!isCurrent?'active':''}" onclick="setAdminSetupTargetV1100('next')">${L('Upcoming Gameweek','الجولة الجاية')}<small>GW ${state.week+1} · ${(state.nextFixtures||[]).length} ${L('selected','مختارة')}</small></button>
@@ -17656,7 +17661,7 @@ if(state?.view==='admin')setTimeout(renderAdminV1100,0);
    Supabase schedule available exclusively inside Admin > Game Setup. */
 (function(){
 'use strict';
-window.MASTABA_BUILD_VERSION='11.08';
+window.MASTABA_BUILD_VERSION='11.09';
 
 const fixtureKeyV1102=f=>Number(f?.apiFixtureId)?`api:${Number(f.apiFixtureId)}`:`id:${String(f?.id||'')}`;
 function pinnedPoolV1102(){
@@ -17716,9 +17721,9 @@ function buildAdminFixtureSelectorV1103(target){
   const leagues=[...new Set(pool.map(competitionV1102))].sort(fixtureCompetitionSort),query=String(ui.q||'').trim();
   const matches=pool.filter(f=>{const league=competitionV1102(f);return(ui.league==='all'||league===ui.league)&&(query?searchMatchV1102(query,f):adminFixtureDateKey(f.kickoff)===ui.date)}).sort((a,b)=>new Date(a.kickoff)-new Date(b.kickoff));
   const visible=matches.slice(0,ui.limit),groups={};visible.forEach(f=>{const league=competitionV1102(f);(groups[league]??=[]).push(f)});
-  const status=query?`${L('Searching the next 8 days','البحث في الـ8 أيام الجاية')} · “${escapeHTML(query)}” · ${matches.length} ${L('matches','ماتش')}`:`${matches.length} ${L('matches on this day','ماتش في اليوم ده')}`;
+  const status=query?`${L('Searching the next 10 days','البحث في الـ10 أيام الجاية')} · “${escapeHTML(query)}” · ${matches.length} ${L('matches','ماتش')}`:`${matches.length} ${L('matches on this day','ماتش في اليوم ده')}`;
   const limited=matches.length>visible.length?` · ${L(`showing ${visible.length} of ${matches.length}`,`عرض ${visible.length} من ${matches.length}`)}`:'';
-  const rows=Object.keys(groups).length?Object.entries(groups).sort((a,b)=>fixtureCompetitionSort(a[0],b[0])).map(([league,fixtures])=>`<div class="fixture-league-group" data-league-group-v1080="${escapeHTML(league)}"><div class="fixture-league-title"><strong>${escapeHTML(league)}</strong><span data-group-count-v1080>${fixtures.length} ${L('fixtures','ماتش')}</span></div>${fixtures.map(f=>{const picked=selected.find(x=>(Number(x?.apiFixtureId)>0&&Number(x.apiFixtureId)===Number(f.apiFixtureId))||String(x?.id)===String(f.id)),checked=!!picked,disabled=target==='current'&&isRoundLocked(),actionId=picked?.id||f.id,h=teamV1102(f,'home'),a=teamV1102(f,'away');return`<label class="fixture-choice fixture-choice-livescore ${checked?'selected':''} ${disabled?'disabled':''}" data-fixture-row-v1080 data-fixture-date-v1080="${adminFixtureDateKey(f.kickoff)}" data-fixture-league-v1080="${escapeHTML(league)}" data-fixture-search-v1080="${escapeHTML(searchTextV1102(f))}"><span class="fixture-kickoff">${formatFixtureClock(f.kickoff)}</span><span class="fixture-team-stack"><span class="fixture-team-line"><span class="fixture-team-logo"><img loading="lazy" decoding="async" src="${escapeHTML(h.logo)}" alt="${escapeHTML(h.name)}"></span><b>${escapeHTML(h.name)}</b></span><span class="fixture-team-line"><span class="fixture-team-logo"><img loading="lazy" decoding="async" src="${escapeHTML(a.logo)}" alt="${escapeHTML(a.name)}"></span><b>${escapeHTML(a.name)}</b></span><small class="fixture-stadium">${escapeHTML(f.stadium||L('Venue TBC','الملعب لم يحدد'))}</small></span><span class="fixture-checkbox-wrap"><input type="checkbox" ${checked?'checked':''} ${disabled?'disabled':''} onchange="toggleAdminFixture('${actionId}','${target}',this.checked)"><span class="fixture-check-label">${checked?L('Selected','مختار'):L('Add','إضافة')}</span></span></label>`}).join('')}</div>`).join(''):`<div class="fixture-empty">${L('No fixtures match these filters.','مفيش ماتشات مطابقة للبحث ده.')}</div>`;
+  const rows=Object.keys(groups).length?Object.entries(groups).sort((a,b)=>fixtureCompetitionSort(a[0],b[0])).map(([league,fixtures])=>`<div class="fixture-league-group" data-league-group-v1080="${escapeHTML(league)}"><div class="fixture-league-title"><strong>${escapeHTML(league)}</strong><span data-group-count-v1080>${fixtures.length} ${L('fixtures','ماتش')}</span></div>${fixtures.map(f=>{const picked=selected.find(x=>(Number(x?.apiFixtureId)>0&&Number(x.apiFixtureId)===Number(f.apiFixtureId))||String(x?.id)===String(f.id)),checked=!!picked,disabled=target==='current'&&isRoundLocked()&&(!checked||!window.adminFixtureCanRemoveV1109?.(picked||f)),actionId=picked?.id||f.id,h=teamV1102(f,'home'),a=teamV1102(f,'away');return`<label class="fixture-choice fixture-choice-livescore ${checked?'selected':''} ${disabled?'disabled':''}" data-fixture-row-v1080 data-fixture-date-v1080="${adminFixtureDateKey(f.kickoff)}" data-fixture-league-v1080="${escapeHTML(league)}" data-fixture-search-v1080="${escapeHTML(searchTextV1102(f))}"><span class="fixture-kickoff">${formatFixtureClock(f.kickoff)}</span><span class="fixture-team-stack"><span class="fixture-team-line"><span class="fixture-team-logo"><img loading="lazy" decoding="async" src="${escapeHTML(h.logo)}" alt="${escapeHTML(h.name)}"></span><b>${escapeHTML(h.name)}</b></span><span class="fixture-team-line"><span class="fixture-team-logo"><img loading="lazy" decoding="async" src="${escapeHTML(a.logo)}" alt="${escapeHTML(a.name)}"></span><b>${escapeHTML(a.name)}</b></span><small class="fixture-stadium">${escapeHTML(f.stadium||L('Venue TBC','الملعب لم يحدد'))}</small></span><span class="fixture-checkbox-wrap"><input type="checkbox" ${checked?'checked':''} ${disabled?'disabled':''} onchange="toggleAdminFixture('${actionId}','${target}',this.checked)"><span class="fixture-check-label">${checked?L('Selected','مختار'):L('Add','إضافة')}</span></span></label>`}).join('')}</div>`).join(''):`<div class="fixture-empty">${L('No fixtures match these filters.','مفيش ماتشات مطابقة للبحث ده.')}</div>`;
   const more='';
   function dateParts(key){
     try{
@@ -18345,7 +18350,7 @@ html[data-theme] body #app #view-admin .admin-v1094-searchrow{grid-template-colu
 
 /* Auth hydration is no longer a blank page while the essential queries run. */
 body.auth-pending-v1064::before{
-  content:"المصطبة"!important;position:fixed!important;z-index:2147483646!important;
+  content:none!important;display:none!important;position:fixed!important;z-index:2147483646!important;
   left:50%!important;top:43%!important;transform:translate(-50%,-50%)!important;
   color:#fff!important;font-size:1.45rem!important;font-weight:1000!important;letter-spacing:.02em!important;
   pointer-events:none!important;
@@ -18425,7 +18430,7 @@ body.auth-pending-v1064::after{top:53%!important}
 <script id="mastaba-v1108-runtime-fixes">
 (function(){
 'use strict';
-window.MASTABA_BUILD_VERSION='11.08';
+window.MASTABA_BUILD_VERSION='11.09';
 
 /* Hard-mount every fixture slot that exists after the catalogue finishes. */
 window.mountAllAdminFixtureBrowsersV1108=function(){
@@ -18515,6 +18520,190 @@ window.refreshPrivateLiveV1083=fetchEfficientSnapshotV1108;
 
 /* Make sure current mobile geometry is applied after the final script wins. */
 requestAnimationFrame(()=>{try{syncBottomNavGlider()}catch{};if(state?.view==='predict')try{window.fixPredictionScoreMetaV23?.()}catch{}});
+})();
+</script>
+
+
+<style id="mastaba-v1109-admin-schedule-finish">
+/* V11.09 — 10-day fixture planning, exact nested contrast and clean boot. */
+
+/* Clean auth boot: keep a small loading indicator, remove the large branded
+   splash that the previous pass introduced. */
+body.auth-pending-v1064::before{display:none!important;content:none!important}
+body.auth-pending-v1064::after{
+  display:block!important;content:""!important;left:50%!important;top:50%!important;
+  width:30px!important;height:30px!important;margin:-15px 0 0 -15px!important;
+  border-width:3px!important;
+}
+
+/* Current / Upcoming is drawn on the outer ATS surface. Every bit of copy must
+   therefore use the exact outer ATS text colour, including nested <small>. */
+html[data-theme] body #app #view-admin .admin-round-tabs{
+  background:transparent!important;color:var(--admin-outer-text)!important;
+  border-bottom-color:color-mix(in srgb,var(--admin-outer-text) 34%,transparent)!important;
+}
+html[data-theme] body #app #view-admin .admin-round-tab,
+html[data-theme] body #app #view-admin .admin-round-tab.active,
+html[data-theme] body #app #view-admin .admin-round-tab :is(strong,b,span,small),
+html[data-theme] body #app #view-admin .admin-round-tab.active :is(strong,b,span,small){
+  background:transparent!important;color:var(--admin-outer-text)!important;
+  -webkit-text-fill-color:var(--admin-outer-text)!important;
+}
+html[data-theme] body #app #view-admin .admin-round-tabs:after{background:var(--admin-outer-text)!important}
+
+/* Inner Gameweek panel -> outer Selected Matches/search/fixture surfaces ->
+   inner chips/controls. This exactly alternates the same two ATS colours. */
+html[data-theme] body #app #view-admin .admin-focus-panel{
+  background:var(--admin-inner)!important;color:var(--admin-inner-text)!important;
+  border-color:var(--admin-inner-line)!important;
+}
+html[data-theme] body #app #view-admin .admin-focus-panel>.panel-head,
+html[data-theme] body #app #view-admin .admin-focus-panel>.panel-head :is(h1,h2,h3,h4,p,strong,b,span,small,.muted){
+  color:var(--admin-inner-text)!important;-webkit-text-fill-color:var(--admin-inner-text)!important;
+}
+html[data-theme] body #app #view-admin .admin-focus-panel .selection-count{
+  background:var(--admin-outer-surface)!important;color:var(--admin-outer-text)!important;
+  -webkit-text-fill-color:var(--admin-outer-text)!important;border-color:var(--admin-outer-line)!important;
+}
+html[data-theme] body #app #view-admin .admin-focus-panel :is(.selected-fixtures-summary,.selected-fixtures-empty,.fixture-search-box,.fixture-league-filter,.fixture-league-title,.fixture-choice,.fixture-day){
+  background:var(--admin-outer-surface)!important;color:var(--admin-outer-text)!important;
+  -webkit-text-fill-color:var(--admin-outer-text)!important;border-color:var(--admin-outer-line)!important;
+}
+html[data-theme] body #app #view-admin .admin-focus-panel .selected-fixtures-summary :is(.selected-fixtures-title,h1,h2,h3,h4,p,strong,b,label){
+  color:var(--admin-outer-text)!important;-webkit-text-fill-color:var(--admin-outer-text)!important;
+}
+html[data-theme] body #app #view-admin .admin-focus-panel :is(.fixture-search-box,.fixture-league-filter)::placeholder{
+  color:var(--admin-outer-text)!important;-webkit-text-fill-color:var(--admin-outer-text)!important;opacity:.68!important;
+}
+html[data-theme] body #app #view-admin .admin-focus-panel .fixture-league-filter option{
+  background:var(--admin-outer)!important;color:var(--admin-outer-text)!important;
+}
+html[data-theme] body #app #view-admin .admin-focus-panel .selected-fixture-chips>span{
+  background:var(--admin-inner)!important;color:var(--admin-inner-text)!important;
+  -webkit-text-fill-color:var(--admin-inner-text)!important;border-color:var(--admin-inner-line)!important;
+}
+html[data-theme] body #app #view-admin .admin-focus-panel .selected-fixture-chips>span :is(small,b,strong){
+  color:var(--admin-inner-text)!important;-webkit-text-fill-color:var(--admin-inner-text)!important;
+}
+html[data-theme] body #app #view-admin .selected-fixture-remove-v1109{
+  display:grid!important;place-items:center!important;flex:0 0 auto!important;width:25px!important;height:25px!important;
+  padding:0!important;margin-inline-start:2px!important;border-radius:999px!important;
+  background:var(--admin-outer-surface)!important;color:var(--admin-outer-text)!important;
+  -webkit-text-fill-color:var(--admin-outer-text)!important;border:1px solid var(--admin-outer-line)!important;
+  font:inherit!important;font-size:1rem!important;font-weight:1000!important;line-height:1!important;
+}
+html[data-theme] body #app #view-admin .selected-fixture-remove-v1109:hover{filter:brightness(1.08)}
+html[data-theme] body #app #view-admin .selected-fixture-remove-v1109:disabled{opacity:.38!important;cursor:not-allowed!important}
+html[data-theme] body #app #view-admin .selected-fixture-edit-note-v1109{
+  display:block!important;margin-top:8px!important;color:var(--admin-outer-text)!important;
+  -webkit-text-fill-color:var(--admin-outer-text)!important;opacity:.8!important;font-size:.65rem!important;line-height:1.35!important;
+}
+
+/* Ten calendar days. Desktop remains one compact row; phone becomes a readable
+   5 x 2 grid instead of ten illegibly thin buttons or a sideways scroller. */
+html[data-theme] body #app #view-admin .fixture-day-strip{
+  display:grid!important;grid-template-columns:repeat(10,minmax(0,1fr))!important;
+  gap:4px!important;overflow:visible!important;padding:9px 0 11px!important;max-width:100%!important;
+}
+html[data-theme] body #app #view-admin .fixture-day{
+  min-width:0!important;width:auto!important;min-height:56px!important;padding:6px 1px!important;
+}
+html[data-theme] body #app #view-admin .fixture-day-weekday{font-size:.50rem!important}
+html[data-theme] body #app #view-admin .fixture-day-date{font-size:.57rem!important}
+html[data-theme] body #app #view-admin .fixture-day-year{font-size:.44rem!important}
+
+/* Other Admin inputs: use the opposite surface of their immediate card. These
+   rules specifically cover the places that had white-on-white/dark-on-dark. */
+html[data-theme] body #app #view-admin .admin-match-v1100 :is(input,select,textarea),
+html[data-theme] body #app #view-admin .admin-health-card-v1100 :is(input,select,textarea){
+  background:var(--admin-outer-surface)!important;color:var(--admin-outer-text)!important;
+  -webkit-text-fill-color:var(--admin-outer-text)!important;border-color:var(--admin-outer-line)!important;
+}
+html[data-theme] body #app #view-admin .admin-v1094-panel :is(.admin-v1094-metric,.admin-v1094-box,.admin-v1094-user) :is(input,select,textarea){
+  background:var(--admin-inner)!important;color:var(--admin-inner-text)!important;
+  -webkit-text-fill-color:var(--admin-inner-text)!important;border-color:var(--admin-inner-line)!important;
+}
+html[data-theme] body #app #view-admin .admin-v1094-panel :is(.admin-v1094-metric,.admin-v1094-box,.admin-v1094-user) :is(input,textarea)::placeholder{
+  color:var(--admin-inner-text)!important;-webkit-text-fill-color:var(--admin-inner-text)!important;opacity:.65!important;
+}
+
+@media(max-width:720px){
+  html[data-theme] body #app #view-admin .fixture-day-strip{grid-template-columns:repeat(5,minmax(0,1fr))!important;gap:4px!important}
+  html[data-theme] body #app #view-admin .fixture-day{min-height:50px!important;padding:5px 1px!important}
+  html[data-theme] body #app #view-admin .fixture-day-weekday{font-size:.52rem!important}
+  html[data-theme] body #app #view-admin .fixture-day-date{font-size:.57rem!important}
+  html[data-theme] body #app #view-admin .fixture-day-year{font-size:.44rem!important}
+  html[data-theme] body #app #view-admin .selected-fixture-chips{gap:6px!important}
+}
+</style>
+
+<script id="mastaba-v1109-admin-schedule-runtime">
+(function(){
+'use strict';
+window.MASTABA_BUILD_VERSION='11.09';
+
+/* Local fallback is intentionally name-based, never T123. The central
+   abbreviation table remains authoritative when it has a row. */
+window.mastabaDerivedTeamAbbrV1109=function(name,id){
+  const known=window.MASTABA_TEAM_ABBR_V1083?.[Number(id)];if(known)return String(known).toUpperCase();
+  const raw=String(name||'').normalize('NFD').replace(/[\u0300-\u036f]/g,'').replace(/[^A-Za-z0-9 ]+/g,' ').trim();
+  const stop=new Set(['FC','SC','CF','AFC','CLUB','FOOTBALL','CALCIO']);
+  const words=raw.split(/\s+/).filter(Boolean).filter(w=>!stop.has(w.toUpperCase()));
+  let code='TM';
+  if(words.length===1)code=words[0].slice(0,3);
+  else if(words.length===2)code=words[0].slice(0,1)+words[1].slice(0,2);
+  else if(words.length>2)code=words.slice(0,3).map(w=>w[0]).join('');
+  code=String(code||'TM').toUpperCase();
+  if(Number(id)&&code!=='TM'){window.MASTABA_TEAM_ABBR_V1083=window.MASTABA_TEAM_ABBR_V1083||{};window.MASTABA_TEAM_ABBR_V1083[Number(id)]=code}
+  return code;
+};
+window.adminFixtureAbbrV1109=function(f,side){
+  const isHome=side==='home',key=isHome?f?.home:f?.away,id=Number(isHome?f?.homeTeamId:f?.awayTeamId);
+  const apiTeam=f?.apiPayload?.teams?.[isHome?'home':'away'];
+  const name=apiTeam?.name||TEAM?.[key]?.name||String(key||'');
+  const current=TEAM?.[key]?.short;
+  if(current&&!/^T\d+$/i.test(String(current)))return current;
+  return window.mastabaDerivedTeamAbbrV1109(name,id);
+};
+window.adminFixtureCanRemoveV1109=function(f){
+  if(!f)return false;
+  const kickoff=new Date(f.kickoff).getTime();
+  return Number.isFinite(kickoff)&&Date.now()<kickoff&&String(f.phase||'upcoming')==='upcoming';
+};
+window.removeSelectedFixtureV1109=async function(target,mid){
+  const list=target==='current'?(state.fixtures||[]):(state.nextFixtures||[]),f=list.find(x=>String(x.id)===String(mid));
+  if(!f)return;
+  if(target==='current'&&!window.adminFixtureCanRemoveV1109(f))return toast(L('This match has already started and can no longer be moved or removed.','الماتش بدأ بالفعل ومينفعش يتنقل أو يتشال.'),'warn');
+  const wasPublished=target==='next'&&!!state.nextPublished;
+  if(target!=='current'){const ok=confirm(L(`Remove ${window.adminFixtureAbbrV1109(f,'home')} — ${window.adminFixtureAbbrV1109(f,'away')} from this Gameweek?`,`تشيل ${window.adminFixtureAbbrV1109(f,'home')} — ${window.adminFixtureAbbrV1109(f,'away')} من الجولة دي؟`));if(!ok)return;}
+  const box=document.querySelector(`#view-admin .fixture-browser[data-admin-target-v1080="${target}"] input[type="checkbox"][onchange*="${String(mid).replace(/"/g,'\\"')}"]`);
+  try{await window.toggleAdminFixture(mid,target,false)}catch(e){console.error(e);return}
+  if(wasPublished&&target==='next')setTimeout(()=>toast(L('Match removed locally. Press Update Upcoming Gameweek to save the revised schedule.','الماتش اتشال. اضغط تحديث الجولة الجاية لحفظ الجدول المعدل.'),'good'),60);
+};
+
+/* Final selected-summary renderer: robust abbreviations plus an explicit remove
+   affordance. Removing then adding from the other Gameweek tab is the safe way
+   to reassign an unstarted fixture. */
+window.selectedFixtureSummary=selectedFixtureSummary=function(target){
+  const selected=target==='current'?(state.fixtures||[]):(state.nextFixtures||[]);
+  if(!selected.length)return `<div class="selected-fixtures-empty">${L('No matches selected yet.','لسه مفيش ماتشات مختارة.')}</div>`;
+  const chips=selected.map(f=>{
+    const h=window.adminFixtureAbbrV1109(f,'home'),a=window.adminFixtureAbbrV1109(f,'away');
+    const removable=target!=='current'||window.adminFixtureCanRemoveV1109(f);
+    const safeId=String(f.id).replace(/'/g,"\\'");
+    return `<span class="selected-fixture-chip"><b>${escapeHTML(h)} — ${escapeHTML(a)}</b><small>${adminFixtureDateLabel(adminFixtureDateKey(f.kickoff))}</small><button type="button" class="selected-fixture-remove-v1109" ${removable?'': 'disabled'} onclick="removeSelectedFixtureV1109('${target}','${safeId}')" aria-label="${L('Remove match','شيل الماتش')}">×</button></span>`;
+  }).join('');
+  const note=L('Unstarted matches can be removed here. To move one to the other Gameweek, remove it, switch Current / Upcoming, then add it there. Published Upcoming changes are saved when you press Update Upcoming Gameweek.','تقدر تشيل أي ماتش لسه مبدأش من هنا. لنقله للجولة التانية: شيله، بدّل بين الحالية / الجاية، وبعدها ضيفه هناك. تغييرات الجولة الجاية المنشورة بتتحفظ لما تضغط تحديث الجولة الجاية.');
+  return `<div class="selected-fixtures-summary"><div class="selected-fixtures-title">${L('Selected Matches','الماتشات المختارة')}</div><div class="selected-fixture-chips">${chips}</div><small class="selected-fixture-edit-note-v1109">${note}</small></div>`;
+};
+
+/* Repaint current Game Setup once so any T### chips already in DOM immediately
+   become proper abbreviations without another Supabase/provider request. */
+requestAnimationFrame(()=>{
+  if(state?.view==='admin'&&String(state.adminWorkspaceTabV1095||'game')==='game'){
+    try{window.refreshAdminGameSetupV1095?.();window.refreshAdminFixtureBrowserV1104?.();window.mountAllAdminFixtureBrowsersV1108?.()}catch(e){console.warn('V11.09 Admin repaint',e)}
+  }
+});
 })();
 </script>
 
