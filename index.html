@@ -9603,7 +9603,7 @@ function normalizeReviewerStateV10211(){
     });
   });
 
-  state.selectedPredictWeek = Math.max(1,Math.min(Number(state.week||1),Number(state.selectedPredictWeek||state.week||1)));
+  state.selectedPredictWeek = Math.max(1,Math.min(Number(state.week||1)+(state.nextPublished?1:0),Number(state.selectedPredictWeek||state.week||1)));
   state.selectedRankWeek = Math.max(1,Math.min(Number(state.week||1),Number(state.selectedRankWeek||state.week||1)));
   if(state.view==='rules'){state.view='profile';state.profileWorkspaceTab='rules'} state.view = ['home','predict','rankings','leagues','show','profile','admin'].includes(state.view) ? state.view : 'home';
 
@@ -13287,7 +13287,7 @@ async function hydrateProductionV1073(profile,user,supa){
  for(const f of fx){const hc=teamCodeV1073(f.home_team_id,f.home_team_name),ac=teamCodeV1073(f.away_team_id,f.away_team_name);TEAM[hc]={name:f.home_team_name,short:hc,logo:f.home_team_logo||''};TEAM[ac]={name:f.away_team_name,short:ac,logo:f.away_team_logo||''}}
  const uniqueTeamIds=[...new Set(fx.flatMap(f=>[f.home_team_id,f.away_team_id]))];
  uniqueTeamIds.forEach(tid=>{const f=fx.find(x=>Number(x.home_team_id)===Number(tid)||Number(x.away_team_id)===Number(tid));const name=Number(f?.home_team_id)===Number(tid)?f?.home_team_name:f?.away_team_name;const code=teamCodeV1073(tid,name);players[code]=players[code]||[]});
- state.week=Number(gw.gameweek_number);state.selectedPredictWeek=state.week;state.selectedRankWeek=state.week;state.selectedHomeWeek='overall';state.nextPublished=false;state.nextFixtures=[];state.history=null;state.previousWeekPoints={};state.previousWeekStats={};state.rankOrderHistory=[];state.leaderHistory=[];state.lastPlaceHistory=[];state.roundLocked=false;state.forceDeadline=false;
+ const priorSelectedPredictWeekV1119=Number(state.selectedPredictWeek||gw.gameweek_number);state.week=Number(gw.gameweek_number);state.selectedPredictWeek=Math.max(1,Math.min(state.week+1,priorSelectedPredictWeekV1119));state.selectedRankWeek=state.week;state.selectedHomeWeek='overall';state.nextPublished=false;state.nextFixtures=[];state.history=null;state.previousWeekPoints={};state.previousWeekStats={};state.rankOrderHistory=[];state.leaderHistory=[];state.lastPlaceHistory=[];state.roundLocked=false;state.forceDeadline=false;
  state.fixtures=fx.map(f=>{const phase=fixturePhaseV1073(f.fixture_status,f.kickoff_at);const result=(f.home_goals!=null&&f.away_goals!=null)?{home:Number(f.home_goals),away:Number(f.away_goals),firstTeam:f.first_scoring_team_id?teamCodeV1073(f.first_scoring_team_id):'none',firstScorer:f.first_scorer_id?String(f.first_scorer_id):'none'}:null;return{id:f.id,apiFixtureId:Number(f.api_fixture_id),competition:f.competition_name,competitionCountry:f.competition_country||'',apiLeagueId:Number(f.api_league_id)||null,competitionLogo:String(f?.api_payload?.league?.logo||''),home:teamCodeV1073(f.home_team_id,f.home_team_name),away:teamCodeV1073(f.away_team_id,f.away_team_name),homeTeamId:Number(f.home_team_id),awayTeamId:Number(f.away_team_id),stadium:f.venue_name||'',kickoff:f.kickoff_at,phase,result}});
  state.fixturePool=state.fixtures.map(x=>({...x}));state.predictions={};state.savedDrafts={};state.officialPredictions={};state.roundMeta={};
  state.users.forEach(u=>{state.predictions[u.id]={};state.savedDrafts[u.id]={};state.officialPredictions[u.id]={};state.roundMeta[u.id]={draftSavedAt:null,submittedAt:null,editing:true}});
@@ -17174,7 +17174,7 @@ html #view-admin .admin-workspace-v1100 .admin-empty-v1100{padding:18px;text-ali
 <script id="mastaba-v1100-admin-repair">
 (function mastabaV1100(){
 'use strict';
-window.MASTABA_BUILD_VERSION='11.18';
+window.MASTABA_BUILD_VERSION='11.19';
 
 const SCHEDULE_SYNC_V1101='https://bnwjtrtlwnlbldfhaggg.supabase.co/functions/v1/mastaba-schedule-sync';
 const scheduleV1100=window.adminScheduleV1100=window.adminScheduleV1100||{
@@ -17677,7 +17677,7 @@ if(state?.view==='admin')setTimeout(renderAdminV1100,0);
    Supabase schedule available exclusively inside Admin > Game Setup. */
 (function(){
 'use strict';
-window.MASTABA_BUILD_VERSION='11.18';
+window.MASTABA_BUILD_VERSION='11.19';
 
 const fixtureKeyV1102=f=>Number(f?.apiFixtureId)?`api:${Number(f.apiFixtureId)}`:`id:${String(f?.id||'')}`;
 function pinnedPoolV1102(){
@@ -18452,7 +18452,7 @@ body.auth-pending-v1064::after{top:53%!important}
 <script id="mastaba-v1108-runtime-fixes">
 (function(){
 'use strict';
-window.MASTABA_BUILD_VERSION='11.18';
+window.MASTABA_BUILD_VERSION='11.19';
 
 /* Hard-mount every fixture slot that exists after the catalogue finishes. */
 window.mountAllAdminFixtureBrowsersV1108=function(){
@@ -18662,7 +18662,7 @@ html[data-theme] body #app #view-admin .admin-v1094-panel :is(.admin-v1094-metri
 <script id="mastaba-v1109-admin-schedule-runtime">
 (function(){
 'use strict';
-window.MASTABA_BUILD_VERSION='11.18';
+window.MASTABA_BUILD_VERSION='11.19';
 
 /* Local fallback is intentionally name-based, never T123. The central
    abbreviation table remains authoritative when it has a row. */
@@ -18776,7 +18776,7 @@ html[data-theme] body #app #view-admin .fixture-league-title :is(strong,b,span,s
 <script id="mastaba-v1110-team-identity-guard">
 (function(){
 'use strict';
-window.MASTABA_BUILD_VERSION='11.18';
+window.MASTABA_BUILD_VERSION='11.19';
 /* Repair any already-loaded cached schedule objects from V11.09 without a
    provider/Supabase reload. Per-fixture payload is authoritative. */
 function repair(f){
@@ -18925,7 +18925,7 @@ html[data-theme] body #app #view-admin .fixture-day[aria-pressed="true"] :is(sma
 <script id="mastaba-v1112-runtime">
 (function(){
 'use strict';
-window.MASTABA_BUILD_VERSION='11.18';
+window.MASTABA_BUILD_VERSION='11.19';
 
 /* ---------------- Admin fixture browser ----------------
    V11.11's cosmetic day change called private lexical functions that were not
@@ -19199,7 +19199,7 @@ html[data-theme] body #app #view-admin .admin-zero-calls-v1101 *{
 <script id="mastaba-v1113-predict-and-context">
 (function(){
 'use strict';
-window.MASTABA_BUILD_VERSION='11.18';
+window.MASTABA_BUILD_VERSION='11.19';
 
 const nextPredV1113={
   loading:false,loaded:false,error:null,gw:null,fixtures:[],dbById:{},picks:{},meta:{draftSavedAt:null,submittedAt:null,editing:true}
@@ -19228,7 +19228,45 @@ function scorerByIdV1113(pid){
 }
 function nextFixtureV1113(mid){return nextPredV1113.fixtures.find(f=>String(f.id)===String(mid))||null}
 function nextPickV1113(mid){return nextPredV1113.picks[mid]||(nextPredV1113.picks[mid]=blankPickV1113())}
-function markNextDirtyV1113(){nextPredV1113.meta.editing=true;nextPredV1113.meta.submittedAt=null}
+let nextAutosaveTimerV1119=0,nextAutosaveDirtyV1119=false,nextAutosaveInFlightV1119=null;
+function nextAutosaveLabelV1119(stateName,text){
+  const el=document.querySelector('#view-predict .next-autosave-v1119');
+  if(!el)return;el.dataset.state=stateName;el.textContent=text||'';
+}
+function queueNextAutosaveV1119(){
+  nextAutosaveDirtyV1119=true;
+  clearTimeout(nextAutosaveTimerV1119);
+  nextAutosaveLabelV1119('saving',L('Saving changes…','جاري حفظ التعديلات…'));
+  nextAutosaveTimerV1119=setTimeout(()=>flushNextAutosaveV1119(false),650);
+}
+async function flushNextAutosaveV1119(force=false){
+  clearTimeout(nextAutosaveTimerV1119);
+  if(nextAutosaveInFlightV1119){try{await nextAutosaveInFlightV1119}catch{}}
+  if(!nextAutosaveDirtyV1119&&!force)return true;
+  if(!nextPredV1113.gw?.id||nextLockedV1113()||nextSubmittedV1113())return false;
+  nextAutosaveDirtyV1119=false;
+  nextAutosaveLabelV1119('saving',L('Saving changes…','جاري حفظ التعديلات…'));
+  nextAutosaveInFlightV1119=(async()=>{
+    try{
+      await persistNextV1113(false);
+      nextPredV1113.meta.draftSavedAt=new Date().toISOString();
+      nextPredV1113.meta.submittedAt=null;
+      nextPredV1113.meta.editing=true;
+      try{save()}catch{}
+      nextAutosaveLabelV1119('saved',L('Draft saved automatically','تم حفظ الـ Draft تلقائيًا'));
+      return true;
+    }catch(e){
+      nextAutosaveDirtyV1119=true;
+      console.error('GW2 autosave failed',e);
+      nextAutosaveLabelV1119('error',L('Autosave failed — use Save Draft','فشل الحفظ التلقائي — استخدم حفظ Draft'));
+      if(force)toast(L('Your latest Gameweek changes could not be saved yet.','تعذر حفظ آخر تعديلات الجولة لسه.'),'warn');
+      throw e;
+    }finally{nextAutosaveInFlightV1119=null}
+  })();
+  return nextAutosaveInFlightV1119;
+}
+window.flushNextAutosaveV1119=flushNextAutosaveV1119;
+function markNextDirtyV1113(){nextPredV1113.meta.editing=true;nextPredV1113.meta.submittedAt=null;queueNextAutosaveV1119()}
 function normalizeNextPickV1113(p,f){
   if(p.home===''||p.away==='')return p;
   const prevTeam=p.firstTeam;p={...p,home:Number(p.home),away:Number(p.away)};
@@ -19387,18 +19425,21 @@ window.chooseNextFirstTeamV1113=function(mid){
   if(Number(p.away)>0&&Number(p.home)===0){p.firstTeam=f.away;p.firstScorer='none';markNextDirtyV1113();refreshNextCardV1113(mid);return}
   openChoiceModal(L('First Team to Score','أول فريق يسجل'),[f.home,f.away].map(c=>({label:TEAM[c]?.name||c,value:c,logo:TEAM[c]?.logo||''})),v=>{p.firstTeam=v;p.firstScorer='none';markNextDirtyV1113();refreshNextCardV1113(mid)});
 };
+const nextPlayerReadAtV1119=window.nextPlayerReadAtV1119||(window.nextPlayerReadAtV1119={});
 async function ensureNextPlayersV1113(f,team){
-  if((players[team]||[]).length)return true;
+  const cachedAt=Number(nextPlayerReadAtV1119[team]||0);
+  if((players[team]||[]).length&&Date.now()-cachedAt<2*60*1000)return true;
   const ctx=window.prodCtxV1073;if(!ctx?.supa)throw new Error(L('Production session is not ready.','جلسة الإنتاج غير جاهزة.'));
   const tid=team===f.home?Number(f.homeTeamId):Number(f.awayTeamId);
   const [poolR,avR]=await Promise.all([
-    ctx.supa.from('mastaba_team_player_pool').select('team_id,player_id,player_name,position,squad_number,stats').eq('team_id',tid).eq('active',true).order('player_name',{ascending:true}),
+    ctx.supa.from('mastaba_team_player_pool').select('team_id,player_id,player_name,position,squad_number,stats,stats_refreshed_at').eq('team_id',tid).eq('active',true).order('player_name',{ascending:true}),
     ctx.supa.from('mastaba_fixture_player_availability').select('player_id,status,reason').eq('fixture_id',f.id)
   ]);
   if(poolR.error)throw poolR.error;
   const av=Object.fromEntries((avR.data||[]).map(x=>[String(x.player_id),x]));
   const pos=x=>{const s=String(x||'MID').toUpperCase();if(s==='DEF')return'CB';if(s==='ATTACKER'||s==='FWD'||s==='FORWARD')return'FW';if(s==='MIDFIELDER')return'MID';if(s==='GOALKEEPER')return'GK';return s};
-  players[team]=(poolR.data||[]).map(r=>({id:String(r.player_id),name:r.player_name||'Player',pos:pos(r.position),number:r.squad_number??null,status:av[String(r.player_id)]?.status||'available',availabilityReason:av[String(r.player_id)]?.reason||null,stats:r.stats&&Object.keys(r.stats).length?r.stats:{ALL:{apps:0,bench:0,goals:0,assists:0,xg:null,xa:null}}}));
+  players[team]=(poolR.data||[]).map(r=>({id:String(r.player_id),name:r.player_name||'Player',pos:pos(r.position),number:r.squad_number??null,status:av[String(r.player_id)]?.status||'available',availabilityReason:av[String(r.player_id)]?.reason||null,statsRefreshedAt:r.stats_refreshed_at||null,stats:r.stats&&Object.keys(r.stats).length?r.stats:{ALL:{apps:0,bench:0,goals:0,assists:0,xg:null,xa:null}}}));
+  nextPlayerReadAtV1119[team]=Date.now();
   return players[team].length>0;
 }
 window.openNextScorersV1113=async function(mid){
@@ -19442,7 +19483,8 @@ async function persistNextV1113(submitted){
 }
 window.saveNextDraftV1113=async function(){
   if(nextLockedV1113()||nextSubmittedV1113())return;
-  try{await persistNextV1113(false);nextPredV1113.meta.draftSavedAt=new Date().toISOString();nextPredV1113.meta.submittedAt=null;nextPredV1113.meta.editing=true;window.renderPredict?.();toast(L('Draft Saved','تم حفظ الـ Draft'),'good')}
+  nextAutosaveDirtyV1119=true;
+  try{await flushNextAutosaveV1119(true);window.renderPredict?.();toast(L('Draft Saved','تم حفظ الـ Draft'),'good')}
   catch(e){console.error(e);toast(String(e?.message||L('Draft could not be saved.','تعذر حفظ الـ Draft.')),'warn')}
 };
 function showNextMissingV1113(missing){
@@ -19467,7 +19509,7 @@ window.openNextSubmitConfirmV1113=function(){
   root.innerHTML=`<div class="modal-backdrop"><div class="modal confirmation-modal"><div class="confirm-symbol submit-symbol">${icon('lock')}</div><h3>${L('Confirm Predictions','تأكيد التوقعات')}</h3><p>${L('Submit and lock your Gameweek predictions? You can unlock and edit them again before the deadline.','تثبت توقعات الجولة؟ تقدر تفتحها وتعدلها تاني قبل موعد القفل.')}</p><div class="confirm-summary"><span>${nextPredV1113.fixtures.length} ${L('Matches Complete','ماتشات مكتملة')}</span><span>${dbl?`X2 · ${TEAM[dbl.home]?.short||dbl.home} vs ${TEAM[dbl.away]?.short||dbl.away}`:L('No Double Selected','مفيش دبل مختار')}</span></div><div class="confirm-actions"><button class="btn btn-secondary" onclick="closeModal()">${L('Cancel','إلغاء')}</button><button class="btn btn-primary" onclick="confirmNextSubmitV1113()">${L('Confirm Submission','تأكيد الإرسال')}</button></div></div></div>`;
 };
 window.confirmNextSubmitV1113=async function(){
-  try{await persistNextV1113(true);nextPredV1113.meta.draftSavedAt=new Date().toISOString();nextPredV1113.meta.submittedAt=new Date().toISOString();nextPredV1113.meta.editing=false;state.validationMissing=[];closeModal();window.renderPredict?.();toast(L('Predictions Submitted','تم إرسال التوقعات'),'good')}
+  try{clearTimeout(nextAutosaveTimerV1119);nextAutosaveDirtyV1119=false;await persistNextV1113(true);nextPredV1113.meta.draftSavedAt=new Date().toISOString();nextPredV1113.meta.submittedAt=new Date().toISOString();nextPredV1113.meta.editing=false;state.validationMissing=[];closeModal();window.renderPredict?.();toast(L('Predictions Submitted','تم إرسال التوقعات'),'good')}
   catch(e){console.error(e);toast(String(e?.message||L('Predictions could not be submitted.','تعذر إرسال التوقعات.')),'warn')}
 };
 window.makeNextChangesV1113=function(){if(nextLockedV1113())return;nextPredV1113.meta.editing=true;window.renderPredict?.();toast(L('Predictions unlocked for editing.','التوقعات مفتوحة للتعديل.'),'good')};
@@ -19496,7 +19538,7 @@ function renderNextPredictionV1113(){
     view.innerHTML=`<h1 class="page-title">${L(`Gameweek ${no} Predictions`,`توقعات الجولة ${no}`)}</h1>${switcherV1113(no)}<div class="notice">${L('The next Gameweek has no published matches yet.','الجولة الجاية مفيهاش ماتشات منشورة لسه.')}</div>`;return;
   }
   const deadline=nextDeadlineDateV1113();
-  view.innerHTML=`<h1 class="page-title">${L(`Gameweek ${no} Predictions`,`توقعات الجولة ${no}`)}</h1><p class="page-sub">${nextSubmittedV1113()?L('Submitted successfully. Your picks are safe until you choose to edit them.','تم الإرسال بنجاح. توقعاتك متثبتة لحد ما تختار تعدلها.'):L('You can predict this published Gameweek now, even before it becomes the default Gameweek.','تقدر تتوقع الجولة المنشورة دي دلوقتي حتى قبل ما تبقى الجولة الأساسية.')}</p>${switcherV1113(no)}<div class="notice next-week-preview-note-v1112">${deadline?`${L('Predictions Deadline','موعد قفل التوقعات')}: ${formatTime(deadline.toISOString())}`:''}</div><div class="match-list next-predict-form-v1113">${nextPredV1113.fixtures.map(nextPredictionCardV1113).join('')}</div>${nextSubmissionActionsV1113()}${switcherV1113(no,'week-switcher-bottom-v1112')}`;
+  view.innerHTML=`<h1 class="page-title">${L(`Gameweek ${no} Predictions`,`توقعات الجولة ${no}`)}</h1><p class="page-sub">${nextSubmittedV1113()?L('Submitted successfully. Your picks are safe until you choose to edit them.','تم الإرسال بنجاح. توقعاتك متثبتة لحد ما تختار تعدلها.'):L('You can predict this published Gameweek now, even before it becomes the default Gameweek.','تقدر تتوقع الجولة المنشورة دي دلوقتي حتى قبل ما تبقى الجولة الأساسية.')}</p>${switcherV1113(no)}<div class="notice next-week-preview-note-v1112">${deadline?`${L('Predictions Deadline','موعد قفل التوقعات')}: ${formatTime(deadline.toISOString())}`:''}</div><div class="next-autosave-v1119" data-state="${nextPredV1113.meta.draftSavedAt?'saved':'idle'}">${nextPredV1113.meta.draftSavedAt?L('Draft saved automatically','تم حفظ الـ Draft تلقائيًا'):''}</div><div class="match-list next-predict-form-v1113">${nextPredV1113.fixtures.map(nextPredictionCardV1113).join('')}</div>${nextSubmissionActionsV1113()}${switcherV1113(no,'week-switcher-bottom-v1112')}`;
 }
 
 /* -------------------- Gameweek performance strip -------------------- */
@@ -19595,7 +19637,7 @@ setTimeout(()=>{if(state?.nextPublished&&nextIsSelectedV1113()){nextPredV1113.lo
 <script id="mastaba-v1114-home-next-predictions">
 (function(){
 'use strict';
-window.MASTABA_BUILD_VERSION='11.18';
+window.MASTABA_BUILD_VERSION='11.19';
 
 const homeSubmissionStatusBaseV1114=window.homeSubmissionStatus||homeSubmissionStatus;
 let homeNextHydrationQueuedV1114=false;
@@ -19912,7 +19954,7 @@ html[data-theme="barcelona"] body #app #view-admin .admin-workspace-v1100 :is(.a
 
 
 <script id="mastaba-v1115-version">
-window.MASTABA_BUILD_VERSION='11.18';
+window.MASTABA_BUILD_VERSION='11.19';
 </script>
 
 
@@ -20030,7 +20072,7 @@ html[data-theme] body #app #view-admin .admin-accounts-v1094 .admin-v1094-action
 <script id="mastaba-v1116-admin-interaction">
 (function(){
 'use strict';
-window.MASTABA_BUILD_VERSION='11.18';
+window.MASTABA_BUILD_VERSION='11.19';
 
 let roundCommitTimerV1116=0;
 let adminRoundObserverV1116=null;
@@ -20245,7 +20287,7 @@ html.mastaba-gw-started-v1117 #view-predict
 <script id="mastaba-v1117-runtime">
 (function(){
 'use strict';
-window.MASTABA_BUILD_VERSION='11.18';
+window.MASTABA_BUILD_VERSION='11.19';
 
 /* ---------- Shared publication helpers ---------- */
 function nextNumberV1117(){return Number(state.week)+1}
@@ -20564,6 +20606,51 @@ requestAnimationFrame(()=>{
   setStartedClassV1117();
   if(state.view==='predict')mountPerformanceV1117(true);
   if(currentAllFinalV1117())ensureBulletinAnchorV1117();
+});
+})();
+</script>
+
+
+<style id="mastaba-v1119-next-gw-draft-stability">
+#view-predict .next-autosave-v1119{
+  max-width:810px;margin:-6px auto 12px;text-align:end;
+  font-size:.58rem;font-weight:850;color:var(--theme-muted);min-height:14px;
+}
+#view-predict .next-autosave-v1119[data-state="saving"]{opacity:.8}
+#view-predict .next-autosave-v1119[data-state="saved"]{opacity:.68}
+#view-predict .next-autosave-v1119[data-state="error"]{color:#b4232e;opacity:1}
+</style>
+
+
+<script id="mastaba-v1119-route-and-autosave">
+(function(){
+'use strict';
+window.MASTABA_BUILD_VERSION='11.19';
+
+const goBaseV1119=window.go;
+if(typeof goBaseV1119==='function'){
+  window.go=async function(view){
+    if(state.view==='predict' &&
+       Number(state.selectedPredictWeek)===Number(state.week)+1 &&
+       typeof window.flushNextAutosaveV1119==='function'){
+      try{await window.flushNextAutosaveV1119(false)}catch(e){console.warn('GW draft route flush failed',e)}
+    }
+    return goBaseV1119.apply(this,arguments);
+  };
+}
+
+document.addEventListener('visibilitychange',()=>{
+  if(document.visibilityState==='hidden' &&
+     state.view==='predict' &&
+     Number(state.selectedPredictWeek)===Number(state.week)+1){
+    window.flushNextAutosaveV1119?.(true);
+  }
+});
+window.addEventListener('pagehide',()=>{
+  if(state.view==='predict' &&
+     Number(state.selectedPredictWeek)===Number(state.week)+1){
+    window.flushNextAutosaveV1119?.(true);
+  }
 });
 })();
 </script>
