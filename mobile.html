@@ -17175,7 +17175,7 @@ html #view-admin .admin-workspace-v1100 .admin-empty-v1100{padding:18px;text-ali
 <script id="mastaba-v1100-admin-repair">
 (function mastabaV1100(){
 'use strict';
-window.MASTABA_BUILD_VERSION='11.25';
+window.MASTABA_BUILD_VERSION='11.26';
 
 const SCHEDULE_SYNC_V1101='https://bnwjtrtlwnlbldfhaggg.supabase.co/functions/v1/mastaba-schedule-sync';
 const scheduleV1100=window.adminScheduleV1100=window.adminScheduleV1100||{
@@ -17678,7 +17678,7 @@ if(state?.view==='admin')setTimeout(renderAdminV1100,0);
    Supabase schedule available exclusively inside Admin > Game Setup. */
 (function(){
 'use strict';
-window.MASTABA_BUILD_VERSION='11.25';
+window.MASTABA_BUILD_VERSION='11.26';
 
 const fixtureKeyV1102=f=>Number(f?.apiFixtureId)?`api:${Number(f.apiFixtureId)}`:`id:${String(f?.id||'')}`;
 function pinnedPoolV1102(){
@@ -18453,7 +18453,7 @@ body.auth-pending-v1064::after{top:53%!important}
 <script id="mastaba-v1108-runtime-fixes">
 (function(){
 'use strict';
-window.MASTABA_BUILD_VERSION='11.25';
+window.MASTABA_BUILD_VERSION='11.26';
 
 /* Hard-mount every fixture slot that exists after the catalogue finishes. */
 window.mountAllAdminFixtureBrowsersV1108=function(){
@@ -18663,7 +18663,7 @@ html[data-theme] body #app #view-admin .admin-v1094-panel :is(.admin-v1094-metri
 <script id="mastaba-v1109-admin-schedule-runtime">
 (function(){
 'use strict';
-window.MASTABA_BUILD_VERSION='11.25';
+window.MASTABA_BUILD_VERSION='11.26';
 
 /* Local fallback is intentionally name-based, never T123. The central
    abbreviation table remains authoritative when it has a row. */
@@ -18777,7 +18777,7 @@ html[data-theme] body #app #view-admin .fixture-league-title :is(strong,b,span,s
 <script id="mastaba-v1110-team-identity-guard">
 (function(){
 'use strict';
-window.MASTABA_BUILD_VERSION='11.25';
+window.MASTABA_BUILD_VERSION='11.26';
 /* Repair any already-loaded cached schedule objects from V11.09 without a
    provider/Supabase reload. Per-fixture payload is authoritative. */
 function repair(f){
@@ -18926,7 +18926,7 @@ html[data-theme] body #app #view-admin .fixture-day[aria-pressed="true"] :is(sma
 <script id="mastaba-v1112-runtime">
 (function(){
 'use strict';
-window.MASTABA_BUILD_VERSION='11.25';
+window.MASTABA_BUILD_VERSION='11.26';
 
 /* ---------------- Admin fixture browser ----------------
    V11.11's cosmetic day change called private lexical functions that were not
@@ -19200,7 +19200,7 @@ html[data-theme] body #app #view-admin .admin-zero-calls-v1101 *{
 <script id="mastaba-v1113-predict-and-context">
 (function(){
 'use strict';
-window.MASTABA_BUILD_VERSION='11.25';
+window.MASTABA_BUILD_VERSION='11.26';
 
 const nextPredV1113={
   loading:false,loaded:false,error:null,gw:null,fixtures:[],dbById:{},picks:{},meta:{draftSavedAt:null,submittedAt:null,editing:true}
@@ -19663,7 +19663,7 @@ setTimeout(()=>{if(state?.nextPublished&&nextIsSelectedV1113()){nextPredV1113.lo
 <script id="mastaba-v1114-home-next-predictions">
 (function(){
 'use strict';
-window.MASTABA_BUILD_VERSION='11.25';
+window.MASTABA_BUILD_VERSION='11.26';
 
 const homeSubmissionStatusBaseV1114=window.homeSubmissionStatus||homeSubmissionStatus;
 let homeNextHydrationQueuedV1114=false;
@@ -19980,7 +19980,7 @@ html[data-theme="barcelona"] body #app #view-admin .admin-workspace-v1100 :is(.a
 
 
 <script id="mastaba-v1115-version">
-window.MASTABA_BUILD_VERSION='11.25';
+window.MASTABA_BUILD_VERSION='11.26';
 </script>
 
 
@@ -20098,7 +20098,7 @@ html[data-theme] body #app #view-admin .admin-accounts-v1094 .admin-v1094-action
 <script id="mastaba-v1116-admin-interaction">
 (function(){
 'use strict';
-window.MASTABA_BUILD_VERSION='11.25';
+window.MASTABA_BUILD_VERSION='11.26';
 
 let roundCommitTimerV1116=0;
 let adminRoundObserverV1116=null;
@@ -20313,7 +20313,7 @@ html.mastaba-gw-started-v1117 #view-predict
 <script id="mastaba-v1117-runtime">
 (function(){
 'use strict';
-window.MASTABA_BUILD_VERSION='11.25';
+window.MASTABA_BUILD_VERSION='11.26';
 
 /* ---------- Shared publication helpers ---------- */
 function nextNumberV1117(){return Number(state.week)+1}
@@ -20651,7 +20651,7 @@ requestAnimationFrame(()=>{
 <script id="mastaba-v1119-route-and-autosave">
 (function(){
 'use strict';
-window.MASTABA_BUILD_VERSION='11.25';
+window.MASTABA_BUILD_VERSION='11.26';
 
 const goBaseV1119=window.go;
 if(typeof goBaseV1119==='function'){
@@ -20705,7 +20705,7 @@ window.addEventListener('pagehide',()=>{
 <script id="mastaba-v1120-player-and-gw-stability">
 (function(){
 'use strict';
-window.MASTABA_BUILD_VERSION='11.25';
+window.MASTABA_BUILD_VERSION='11.26';
 
 const LAST_WEEK_KEY_V1120='mastaba:last-predict-week:v1120';
 function rememberPredictWeekV1120(w){
@@ -20875,7 +20875,7 @@ requestAnimationFrame(()=>rememberPredictWeekV1120(state.selectedPredictWeek));
 <script id="mastaba-v1121-competition-stats">
 (function(){
 'use strict';
-window.MASTABA_BUILD_VERSION='11.25';
+window.MASTABA_BUILD_VERSION='11.26';
 
 /* V11.21
    Player stats in the scorer drawer must be for the competition being
@@ -20913,7 +20913,7 @@ window.playerRow=function(p,comp,mid){
 <script id="mastaba-v1122-season-competition-integrity">
 (function(){
 'use strict';
-window.MASTABA_BUILD_VERSION='11.25';
+window.MASTABA_BUILD_VERSION='11.26';
 
 /* fixtureById originally searched only the active Gameweek. That made every
    published-next-GW player drawer lose its competition identity and fall back
@@ -21032,7 +21032,7 @@ window.playerRow=function(p,comp,mid){
 <script id="mastaba-v1123-authoritative-runtime">
 (function(){
 'use strict';
-window.MASTABA_BUILD_VERSION='11.25';
+window.MASTABA_BUILD_VERSION='11.26';
 
 /* -------------------------------------------------------------------------
    1) PLAYER DATA: never allow demo/local-storage season stats to win in
@@ -21506,7 +21506,7 @@ setTimeout(safeATSSyncV1123,120);
 <script id="mastaba-v1124-next-submit-scope-hotfix">
 (function(){
 'use strict';
-window.MASTABA_BUILD_VERSION='11.25';
+window.MASTABA_BUILD_VERSION='11.26';
 
 /* Final GW2 Submit authority.
    V11.20 tried to call the V11.13 persistence function outside the closure
@@ -21714,7 +21714,7 @@ window.confirmNextSubmitV1113=async function(){
 <script id="mastaba-v1125-rolling-predictions">
 (function(){
 'use strict';
-window.MASTABA_BUILD_VERSION='11.25';
+window.MASTABA_BUILD_VERSION='11.26';
 
 const saveStateV1125=window.__matchSaveStateV1125||(window.__matchSaveStateV1125={});
 let currentAutosaveTimerV1125=0;
@@ -21832,11 +21832,20 @@ async function saveRowsV1125(ctx,fixtures,submitted){
   const {data,error}=await window.prodCtxV1073.supa.rpc('mastaba_save_prediction_batch',{p_rows:rows});
   if(error)throw error;
   const now=new Date().toISOString();
+  window.rollingPredictionCacheV1126=window.rollingPredictionCacheV1126||{};
   for(const f of writable){
     const p=pickForV1125(ctx,f.id);if(!p)continue;
     p.savedAt=now;
     p.submitted=!!submitted;
     p.submittedAt=submitted?now:null;
+    window.rollingPredictionCacheV1126[f.id]={...p};
+    if(ctx.kind==='current'){
+      state.savedDrafts[state.currentUser]=state.savedDrafts[state.currentUser]||{};
+      state.officialPredictions[state.currentUser]=state.officialPredictions[state.currentUser]||{};
+      state.savedDrafts[state.currentUser][f.id]={...p};
+      if(submitted)state.officialPredictions[state.currentUser][f.id]={...p};
+      else delete state.officialPredictions[state.currentUser][f.id];
+    }
   }
   if(ctx.kind==='current'){
     const m=state.roundMeta?.[state.currentUser];
@@ -21951,12 +21960,10 @@ function updateOneMatchActionV1125(mid){
   const card=document.querySelector(`#view-predict .match-card[data-mid="${CSS.escape(String(mid))}"]`);if(!card)return;
   const old=card.querySelector('.match-entry-actions-v1125,.match-entry-locked-v1125');
   const html=matchActionHTMLV1125(ctx,f);
-  if(old)old.outerHTML=html;
-  else{
-    const footer=card.querySelector(':scope > .match-footer');
-    if(footer)footer.insertAdjacentHTML('beforebegin',html);
-    else card.insertAdjacentHTML('beforeend',html);
-  }
+  if(old)old.remove();
+  const footer=card.querySelector(':scope > .match-footer');
+  if(footer)footer.insertAdjacentHTML('afterend',html);
+  else card.insertAdjacentHTML('beforeend',html);
 }
 window.saveMatchDraftV1125=async function(mid){
   const ctx=selectedContextV1125(),f=ctx?.fixtures.find(x=>String(x.id)===String(mid));if(!ctx||!f||fixturePredictionLockedV1125(f))return;
@@ -22112,16 +22119,17 @@ function rollingLockHTMLV1125(ctx){
   return`${L('Rolling Deadlines','مواعيد قفل متدرجة')} · ${L('Each match locks at kickoff.','كل ماتش بيقفل مع بداية الماتش.')} <strong>${L('Next','التالي')}: ${escapeHTML(teamPairV1125(next))} · ${formatTime(next.kickoff)}</strong>`;
 }
 function updatePredictDeadlineV1125(ctx,view,list){
-  let note=view.querySelector('.next-week-preview-note-v1112');
-  if(!note){
-    const candidate=[...view.querySelectorAll('.notice')].find(x=>x.nextElementSibling===list);
-    note=candidate||null;
-  }
+  const existing=[...view.querySelectorAll('.rolling-lock-note-v1125')];
+  let note=existing[0]||view.querySelector('.next-week-preview-note-v1112')||null;
+  existing.slice(1).forEach(x=>x.remove());
+  const legacy=view.querySelector('.next-week-preview-note-v1112');
+  if(legacy&&legacy!==note)legacy.remove();
   if(note){
     note.className='rolling-lock-note-v1125';
+    note.dataset.rollingAuthorityV1126='1';
     note.innerHTML=rollingLockHTMLV1125(ctx);
   }else{
-    list.insertAdjacentHTML('beforebegin',`<div class="rolling-lock-note-v1125">${rollingLockHTMLV1125(ctx)}</div>`);
+    list.insertAdjacentHTML('beforebegin',`<div class="rolling-lock-note-v1125" data-rolling-authority-v1126="1">${rollingLockHTMLV1125(ctx)}</div>`);
   }
   const sub=view.querySelector('.page-sub');
   if(sub)sub.textContent=L(
@@ -22228,12 +22236,10 @@ function installPredictionControlsV1125(){
     const f=ctx.fixtures.find(x=>String(x.id)===String(card.dataset.mid));if(!f)return;
     const existing=card.querySelector('.match-entry-actions-v1125,.match-entry-locked-v1125');
     const html=matchActionHTMLV1125(ctx,f);
-    if(existing)existing.outerHTML=html;
-    else{
-      const footer=card.querySelector(':scope > .match-footer');
-      if(footer)footer.insertAdjacentHTML('beforebegin',html);
-      else card.insertAdjacentHTML('beforeend',html);
-    }
+    if(existing)existing.remove();
+    const footer=card.querySelector(':scope > .match-footer');
+    if(footer)footer.insertAdjacentHTML('afterend',html);
+    else card.insertAdjacentHTML('beforeend',html);
   });
   updatePredictDeadlineV1125(ctx,view,list);
   installBottomActionsV1125(ctx,view,list);
@@ -22275,6 +22281,499 @@ window.go=async function(){
 document.addEventListener('visibilitychange',()=>{if(document.hidden){flushCurrentAutosaveV1125().catch(()=>{});window.flushNextAutosaveV1119?.(false)}else{syncATSV1125();if(state.view==='home')updateHomeDeadlineV1125()}});
 window.addEventListener('focus',()=>{syncATSV1125();if(state.view==='home')updateHomeDeadlineV1125()});
 setTimeout(()=>{if(state.view==='predict')installPredictionControlsV1125();if(state.view==='home')updateHomeDeadlineV1125();syncATSV1125()},150);
+})();
+</script>
+
+
+<style id="mastaba-v1126-predict-polish">
+/* =========================================================
+   V11.26 — Quick Predict sizing + bottom actions + Power Chips
+   ========================================================= */
+
+/* Quick Predict must stay a compact toolbar, never an oversized SVG card. */
+#view-predict .quick-predict-dock-v1125{
+  min-height:64px!important;
+  max-height:none!important;
+  padding:10px 13px!important;
+  margin:0 auto 12px!important;
+  border-radius:14px!important;
+}
+#view-predict .quick-predict-dock-v1125>div:first-child{min-width:0}
+#view-predict .quick-predict-dock-v1125 strong{
+  display:flex!important;align-items:center!important;gap:8px!important;
+  font-size:.78rem!important;line-height:1.15!important;
+}
+#view-predict .quick-predict-dock-v1125 strong svg{
+  width:18px!important;height:18px!important;min-width:18px!important;max-width:18px!important;
+  flex:0 0 18px!important;display:block!important;
+}
+#view-predict .quick-predict-dock-v1125 small{
+  margin-top:4px!important;line-height:1.25!important;
+}
+#view-predict .quick-predict-toggle-v1125{
+  min-width:62px!important;min-height:36px!important;padding:7px 11px!important;
+}
+
+/* Match Save/Submit is the LAST section in the card. */
+#view-predict .match-card>.match-entry-actions-v1125{
+  margin:0!important;
+  border-top:1px solid color-mix(in srgb,var(--dark) 14%,transparent)!important;
+  border-radius:0!important;
+}
+#view-predict .match-card>.match-entry-actions-v1125:last-child{
+  border-radius:0 0 var(--mastaba-box-radius,18px) var(--mastaba-box-radius,18px)!important;
+}
+html[dir="rtl"] #view-predict .match-card>.match-entry-actions-v1125:last-child{
+  border-radius:0 0 var(--mastaba-box-radius-rtl,18px) var(--mastaba-box-radius-rtl,18px)!important;
+}
+
+/* Single rolling-deadline authority. */
+#view-predict .rolling-lock-note-v1125[data-rolling-authority-v1126]{
+  margin-bottom:10px!important;
+}
+
+/* Power Chip context for future and already-started Gameweeks. */
+#view-predict .power-chip-context-v1126{
+  max-width:810px;margin:0 auto 12px;
+  border:1px solid var(--theme-border);
+  border-radius:var(--mastaba-box-radius,16px);
+  background:var(--theme-surface);color:var(--theme-text);
+  box-shadow:var(--shadow);overflow:hidden;
+}
+#view-predict .power-chip-context-head-v1126{
+  display:flex;align-items:center;justify-content:space-between;gap:12px;
+  padding:12px 14px;background:linear-gradient(132deg,var(--theme-head-a),var(--theme-head-b));
+  color:var(--theme-head-text);
+}
+#view-predict .power-chip-context-head-v1126 strong{
+  display:block;font-size:.82rem;font-weight:1000;color:inherit!important;
+  -webkit-text-fill-color:currentColor!important;
+}
+#view-predict .power-chip-context-head-v1126 span{
+  display:block;margin-top:2px;font-size:.58rem;font-weight:850;opacity:.78;
+  color:inherit!important;-webkit-text-fill-color:currentColor!important;
+}
+#view-predict .power-chip-context-head-v1126 .chip-lock-v1126{
+  flex:0 0 auto;margin:0;padding:5px 8px;border-radius:999px;
+  border:1px solid currentColor;font-size:.55rem;font-weight:1000;opacity:.85;
+}
+#view-predict .power-chip-cards-v1126{
+  display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;padding:12px;
+  background:var(--paper);color:var(--dark);
+}
+#view-predict .power-chip-card-v1126{
+  min-height:82px;border-radius:13px;border:1px solid #d4dae3;
+  padding:10px;display:grid;align-content:space-between;gap:9px;
+  background:#f8f9fb;color:#1d2b45;text-align:start;
+}
+#view-predict button.power-chip-card-v1126{cursor:pointer}
+#view-predict .power-chip-card-v1126 strong{font-size:.74rem;font-weight:1000}
+#view-predict .power-chip-card-v1126 small{font-size:.55rem;font-weight:850;opacity:.68}
+#view-predict .power-chip-card-v1126.steal{border-top:4px solid #d88616}
+#view-predict .power-chip-card-v1126.surge{border-top:4px solid #3478df}
+#view-predict .power-chip-card-v1126.redemption{border-top:4px solid #34b982}
+#view-predict .power-chip-card-v1126.selected{
+  box-shadow:inset 0 0 0 2px #182b55;
+}
+#view-predict .power-chip-card-v1126.used{opacity:.48}
+#view-predict .power-chip-selected-v1126{
+  padding:11px 13px;border-top:1px solid #d7dce4;background:#fff;color:#24334c;
+  display:flex;align-items:center;justify-content:space-between;gap:12px;
+}
+#view-predict .power-chip-selected-v1126 strong{font-size:.72rem;font-weight:1000}
+#view-predict .power-chip-selected-v1126 span{font-size:.58rem;font-weight:850;opacity:.7}
+#view-predict .power-chip-remove-v1126{
+  flex:0 0 auto;border:1px solid #c9d0db;border-radius:9px;padding:7px 9px;
+  background:#f4f6f8;color:#25334b;font-size:.58rem;font-weight:950;
+}
+
+/* Started/completed: Performance remains the main box; chip is a compact history strip. */
+#view-predict .power-chip-history-v1126{
+  margin:8px 0 12px;padding:10px 12px;border-radius:12px;
+  border:1px solid var(--theme-border);background:var(--theme-surface);color:var(--theme-text);
+  display:flex;align-items:center;justify-content:space-between;gap:12px;
+}
+#view-predict .power-chip-history-v1126 strong{font-size:.69rem;font-weight:1000}
+#view-predict .power-chip-history-v1126 span{font-size:.58rem;font-weight:850;opacity:.7}
+
+/* Keep the older started-GW rule from hiding our read-only history. */
+html.mastaba-gw-started-v1117 #view-predict
+:is(.power-chip-context-v1126,.power-chip-history-v1126){display:flex!important}
+html.mastaba-gw-started-v1117 #view-predict .power-chip-context-v1126{display:block!important}
+
+/* Avoid old shell and new context ever appearing together for future/history. */
+#view-predict .power-chip-context-v1126 + .power-chip-context-v1126,
+#view-predict .power-chip-history-v1126 + .power-chip-history-v1126{display:none!important}
+
+@media(max-width:620px){
+  #view-predict .quick-predict-dock-v1125{
+    min-height:58px!important;align-items:center!important;padding:9px 10px!important;
+  }
+  #view-predict .quick-predict-dock-v1125 small{font-size:.56rem!important}
+  #view-predict .power-chip-cards-v1126{grid-template-columns:1fr 1fr 1fr;gap:6px;padding:9px}
+  #view-predict .power-chip-card-v1126{min-height:72px;padding:8px 7px}
+  #view-predict .power-chip-card-v1126 strong{font-size:.65rem}
+  #view-predict .power-chip-card-v1126 small{font-size:.5rem}
+}
+</style>
+
+
+<script id="mastaba-v1126-predict-polish-runtime">
+(function(){
+'use strict';
+window.MASTABA_BUILD_VERSION='11.26';
+
+const chipCacheV1126=new Map();
+let privateLeagueDbIdV1126=null;
+let powerChipMountTokenV1126=0;
+window.rollingPredictionCacheV1126=window.rollingPredictionCacheV1126||{};
+
+/* -------------------- Exact current prediction for ATS -------------------- */
+window.homePredictionForFixtureV20=homePredictionForFixtureV20=function(f){
+  if(!f)return null;
+  const cached=window.rollingPredictionCacheV1126?.[f.id];
+  if(cached)return cached;
+
+  const next=window.nextPredV1113;
+  const nextPick=next?.picks?.[f.id];
+  if(nextPick)return nextPick;
+
+  const hist=(state.history?.fixtures||[]).some(x=>x.id===f.id);
+  if(hist)return state.history?.predictions?.[state.currentUser]?.[f.id]||null;
+
+  /* Before kickoff, ATS should reflect what the user is actually editing now.
+     After kickoff/final, use the locked official pick first. */
+  if(f.phase==='upcoming'){
+    return getWorking(state.currentUser,f.id)||getOfficial(state.currentUser,f.id)||null;
+  }
+  return getOfficial(state.currentUser,f.id)||getWorking(state.currentUser,f.id)||null;
+};
+
+/* -------------------- Fix Rolling Deadline singleton + move actions -------------------- */
+function selectedCtxV1126(){
+  const base=window.selectedPredictionContextV1125?.();
+  if(base)return base;
+  const w=Number(state.selectedPredictWeek)||Number(state.week);
+  if(w<Number(state.week)){
+    return{
+      kind:'history',week:w,gameweekId:null,
+      fixtures:state.history?.fixtures||[],
+      picks:state.history?.predictions?.[state.currentUser]||{}
+    };
+  }
+  return null;
+}
+function openFixturesV1126(ctx){
+  return (ctx?.fixtures||[]).filter(f=>!window.fixturePredictionLockedV1125?.(f)).sort((a,b)=>new Date(a.kickoff)-new Date(b.kickoff));
+}
+function pairV1126(f){return `${TEAM[f?.home]?.name||f?.home||''} vs ${TEAM[f?.away]?.name||f?.away||''}`}
+function rollingTextV1126(ctx){
+  const next=openFixturesV1126(ctx)[0];
+  if(!next)return`<strong>${L('All Match Deadlines Passed','كل مواعيد الماتشات اتقفلت')}</strong>`;
+  return`${L('Rolling Deadlines','مواعيد قفل متدرجة')} · ${L('Each match locks at kickoff.','كل ماتش بيقفل مع بداية الماتش.')} <strong>${L('Next','التالي')}: ${escapeHTML(pairV1126(next))} · ${formatTime(next.kickoff)}</strong>`;
+}
+function dedupeRollingDeadlineV1126(){
+  const view=document.querySelector('#view-predict'),ctx=selectedCtxV1126();
+  if(!view||!ctx)return;
+  const list=view.querySelector('.match-list');if(!list)return;
+
+  const notes=[...view.querySelectorAll('.rolling-lock-note-v1125')];
+  let note=notes[0]||null;
+  notes.slice(1).forEach(x=>x.remove());
+
+  /* Convert/remove the old next-GW preview note so there is one authority. */
+  const legacy=view.querySelector('.next-week-preview-note-v1112');
+  if(legacy&&legacy!==note){
+    if(note)legacy.remove();
+    else{note=legacy;note.className='rolling-lock-note-v1125'}
+  }
+
+  if(!note){
+    list.insertAdjacentHTML('beforebegin','<div class="rolling-lock-note-v1125"></div>');
+    note=view.querySelector('.rolling-lock-note-v1125');
+  }
+  note.dataset.rollingAuthorityV1126='1';
+  note.innerHTML=rollingTextV1126(ctx);
+}
+
+function moveActionsToBottomV1126(){
+  const ctx=selectedCtxV1126(),view=document.querySelector('#view-predict');
+  if(!ctx||!view)return;
+  view.querySelectorAll('.match-card[data-mid]').forEach(card=>{
+    const mid=card.dataset.mid,f=ctx.fixtures.find(x=>String(x.id)===String(mid));
+    if(!f)return;
+    const action=card.querySelector(':scope > .match-entry-actions-v1125,:scope > .match-entry-locked-v1125');
+    if(!action)return;
+    /* The action rail is the final child, after the hidden-predictions footer. */
+    if(card.lastElementChild!==action)card.appendChild(action);
+  });
+}
+
+/* -------------------- Power Chip DB context -------------------- */
+function privateMemberV1126(){
+  try{return !!leagueById('mastaba')?.members?.includes(state.currentUser)}catch{return false}
+}
+async function privateLeagueIdV1126(){
+  if(privateLeagueDbIdV1126)return privateLeagueDbIdV1126;
+  const ctx=window.prodCtxV1073;if(!ctx?.supa)return null;
+  const {data,error}=await ctx.supa.from('mastaba_leagues').select('id').eq('slug','mastaba').maybeSingle();
+  if(error)throw error;
+  privateLeagueDbIdV1126=data?.id||null;return privateLeagueDbIdV1126;
+}
+async function gameweekRowV1126(week){
+  const w=Number(week),ctx=window.prodCtxV1073;
+  if(w===Number(state.week)&&ctx?.gw?.id)return{...ctx.gw,id:ctx.gw.id,gameweek_number:w};
+  if(w===Number(state.week)+1&&window.nextPredV1113?.gw?.id)return window.nextPredV1113.gw;
+  if(!ctx?.supa)return null;
+  const {data,error}=await ctx.supa.from('mastaba_gameweeks')
+    .select('id,gameweek_number,status,published_at,deadline_at,opens_at,finalized_at')
+    .eq('gameweek_number',w).maybeSingle();
+  if(error)throw error;return data||null;
+}
+async function chipContextV1126(week,force=false){
+  const w=Number(week),ctx=window.prodCtxV1073;
+  if(!ctx?.supa||!ctx?.user?.id||!privateMemberV1126())return null;
+  const cached=chipCacheV1126.get(w);
+  if(!force&&cached&&Date.now()-cached.ts<15000)return cached.data;
+
+  const [lid,gw]=await Promise.all([privateLeagueIdV1126(),gameweekRowV1126(w)]);
+  if(!lid||!gw?.id)return null;
+  const {data:rows,error}=await ctx.supa.from('mastaba_power_chip_uses')
+    .select('id,league_id,user_id,gameweek_id,chip_type,status,payload,result,selected_at,locked_at,resolved_at,season_key,season_half')
+    .eq('league_id',lid).eq('user_id',ctx.user.id).neq('status','cancelled')
+    .order('selected_at',{ascending:false});
+  if(error)throw error;
+
+  const own=(rows||[]),selected=own.find(r=>r.gameweek_id===gw.id)||null;
+  const firstKick=(w===Number(state.week)?Math.min(...(state.fixtures||[]).map(f=>new Date(f.kickoff).getTime()).filter(Number.isFinite)):
+                  w===Number(state.week)+1?Math.min(...(state.nextFixtures||[]).map(f=>new Date(f.kickoff).getTime()).filter(Number.isFinite)):
+                  gw.deadline_at?new Date(gw.deadline_at).getTime():NaN);
+  const editable=Number.isFinite(firstKick)?Date.now()<firstKick:false;
+  const data={week:w,lid,gw,rows:own,selected,editable,firstKick};
+  chipCacheV1126.set(w,{ts:Date.now(),data});return data;
+}
+function chipTitleV1126(type){return type==='steal'?'STEAL':type==='surge'?'SURGE':'REDEMPTION'}
+function chipCopyV1126(type){
+  return type==='steal'?L('Challenge one Mastaba member','تحدى لاعب من المصطبة'):
+    type==='surge'?L('x1.5 your private Gameweek','x1.5 على جولتك الخاصة'):
+    L('Replace your lowest completed GW','بدّل أقل جولة مكتملة');
+}
+function chipTargetNameV1126(row){
+  const auth=String(row?.payload?.target_user_id||'');
+  return (state.users||[]).find(u=>String(u.authUserId||'')===auth)?.name||null;
+}
+function chipHistoryHTMLV1126(data){
+  const r=data?.selected;
+  const label=r?chipTitleV1126(r.chip_type):L('No Power Chip used','لم يتم استخدام كارت');
+  let detail=r?L(`Gameweek ${data.week} · ${String(r.status||'').toUpperCase()}`,`الجولة ${data.week} · ${String(r.status||'').toUpperCase()}`):L(`Gameweek ${data.week}`,`الجولة ${data.week}`);
+  const target=r?.chip_type==='steal'?chipTargetNameV1126(r):null;
+  if(target)detail+=` · ${L('vs','ضد')} ${target}`;
+  return`<div class="power-chip-history-v1126" data-power-chip-v1126><strong>${L('Power Chip','كارت المصطبة')}: ${escapeHTML(label)}</strong><span>${escapeHTML(detail)}</span></div>`;
+}
+function chipChooserHTMLV1126(data){
+  const selected=data.selected;
+  const season=selected?.season_key||data.rows?.[0]?.season_key||new Date().getUTCFullYear();
+  const half=Number(selected?.season_half||data.rows?.[0]?.season_half||1);
+  const cards=['steal','surge','redemption'].map(type=>{
+    const same=selected?.chip_type===type;
+    const used=data.rows.some(r=>{
+      if(r.chip_type!==type||Number(r.season_key)!==Number(season))return false;
+      if(type==='steal')return Number(r.season_half)===half&&r.gameweek_id!==data.gw.id;
+      return r.gameweek_id!==data.gw.id;
+    });
+    const disabled=used||(selected?.chip_type==='steal'&&!same);
+    return`<button type="button" class="power-chip-card-v1126 ${type} ${same?'selected':''} ${used?'used':''}" ${disabled?'disabled':''} onclick="chooseUpcomingPowerChipV1126('${type}')">
+      <strong>${chipTitleV1126(type)}</strong><small>${same?L('Selected for this Gameweek','مختار للجولة دي'):used?L('Already used','اتستخدم قبل كده'):chipCopyV1126(type)}</small>
+    </button>`;
+  }).join('');
+  const selectedLine=selected?`<div class="power-chip-selected-v1126"><div><strong>${chipTitleV1126(selected.chip_type)} · ${L('Selected','مختار')}</strong><span>${selected.chip_type==='steal'&&chipTargetNameV1126(selected)?`${L('Target','الهدف')}: ${escapeHTML(chipTargetNameV1126(selected))}`:L('Locks when this Gameweek starts','يقفل مع بداية الجولة')}</span></div>${selected.chip_type!=='steal'?`<button class="power-chip-remove-v1126" onclick="removeUpcomingPowerChipV1126()">${L('Unselect','إلغاء')}</button>`:''}</div>`:'';
+  return`<section class="power-chip-context-v1126" data-power-chip-v1126>
+    <div class="power-chip-context-head-v1126"><div><strong>${L(`Gameweek ${data.week} Power Chip`,`كارت الجولة ${data.week}`)}</strong><span>${L('Private Mastaba League only · one chip per Gameweek','لدوري المصطبة الخاص فقط · كارت واحد لكل جولة')}</span></div><span class="chip-lock-v1126">${L('OPEN','مفتوح')}</span></div>
+    <div class="power-chip-cards-v1126">${cards}</div>${selectedLine}
+  </section>`;
+}
+async function mountPowerChipContextV1126(force=false){
+  const token=++powerChipMountTokenV1126,view=document.querySelector('#view-predict'),ctx=selectedCtxV1126();
+  if(!view||!ctx||!privateMemberV1126())return;
+
+  /* Old current-GW shell remains authoritative only before the current GW starts. */
+  const currentWeek=Number(ctx.week)===Number(state.week);
+  const currentStarted=currentWeek&&(state.fixtures||[]).some(f=>Date.now()>=new Date(f.kickoff).getTime());
+  if(currentWeek&&!currentStarted){
+    view.querySelectorAll('[data-power-chip-v1126]').forEach(x=>x.remove());
+    return;
+  }
+
+  /* For future/history we do not want an empty old shell hanging around. */
+  if(!currentWeek)view.querySelectorAll('.power-chip-shell-v1048,.mastaba-wildcards-v1043,.wc-personal-alert-v1043').forEach(x=>x.remove());
+
+  let data;
+  try{data=await chipContextV1126(ctx.week,force)}catch(e){console.warn('Power Chip context failed',e);return}
+  if(token!==powerChipMountTokenV1126||state.view!=='predict'||Number(state.selectedPredictWeek)!==Number(ctx.week)||!data)return;
+
+  view.querySelectorAll('[data-power-chip-v1126]').forEach(x=>x.remove());
+  const list=view.querySelector('.match-list');if(!list)return;
+
+  if(Number(ctx.week)>Number(state.week)&&data.editable){
+    const quick=view.querySelector('.quick-predict-dock-v1125');
+    if(quick)quick.insertAdjacentHTML('beforebegin',chipChooserHTMLV1126(data));
+    else list.insertAdjacentHTML('beforebegin',chipChooserHTMLV1126(data));
+  }else{
+    const perf=view.querySelector('.predict-gw-performance-v1117,.predict-gw-performance-v1113');
+    if(perf)perf.insertAdjacentHTML('afterend',chipHistoryHTMLV1126(data));
+    else list.insertAdjacentHTML('afterbegin',chipHistoryHTMLV1126(data));
+  }
+}
+window.mountPowerChipContextV1126=mountPowerChipContextV1126;
+
+async function persistUpcomingChipV1126(type,payload={}){
+  const ctx=selectedCtxV1126(),prod=window.prodCtxV1073;
+  if(!ctx||Number(ctx.week)<=Number(state.week)||!prod?.supa)throw new Error(L('Select an upcoming Gameweek first.','اختار جولة جاية الأول.'));
+  const data=await chipContextV1126(ctx.week,true);
+  if(!data?.editable)throw new Error(L('Power Chips are locked for this Gameweek.','كروت المصطبة اتقفلت للجولة دي.'));
+  let existing=data.selected;
+
+  if(existing&&existing.chip_type!==type){
+    if(existing.chip_type==='steal')throw new Error(L('A confirmed Steal cannot be changed.','الـ Steal بعد التأكيد مينفعش يتغير.'));
+    const {error}=await prod.supa.from('mastaba_power_chip_uses').update({status:'cancelled'}).eq('id',existing.id);
+    if(error)throw error;existing=null;
+  }
+
+  if(type==='surge'){
+    const {error}=await prod.supa.from('mastaba_predictions').update({double_points:false})
+      .eq('user_id',prod.user.id).eq('gameweek_id',data.gw.id);
+    if(error)throw error;
+    if(window.nextPredV1113?.picks)Object.values(window.nextPredV1113.picks).forEach(p=>{if(p)p.double=false});
+  }
+
+  if(existing){
+    const {error}=await prod.supa.from('mastaba_power_chip_uses').update({payload,status:'selected'}).eq('id',existing.id);
+    if(error)throw error;
+  }else{
+    const {error}=await prod.supa.from('mastaba_power_chip_uses').insert({
+      league_id:data.lid,user_id:prod.user.id,gameweek_id:data.gw.id,chip_type:type,status:'selected',payload
+    });
+    if(error)throw error;
+  }
+  chipCacheV1126.delete(Number(ctx.week));
+  await mountPowerChipContextV1126(true);
+  try{save()}catch{}
+}
+window.chooseUpcomingPowerChipV1126=async function(type){
+  try{
+    if(type==='steal'){
+      const league=leagueById('mastaba'),members=(league?.members||[]).filter(id=>id!==state.currentUser)
+        .map(id=>(state.users||[]).find(u=>u.id===id)).filter(u=>u?.authUserId);
+      const root=document.querySelector('#modalRoot');
+      root.innerHTML=`<div class="modal-backdrop" onclick="if(event.target===this)closeModal()"><div class="modal confirmation-modal"><h3>${L('Choose Steal Target','اختار هدف Steal')}</h3><p>${L('Once confirmed, Steal cannot be cancelled or switched.','بعد التأكيد، Steal مينفعش يتلغي أو يتغير.')}</p><div style="display:grid;gap:7px;margin:12px 0">${members.map(u=>`<button class="btn btn-secondary" onclick="confirmUpcomingStealV1126('${u.id}')">${escapeHTML(u.name)}</button>`).join('')}</div><div class="confirm-actions"><button class="btn btn-ghost" onclick="closeModal()">${L('Cancel','إلغاء')}</button></div></div></div>`;
+      return;
+    }
+    const title=chipTitleV1126(type);
+    const root=document.querySelector('#modalRoot');
+    root.innerHTML=`<div class="modal-backdrop" onclick="if(event.target===this)closeModal()"><div class="modal confirmation-modal"><h3>${title}</h3><p>${type==='surge'?L('Surge applies x1.5 to your private Gameweek and removes Double Points from this Gameweek.','Surge بيطبق x1.5 على جولتك الخاصة وبيشيل Double Points من الجولة دي.'):L('Redemption can replace your lowest completed Gameweek if you qualify.','Redemption يقدر يبدّل أقل جولة مكتملة لو أنت مؤهل.')}</p><div class="confirm-actions"><button class="btn btn-ghost" onclick="closeModal()">${L('Cancel','إلغاء')}</button><button class="btn btn-primary" onclick="confirmUpcomingChipV1126('${type}')">${L('Confirm','تأكيد')}</button></div></div></div>`;
+  }catch(e){toast(String(e?.message||e),'warn')}
+};
+window.confirmUpcomingChipV1126=async function(type){
+  try{await persistUpcomingChipV1126(type,{});closeModal();toast(L(`${chipTitleV1126(type)} selected`,`تم اختيار ${chipTitleV1126(type)}`),'good')}
+  catch(e){console.error(e);toast(String(e?.message||e),'warn')}
+};
+window.confirmUpcomingStealV1126=async function(targetId){
+  try{
+    const target=(state.users||[]).find(u=>u.id===targetId);
+    if(!target?.authUserId)throw new Error(L('This player is not available in Production.','اللاعب ده مش متاح في الإنتاج.'));
+    const rows=leagueStandings('mastaba','overall'),rank=Math.max(1,rows.findIndex(x=>x.id===targetId)+1);
+    await persistUpcomingChipV1126('steal',{target_user_id:target.authUserId,target_was_first:rank===1});
+    closeModal();toast(L('Steal confirmed','تم تأكيد Steal'),'good');
+  }catch(e){console.error(e);toast(String(e?.message||e),'warn')}
+};
+window.removeUpcomingPowerChipV1126=async function(){
+  try{
+    const ctx=selectedCtxV1126(),data=await chipContextV1126(ctx.week,true),row=data?.selected;
+    if(!row)return;
+    if(row.chip_type==='steal')throw new Error(L('A confirmed Steal cannot be cancelled.','الـ Steal بعد التأكيد مينفعش يتلغي.'));
+    const {error}=await window.prodCtxV1073.supa.from('mastaba_power_chip_uses').update({status:'cancelled'}).eq('id',row.id);
+    if(error)throw error;
+    chipCacheV1126.delete(Number(ctx.week));await mountPowerChipContextV1126(true);
+    toast(L('Power Chip removed','تم إلغاء الكارت'),'good');
+  }catch(e){console.error(e);toast(String(e?.message||e),'warn')}
+};
+
+/* -------------------- ATS linkage after every match save -------------------- */
+function syncPredictionCacheV1126(){
+  const ctx=selectedCtxV1126();if(!ctx)return;
+  for(const f of ctx.fixtures||[]){
+    const p=ctx.picks?.[f.id];if(p)window.rollingPredictionCacheV1126[f.id]={...p};
+  }
+}
+const persistCurrentBaseV1126=window.persistCurrentMatchesV1125;
+if(typeof persistCurrentBaseV1126==='function')window.persistCurrentMatchesV1125=async function(){
+  const out=await persistCurrentBaseV1126.apply(this,arguments);syncPredictionCacheV1126();return out;
+};
+const persistNextBaseV1126=window.persistNextMatchesV1125;
+if(typeof persistNextBaseV1126==='function')window.persistNextMatchesV1125=async function(){
+  const out=await persistNextBaseV1126.apply(this,arguments);syncPredictionCacheV1126();return out;
+};
+
+/* Home fresh-load safety: make the published next prediction context available
+   before ATS needs to render its upcoming prediction. */
+let homeNextLoadV1126=false;
+function ensureHomeNextPredictionsV1126(){
+  if(homeNextLoadV1126||!state.nextPublished||window.nextPredV1113?.loaded||!window.loadNextPredictionContextV1113)return;
+  homeNextLoadV1126=true;
+  Promise.resolve(window.loadNextPredictionContextV1113()).then(()=>{
+    syncPredictionCacheV1126();
+    if(state.view==='home')window.renderHome?.();
+  }).finally(()=>homeNextLoadV1126=false);
+}
+
+/* -------------------- Final render/refresh authority -------------------- */
+const installBaseV1126=window.installPredictionControlsV1125;
+window.installPredictionControlsV1125=function(){
+  const out=typeof installBaseV1126==='function'?installBaseV1126.apply(this,arguments):undefined;
+  requestAnimationFrame(()=>{
+    dedupeRollingDeadlineV1126();
+    moveActionsToBottomV1126();
+    mountPowerChipContextV1126(false);
+  });
+  return out;
+};
+
+const refreshCardBaseV1126=window.refreshPredictionCard;
+if(typeof refreshCardBaseV1126==='function')window.refreshPredictionCard=refreshPredictionCard=function(){
+  const out=refreshCardBaseV1126.apply(this,arguments);
+  requestAnimationFrame(()=>window.installPredictionControlsV1125?.());
+  return out;
+};
+
+for(const name of ['toggleQuickPredictV1125','quickPredictStepV1125']){
+  const base=window[name];
+  if(typeof base==='function')window[name]=function(){
+    const out=base.apply(this,arguments);
+    requestAnimationFrame(()=>window.installPredictionControlsV1125?.());
+    return out;
+  };
+}
+window.toggleQuickPredict=window.toggleQuickPredictV1125;
+window.quickPredictStep=window.quickPredictStepV1125;
+
+const renderPredictBaseV1126=window.renderPredict;
+window.renderPredict=renderPredict=function(){
+  const out=renderPredictBaseV1126.apply(this,arguments);
+  requestAnimationFrame(()=>window.installPredictionControlsV1125?.());
+  return out;
+};
+
+const renderHomeBaseV1126=window.renderHome;
+window.renderHome=renderHome=function(){
+  ensureHomeNextPredictionsV1126();
+  return renderHomeBaseV1126.apply(this,arguments);
+};
+
+setTimeout(()=>{
+  syncPredictionCacheV1126();
+  if(state.view==='predict')window.installPredictionControlsV1125?.();
+  if(state.view==='home')ensureHomeNextPredictionsV1126();
+},180);
 })();
 </script>
 
