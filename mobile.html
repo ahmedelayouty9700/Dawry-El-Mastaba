@@ -4110,7 +4110,7 @@ html[dir="rtl"] .player-name-cell{left:auto;right:0}
 
 /* Bottom navigation: solid matchday command strip with an active top track; no rounded active pills. */
 @media(max-width:760px){
-  .bottom-nav{left:0!important;right:0!important;bottom:0!important;transform:none!important;width:100%!important;height:72px!important;padding:0 5px env(safe-area-inset-bottom)!important;gap:0!important;background:#080f1c!important;backdrop-filter:none!important;-webkit-backdrop-filter:none!important;border-top:3px solid color-mix(in srgb,var(--theme-action) 52%,#263249)!important;box-shadow:0 -10px 28px rgba(0,0,0,.27)!important}
+  .bottom-nav{left:0!important;right:0!important;bottom:0!important;transform:none!important;width:100%!important;height:72px!important;padding:0 5px env(safe-area-inset-bottom)!important;gap:0!important;background:var(--theme-chrome)!important;backdrop-filter:blur(20px)!important;-webkit-backdrop-filter:blur(20px)!important;border-top:1px solid var(--theme-border)!important;box-shadow:0 -8px 30px rgba(0,0,0,.12)!important}
   .nav-item{position:relative!important;border-radius:0!important;background:transparent!important;color:#7e8ca1!important;gap:3px!important;padding-top:6px!important}
   .nav-item.active{background:linear-gradient(180deg,color-mix(in srgb,var(--theme-action) 12%,transparent),transparent 70%)!important;color:#fff!important}
   .nav-item.active:before{content:"";position:absolute;left:25%;right:25%;top:-3px;height:4px;background:var(--theme-action)}
@@ -16331,7 +16331,17 @@ function privateStoryHTMLV1096(){
 currentPublicEventsHTMLV1043=privateStoryHTMLV1096;window.currentPublicEventsHTMLV1043=currentPublicEventsHTMLV1043;
 
 // When a new fixture moves from Upcoming to Live, its previously-hidden Production picks become readable once; refresh the compact league dataset.
-let phaseSigV1096='';setInterval(()=>{const s=(state.fixtures||[]).map(f=>`${f.id}:${f.phase}`).join('|');if(s!==phaseSigV1096){const had=phaseSigV1096;phaseSigV1096=s;if(had&&window.prodCtxV1073?.supa)window.loadProdLeagueV1096(window.prodCtxV1073.supa,true).then(()=>{syncPublicLeagueV1096();if(state.view==='predict')renderPredict();if(state.view==='rankings')renderRankings()})}},2500);
+let phaseSigV1096='';
+setInterval(()=>{
+  const s=(state.fixtures||[]).map(f=>`${f.id}:${f.phase}`).join('|');
+  if(s===phaseSigV1096)return;
+  const had=phaseSigV1096;phaseSigV1096=s;
+  if(!had||!window.prodCtxV1073?.supa)return;
+  window.loadProdLeagueV1096(window.prodCtxV1073.supa,true).then(()=>{
+    syncPublicLeagueV1096();
+    if(typeof window.renderLiveSurfaceV1094==='function')window.renderLiveSurfaceV1094();
+  }).catch(e=>console.warn('League live-pick refresh failed',e));
+},2500);
 })();
 </script>
 
