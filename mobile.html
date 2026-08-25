@@ -7171,14 +7171,12 @@ function defaultUsers(){return[
  {id:'u7',name:'Manar Sarhan',nickname:'منار',gender:'female',avatar:null,admin:false,timeZone:'auto',club:'realmadrid',theme:'realmadrid'}
 ]}
 function defaultLeagues(){return[
- {id:'mastaba',nameEn:'Mastaba League',nameAr:'دوري المصطبة',members:['u1','u2','u3','u4','u5','u6','u7'],visibility:'private',adminId:'u1'},
- {id:'mastaba-public',nameEn:'Mastaba Public League',nameAr:'دوري المصطبة العام',description:'Global ranking · waiting for admin start',members:['u1','u2','u3','u4','u5','u6','u7'],visibility:'public',adminId:'u1',lockedMembership:true,fixtureSource:'mastaba',started:false,startWeek:null,baselineByUser:{}},
- {id:'friends',nameEn:'Friends League',nameAr:'دوري الصحاب',members:['u1','u2','u3','u5','u7']},
- {id:'weekend',nameEn:'Weekend League',nameAr:'دوري الويك إند',members:['u1','u4','u6','u7']}
+ {id:'mastaba',nameEn:'Mastaba League',nameAr:'دوري المصطبة',members:['u1','u2','u3','u4','u5','u6','u7'],visibility:'private',adminId:'u1',lockedMembership:true},
+ {id:'mastaba-public',nameEn:'Mastaba Public League',nameAr:'دوري المصطبة العام',description:'Global ranking',members:['u1','u2','u3','u4','u5','u6','u7'],visibility:'public',adminId:'u1',lockedMembership:true,fixtureSource:'mastaba',started:false,startWeek:null,baselineByUser:{}}
 ]}
 function leagueById(id){return (state?.leagues||defaultLeagues()).find(l=>l.id===id)||(state?.leagues||defaultLeagues())[0]}
 function leagueName(l){return state.lang==='ar'?l.nameAr:l.nameEn}
-function memberLeagues(uid){if(typeof ensureV1018State==='function')ensureV1018State();return (state.leagues||defaultLeagues()).filter(l=>l.members.includes(uid))}
+function memberLeagues(uid){return (state.leagues||defaultLeagues()).filter(l=>['mastaba','mastaba-public'].includes(l.id)&&l.members.includes(uid))}
 function leagueStandings(leagueId,mode=state.selectedRankMode){
  const members=new Set((leagueById(leagueId)||{}).members||[]);
  return standings(mode).filter(u=>members.has(u.id))
@@ -7306,8 +7304,8 @@ function renderHome(){
    <div class="home-command-actions">
      <button class="btn status-cta" onclick="openPredictionWeek(${st.week})">${st.cta}</button>
      <button class="btn btn-secondary" onclick="go('rankings')">${L('View Rankings','عرض الترتيب')}</button>
-     <button class="btn btn-join" onclick="go('leagues')">${L('Join League','انضم لدوري')}</button>
-     <button class="btn btn-create-league" onclick="comingSoonLeague()">${L('Create League','إنشاء دوري')}</button>
+     <button class="btn btn-join" onclick="openLatestEpisodeV1128()">${L('View Latest Episode','شاهد أحدث حلقة')}</button>
+     <button class="btn btn-create-league" onclick="openAskMastabaV1128()">${L('Ask المصطبة','اسأل المصطبة')}</button>
    </div>
  </div>
  <div class="section-title home-bulletin-title">${L('Gameweek Bulletin','لوحة الجولة')}</div>${homeBulletinTickerHTML(homeWeek)}
@@ -13242,7 +13240,7 @@ function rowToPickV1073(row,fixture){const homeCode=teamCodeV1073(fixture.home_t
 async function hydrateProductionV1073(profile,user,supa){
  // Scale-safe hydration: only load memberships/profiles for leagues the current user actually belongs to.
  const [leaguesR,gwR,roleR,ownMembershipR]=await Promise.all([
-  supa.from('mastaba_leagues').select('id,slug,name_en,name_ar,league_type,status,auto_join,can_leave,owner_id,scoring_from_gameweek,started_at'),
+  supa.from('mastaba_leagues').select('id,slug,name_en,name_ar,league_type,status,auto_join,can_leave,owner_id,scoring_from_gameweek,started_at').in('slug',['mastaba','mastaba-public']),
   supa.from('mastaba_gameweeks').select('id,gameweek_number,name_en,name_ar,status,opens_at,deadline_at,finalized_at,updated_at').in('status',['open','locked','scoring','final']).order('gameweek_number',{ascending:false}).limit(1).maybeSingle(),
   supa.from('mastaba_roles').select('role').eq('user_id',user.id).maybeSingle(),
   supa.from('mastaba_league_members').select('league_id,user_id,member_role,scoring_from_gameweek').eq('user_id',user.id)
@@ -13281,7 +13279,8 @@ async function hydrateProductionV1073(profile,user,supa){
  state.users=profiles.map(p=>({id:slotByAuth[p.id],authUserId:p.id,name:p.display_name||'Mastaba Player',nickname:p.display_name||'Mastaba Player',gender:'male',avatar:null,admin:p.id===user.id&&isAdmin,timeZone:'auto',club:clubFromThemeV1073(p.theme_key),theme:p.theme_key||'mastaba',active:true}));
  state.currentUser=slotByAuth[user.id];
  state.authProfileV1064={id:user.id,email:user.email||'',displayName:profile.display_name||'',team:profile.primary_team_key||'',theme:profile.theme_key||'mastaba'};
- state.leagues=leagueRows.map(l=>({id:l.slug,nameEn:l.name_en,nameAr:l.name_ar,visibility:l.league_type==='private'?'private':'public',members:memberships.filter(m=>m.league_id===l.id&&slotByAuth[m.user_id]).map(m=>slotByAuth[m.user_id]),adminId:l.owner_id?slotByAuth[l.owner_id]:null,lockedMembership:!l.can_leave,fixtureSource:l.slug==='mastaba-public'?'mastaba':undefined,started:l.status==='active',startWeek:l.scoring_from_gameweek||null,baselineByUser:{}})).filter(l=>l.members.includes(state.currentUser));
+ state.leagues=leagueRows.filter(l=>['mastaba','mastaba-public'].includes(l.slug)).map(l=>({id:l.slug,nameEn:l.name_en,nameAr:l.name_ar,visibility:l.league_type==='private'?'private':'public',members:memberships.filter(m=>m.league_id===l.id&&slotByAuth[m.user_id]).map(m=>slotByAuth[m.user_id]),adminId:l.slug==='mastaba'&&l.owner_id?slotByAuth[l.owner_id]:null,lockedMembership:true,fixtureSource:l.slug==='mastaba-public'?'mastaba':undefined,started:l.status==='active',startWeek:l.scoring_from_gameweek||null,baselineByUser:{}})).filter(l=>l.id==='mastaba-public'||l.members.includes(state.currentUser));
+ const hydratedPublic=state.leagues.find(l=>l.id==='mastaba-public');if(hydratedPublic&&!hydratedPublic.members.includes(state.currentUser))hydratedPublic.members.push(state.currentUser);
  if(!state.leagues.length){const pl=leagueRows.find(l=>l.slug==='mastaba-public');state.leagues=[{id:'mastaba-public',nameEn:pl?.name_en||'Mastaba Public League',nameAr:pl?.name_ar||'دوري المصطبة العام',visibility:'public',members:[state.currentUser],lockedMembership:true,started:pl?.status==='active',startWeek:pl?.scoring_from_gameweek||null,baselineByUser:{}}]}
  const publicL=state.leagues.find(l=>l.id==='mastaba-public');state.homeLeagueId=(state.leagues.find(l=>l.id==='mastaba')||publicL||state.leagues[0]).id;state.selectedLeagueId=state.homeLeagueId;
  const fx=fixtureRows;
@@ -14829,75 +14828,28 @@ function applyLiveSnapshotV1088(snap){
   }
   return true;
 }
-async function fetchLiveSnapshotV1088(force=false){
-  if(document.visibilityState==='hidden')return;
-  if(!force&&!liveWindowV11262())return;
-  const now=Date.now();
-  if(!force&&window.__mastabaLiteFetchInFlightV11262)return;
-  if(!force&&window.__mastabaLiveLastFetchV1092&&now-window.__mastabaLiveLastFetchV1092<45000)return;
-  window.__mastabaLiteFetchInFlightV11262=true;
+async function fetchLiveSnapshotV1088(){
   try{
-    const liteUrl='https://bnwjtrtlwnlbldfhaggg.supabase.co/storage/v1/object/public/mastaba-live/live-lite.json';
-    let r=await fetch(liteUrl,{cache:'no-cache'});
-    if(r.ok){
-      const x=await r.json();
-      const snap={
-        version:2,
-        generated_at:x?.generated_at||null,
-        gameweek:x?.gameweek||null,
-        fixtures:(x?.fixtures||[]).map(f=>({
-          id:f.id,api_fixture_id:f.a,kickoff_at:f.k,fixture_status:f.s,status:f.s,
-          elapsed:f.e,home_goals:f.h,away_goals:f.w,result_final:!!f.fin,
-          first_scoring_team_id:f.ft??null,first_scorer_id:f.fs??null,
-          first_scorer_name:f.fsn??null,last_synced_at:f.ls??null,
-          clock:{status:f.s,period_started_at:f?.c?.p??null,base_minute:f?.c?.b??null,status_changed_at:f?.c?.x??null}
-        }))
-      };
-      applyLiveSnapshotV1088(snap);
-      window.__mastabaLiveLastFetchV1092=Date.now();
-      return;
+    // Time-bucketed URL lets thousands of users share the same CDN object while still refreshing promptly.
+    const bucket=Math.floor(Date.now()/15000);
+    let r=await fetch(`${LIVE_SNAPSHOT_BASE_V1088}?v=${bucket}`,{cache:'no-cache'});
+    if(!r.ok)throw new Error(`snapshot ${r.status}`);
+    let snap=await r.json();
+    const generated=Date.parse(snap?.generated_at||'');
+    if(document.visibilityState==='visible'&&Number.isFinite(generated)&&Date.now()-generated>90000){
+      r=await fetch(`${LIVE_SNAPSHOT_BASE_V1088}?fresh=${Date.now()}`,{cache:'reload'});
+      if(r.ok)snap=await r.json();
     }
-    // Until the first post-deploy live cycle creates live-lite.json, or if
-    // Storage has a transient miss, use the existing shared CDN snapshot.
-    // This is still one shared Storage object — never a per-user DB/API call.
-    if(!window.__mastabaFullFallbackAtV11262||now-window.__mastabaFullFallbackAtV11262>180000){
-      window.__mastabaFullFallbackAtV11262=now;
-      r=await fetch(LIVE_SNAPSHOT_BASE_V1088,{cache:'no-cache'});
-      if(!r.ok)throw new Error(`snapshot ${r.status}`);
-      applyLiveSnapshotV1088(await r.json());
-      window.__mastabaLiveLastFetchV1092=Date.now();
-    }
+    applyLiveSnapshotV1088(snap);
+    window.__mastabaLiveLastFetchV1092=Date.now();
   }catch(e){console.warn('Shared live snapshot refresh failed',e)}
-  finally{window.__mastabaLiteFetchInFlightV11262=false}
-}
-function liveWindowV11262(){
-  const now=Date.now();
-  return (state.fixtures||[]).some(f=>{
-    if(f?.phase==='live')return true;
-    if(f?.phase==='final'||f?.result)return false;
-    const k=new Date(f?.kickoff||f?.kickoff_at||0).getTime();
-    return Number.isFinite(k)&&now>=k-120000&&now<=k+5*3600000;
-  });
 }
 function startSharedLiveV1088(){
   if(liveDbTimerV1083){clearInterval(liveDbTimerV1083);liveDbTimerV1083=null}
   if(liveSnapshotTimerV1088)clearInterval(liveSnapshotTimerV1088);
-  // One full CDN read on activation keeps consensus/analytics hydrated.
-  // Live score changes thereafter use only the tiny central live-lite object.
-  (async()=>{
-    try{
-      if(document.visibilityState!=='hidden'){
-        const r=await fetch(LIVE_SNAPSHOT_BASE_V1088,{cache:'no-cache'});
-        if(r.ok){applyLiveSnapshotV1088(await r.json());window.__mastabaLiveLastFetchV1092=Date.now();window.__mastabaFullFallbackAtV11262=Date.now()}
-        else await fetchLiveSnapshotV1088(true);
-      }
-    }catch(_){await fetchLiveSnapshotV1088(true)}
-  })();
-  // Randomized 55–70s cadence avoids a thundering herd at :00. The timer
-  // does no network work outside a live match window or in hidden tabs.
-  const cadence=55000+Math.floor(Math.random()*15000);
-  liveSnapshotTimerV1088=setInterval(()=>{if(liveWindowV11262())fetchLiveSnapshotV1088(false)},cadence);
-  window.__mastabaLiveCadenceV11262=cadence;
+  fetchLiveSnapshotV1088();
+  // Backend snapshot itself refreshes once/minute; 45s client reads keep latency low without hammering Supabase.
+  liveSnapshotTimerV1088=setInterval(fetchLiveSnapshotV1088,30000);
 }
 window.fetchLiveSnapshotV1088=fetchLiveSnapshotV1088;
 window.startSharedLiveV1088=startSharedLiveV1088;
@@ -15666,7 +15618,7 @@ function accountDirectoryV1094(){
           <span class="admin-v1094-pill">${escV1094(teamLabelV1094(u.primary_team_key))}</span>
           <span class="admin-v1094-pill">${escV1094(langLabelV1094(u.language))}</span>
           ${u.is_private_member?`<span class="admin-v1094-pill good">${L('Private Mastaba','المصطبة الخاصة')}</span>`:''}
-          ${u.is_public_member?`<span class="admin-v1094-pill">${L('Public League','الدوري العام')}</span>`:''}
+          
           ${u.is_admin?`<span class="admin-v1094-pill warn">${L('Admin','أدمن')}</span>`:''}
         </div>
         <div class="admin-v1094-details">
@@ -17232,7 +17184,7 @@ html #view-admin .admin-workspace-v1100 .admin-empty-v1100{padding:18px;text-ali
 <script id="mastaba-v1100-admin-repair">
 (function mastabaV1100(){
 'use strict';
-window.MASTABA_BUILD_VERSION='11.26.2';
+window.MASTABA_BUILD_VERSION='11.26';
 
 const SCHEDULE_SYNC_V1101='https://bnwjtrtlwnlbldfhaggg.supabase.co/functions/v1/mastaba-schedule-sync';
 const scheduleV1100=window.adminScheduleV1100=window.adminScheduleV1100||{
@@ -17508,7 +17460,7 @@ function accountDirectoryV1100(){
           <span class="admin-v1094-pill ${u.email_confirmed?'good':'warn'}">${u.email_confirmed?L('Verified','مؤكد'):L('Unverified','غير مؤكد')}</span>
           <span class="admin-v1094-pill">${escV1100(labelV1100(u.primary_team_key))}</span>
           ${u.is_private_member?`<span class="admin-v1094-pill good">${L('Private Mastaba','المصطبة الخاصة')}</span>`:''}
-          ${u.is_public_member?`<span class="admin-v1094-pill">${L('Public League','الدوري العام')}</span>`:''}
+          
           ${u.is_admin?`<span class="admin-v1094-pill warn">${L('Ultimate Admin','الأدمن الرئيسي')}</span>`:''}
           ${u.is_mastaba_admin&&!u.is_admin?`<span class="admin-v1094-pill warn">${L('Mastaba Admin','أدمن المصطبة')}</span>`:''}
           ${(u.leagues||[]).filter(l=>!['mastaba','mastaba-public'].includes(String(l.slug||''))).map(l=>`<span class="admin-v1094-pill">${escV1100(l.name)}</span>`).join('')}
@@ -17735,7 +17687,7 @@ if(state?.view==='admin')setTimeout(renderAdminV1100,0);
    Supabase schedule available exclusively inside Admin > Game Setup. */
 (function(){
 'use strict';
-window.MASTABA_BUILD_VERSION='11.26.2';
+window.MASTABA_BUILD_VERSION='11.26';
 
 const fixtureKeyV1102=f=>Number(f?.apiFixtureId)?`api:${Number(f.apiFixtureId)}`:`id:${String(f?.id||'')}`;
 function pinnedPoolV1102(){
@@ -18510,7 +18462,7 @@ body.auth-pending-v1064::after{top:53%!important}
 <script id="mastaba-v1108-runtime-fixes">
 (function(){
 'use strict';
-window.MASTABA_BUILD_VERSION='11.26.2';
+window.MASTABA_BUILD_VERSION='11.26';
 
 /* Hard-mount every fixture slot that exists after the catalogue finishes. */
 window.mountAllAdminFixtureBrowsersV1108=function(){
@@ -18586,7 +18538,7 @@ function liveWindowV1108(){
 async function fetchEfficientSnapshotV1108(force=false){
   if(typeof snapshotFetchBaseV1108!=='function')return false;
   if(!force&&!liveWindowV1108())return false;
-  if(!force&&Date.now()-lastSnapshotRequestV1108<45000)return false;
+  if(!force&&Date.now()-lastSnapshotRequestV1108<25000)return false;
   lastSnapshotRequestV1108=Date.now();return snapshotFetchBaseV1108();
 }
 window.fetchLiveSnapshotV1088=fetchEfficientSnapshotV1108;
@@ -18594,9 +18546,7 @@ window.startSharedLiveV1088=window.startPrivateLiveV1083=function(){
   try{if(liveDbTimerV1083){clearInterval(liveDbTimerV1083);liveDbTimerV1083=null}}catch{}
   if(efficientSnapshotTimerV1108)clearInterval(efficientSnapshotTimerV1108);
   fetchEfficientSnapshotV1108(false);
-  const cadenceV11262=55000+Math.floor(Math.random()*15000);
-  efficientSnapshotTimerV1108=setInterval(()=>fetchEfficientSnapshotV1108(false),cadenceV11262);
-  window.__mastabaLiveCadenceV11262=cadenceV11262;
+  efficientSnapshotTimerV1108=setInterval(()=>fetchEfficientSnapshotV1108(false),15000);
 };
 window.refreshPrivateLiveV1083=fetchEfficientSnapshotV1108;
 
@@ -18722,7 +18672,7 @@ html[data-theme] body #app #view-admin .admin-v1094-panel :is(.admin-v1094-metri
 <script id="mastaba-v1109-admin-schedule-runtime">
 (function(){
 'use strict';
-window.MASTABA_BUILD_VERSION='11.26.2';
+window.MASTABA_BUILD_VERSION='11.26';
 
 /* Local fallback is intentionally name-based, never T123. The central
    abbreviation table remains authoritative when it has a row. */
@@ -18836,7 +18786,7 @@ html[data-theme] body #app #view-admin .fixture-league-title :is(strong,b,span,s
 <script id="mastaba-v1110-team-identity-guard">
 (function(){
 'use strict';
-window.MASTABA_BUILD_VERSION='11.26.2';
+window.MASTABA_BUILD_VERSION='11.26';
 /* Repair any already-loaded cached schedule objects from V11.09 without a
    provider/Supabase reload. Per-fixture payload is authoritative. */
 function repair(f){
@@ -18985,7 +18935,7 @@ html[data-theme] body #app #view-admin .fixture-day[aria-pressed="true"] :is(sma
 <script id="mastaba-v1112-runtime">
 (function(){
 'use strict';
-window.MASTABA_BUILD_VERSION='11.26.2';
+window.MASTABA_BUILD_VERSION='11.26';
 
 /* ---------------- Admin fixture browser ----------------
    V11.11's cosmetic day change called private lexical functions that were not
@@ -19259,7 +19209,7 @@ html[data-theme] body #app #view-admin .admin-zero-calls-v1101 *{
 <script id="mastaba-v1113-predict-and-context">
 (function(){
 'use strict';
-window.MASTABA_BUILD_VERSION='11.26.2';
+window.MASTABA_BUILD_VERSION='11.26';
 
 const nextPredV1113={
   loading:false,loaded:false,error:null,gw:null,fixtures:[],dbById:{},picks:{},meta:{draftSavedAt:null,submittedAt:null,editing:true}
@@ -19722,7 +19672,7 @@ setTimeout(()=>{if(state?.nextPublished&&nextIsSelectedV1113()){nextPredV1113.lo
 <script id="mastaba-v1114-home-next-predictions">
 (function(){
 'use strict';
-window.MASTABA_BUILD_VERSION='11.26.2';
+window.MASTABA_BUILD_VERSION='11.26';
 
 const homeSubmissionStatusBaseV1114=window.homeSubmissionStatus||homeSubmissionStatus;
 let homeNextHydrationQueuedV1114=false;
@@ -20039,7 +19989,7 @@ html[data-theme="barcelona"] body #app #view-admin .admin-workspace-v1100 :is(.a
 
 
 <script id="mastaba-v1115-version">
-window.MASTABA_BUILD_VERSION='11.26.2';
+window.MASTABA_BUILD_VERSION='11.26';
 </script>
 
 
@@ -20157,7 +20107,7 @@ html[data-theme] body #app #view-admin .admin-accounts-v1094 .admin-v1094-action
 <script id="mastaba-v1116-admin-interaction">
 (function(){
 'use strict';
-window.MASTABA_BUILD_VERSION='11.26.2';
+window.MASTABA_BUILD_VERSION='11.26';
 
 let roundCommitTimerV1116=0;
 let adminRoundObserverV1116=null;
@@ -20372,7 +20322,7 @@ html.mastaba-gw-started-v1117 #view-predict
 <script id="mastaba-v1117-runtime">
 (function(){
 'use strict';
-window.MASTABA_BUILD_VERSION='11.26.2';
+window.MASTABA_BUILD_VERSION='11.26';
 
 /* ---------- Shared publication helpers ---------- */
 function nextNumberV1117(){return Number(state.week)+1}
@@ -20710,7 +20660,7 @@ requestAnimationFrame(()=>{
 <script id="mastaba-v1119-route-and-autosave">
 (function(){
 'use strict';
-window.MASTABA_BUILD_VERSION='11.26.2';
+window.MASTABA_BUILD_VERSION='11.26';
 
 const goBaseV1119=window.go;
 if(typeof goBaseV1119==='function'){
@@ -20764,7 +20714,7 @@ window.addEventListener('pagehide',()=>{
 <script id="mastaba-v1120-player-and-gw-stability">
 (function(){
 'use strict';
-window.MASTABA_BUILD_VERSION='11.26.2';
+window.MASTABA_BUILD_VERSION='11.26';
 
 const LAST_WEEK_KEY_V1120='mastaba:last-predict-week:v1120';
 function rememberPredictWeekV1120(w){
@@ -20934,7 +20884,7 @@ requestAnimationFrame(()=>rememberPredictWeekV1120(state.selectedPredictWeek));
 <script id="mastaba-v1121-competition-stats">
 (function(){
 'use strict';
-window.MASTABA_BUILD_VERSION='11.26.2';
+window.MASTABA_BUILD_VERSION='11.26';
 
 /* V11.21
    Player stats in the scorer drawer must be for the competition being
@@ -20972,7 +20922,7 @@ window.playerRow=function(p,comp,mid){
 <script id="mastaba-v1122-season-competition-integrity">
 (function(){
 'use strict';
-window.MASTABA_BUILD_VERSION='11.26.2';
+window.MASTABA_BUILD_VERSION='11.26';
 
 /* fixtureById originally searched only the active Gameweek. That made every
    published-next-GW player drawer lose its competition identity and fall back
@@ -21091,7 +21041,7 @@ window.playerRow=function(p,comp,mid){
 <script id="mastaba-v1123-authoritative-runtime">
 (function(){
 'use strict';
-window.MASTABA_BUILD_VERSION='11.26.2';
+window.MASTABA_BUILD_VERSION='11.26';
 
 /* -------------------------------------------------------------------------
    1) PLAYER DATA: never allow demo/local-storage season stats to win in
@@ -21565,7 +21515,7 @@ setTimeout(safeATSSyncV1123,120);
 <script id="mastaba-v1124-next-submit-scope-hotfix">
 (function(){
 'use strict';
-window.MASTABA_BUILD_VERSION='11.26.2';
+window.MASTABA_BUILD_VERSION='11.26';
 
 /* Final GW2 Submit authority.
    V11.20 tried to call the V11.13 persistence function outside the closure
@@ -21773,7 +21723,7 @@ window.confirmNextSubmitV1113=async function(){
 <script id="mastaba-v1125-rolling-predictions">
 (function(){
 'use strict';
-window.MASTABA_BUILD_VERSION='11.26.2';
+window.MASTABA_BUILD_VERSION='11.26';
 
 const saveStateV1125=window.__matchSaveStateV1125||(window.__matchSaveStateV1125={});
 let currentAutosaveTimerV1125=0;
@@ -22480,7 +22430,7 @@ html.mastaba-gw-started-v1117 #view-predict .power-chip-context-v1126{display:bl
 <script id="mastaba-v1126-predict-polish-runtime">
 (function(){
 'use strict';
-window.MASTABA_BUILD_VERSION='11.26.2';
+window.MASTABA_BUILD_VERSION='11.26';
 
 const chipCacheV1126=new Map();
 let privateLeagueDbIdV1126=null;
@@ -22836,311 +22786,121 @@ setTimeout(()=>{
 })();
 </script>
 
-
-<script id="mastaba-v11262-scoring-integrity">
-/* Mastaba Prediction League — V11.26.2 scoring/UI integrity patch
-   Apply AFTER the existing V11.26/V11.26.1 scripts.
-
-   Goals:
-   - Keep live "As Things Stand" / Match Analytics mathematically aligned with
-     the authoritative Supabase scoring ledger.
-   - Correct 0–0 "No Team to Score" (+2) and "No First Scorer" (+3).
-   - Preserve private/public risky rules and apply Risky BEFORE Double.
-   - Make Risky, Double, First Team and First Scorer visible in live analytics.
-   - Repair the non-authoritative final fallback so it cannot silently omit
-     risky / 0–0 auxiliary points while the DB score row is loading.
-*/
-(function mastabaV11262ScoringIntegrity(){
+<style id="mastaba-v1128-two-league-style">
+.league-fixed-label-v1128{min-height:54px;display:flex;align-items:center;padding:12px 15px;border:2px solid var(--theme-border);border-radius:14px;background:var(--theme-surface-2);color:var(--theme-text);font-weight:950;width:100%}
+.official-rank-actions-v1128{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px}.official-rank-actions-v1128 .btn{min-height:42px}
+.public-cup-modal-v1128{max-width:840px}.public-cup-rounds-v1128{display:grid;gap:12px;max-height:58vh;overflow:auto;padding-right:3px}.public-cup-round-v1128{display:grid;gap:7px}.public-cup-round-v1128>strong{font-size:.86rem}.public-cup-match-v1128{border:1px solid var(--theme-border);background:var(--theme-surface-2);border-radius:12px;padding:9px 11px;display:grid;gap:5px}.public-cup-side-v1128{display:flex;justify-content:space-between;gap:12px;font-size:.8rem;font-weight:800}.public-cup-side-v1128.winner{font-weight:950}.public-cup-status-v1128{font-size:.68rem;color:var(--theme-muted)}
+.public-cup-admin-v1128{margin-top:14px}.public-cup-admin-v1128 .admin-start-row-v1128{display:grid;grid-template-columns:minmax(180px,1fr) 120px auto;gap:8px;align-items:end}.public-cup-admin-v1128 label{display:grid;gap:5px;font-size:.72rem;font-weight:850}.public-cup-admin-v1128 input{min-height:42px}.cup-tie-actions-v1128{display:flex;gap:7px;flex-wrap:wrap;margin-top:6px}
+@media(max-width:760px){.public-cup-admin-v1128 .admin-start-row-v1128{grid-template-columns:1fr}.league-fixed-label-v1128{min-height:52px}}
+</style>
+<script id="mastaba-v1128-two-league-runtime">
+(function(){
 'use strict';
-if (window.__MASTABA_V11262_SCORING_INTEGRITY__) return;
-window.__MASTABA_V11262_SCORING_INTEGRITY__ = true;
-window.MASTABA_BUILD_VERSION = '11.26.2';
-
-const W = window;
-const S = () => W.state || {};
-const L27 = (en, ar) => typeof W.L === 'function' ? W.L(en, ar) : en;
-const esc27 = v => typeof W.escapeHTML === 'function'
-  ? W.escapeHTML(String(v ?? ''))
-  : String(v ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
-
-function out27(h,a){
-  h=Number(h); a=Number(a);
-  return h>a?'H':h<a?'A':'D';
+const OFFICIAL_LEAGUES_V1128=new Set(['mastaba','mastaba-public']);
+function privateMemberV1128(){return !!leagueById('mastaba')?.members?.includes(state.currentUser)}
+function publicLeagueV1128(){return leagueById('mastaba-public')||{id:'mastaba-public',nameEn:'Mastaba Public League',nameAr:'دوري المصطبة العام',members:[state.currentUser]}}
+function normalizeLeagueStateV1128(){
+ state.leagues=(state.leagues||[]).filter(l=>OFFICIAL_LEAGUES_V1128.has(l.id));
+ let pub=state.leagues.find(l=>l.id==='mastaba-public');if(!pub){pub=publicLeagueV1128();state.leagues.push(pub)}
+ if(!pub.members)pub.members=[];if(!pub.members.includes(state.currentUser))pub.members.push(state.currentUser);pub.lockedMembership=true;
+ const priv=state.leagues.find(l=>l.id==='mastaba'),isPrivate=!!priv?.members?.includes(state.currentUser);
+ const valid=isPrivate?new Set(['mastaba','mastaba-public']):new Set(['mastaba-public']);
+ if(!valid.has(state.homeLeagueId))state.homeLeagueId=isPrivate?'mastaba':'mastaba-public';
+ if(!valid.has(state.selectedLeagueId))state.selectedLeagueId=state.homeLeagueId;
+ if(!isPrivate){state.homeLeagueId='mastaba-public';state.selectedLeagueId='mastaba-public'}
+ try{save()}catch{}
 }
-function league27(){
-  try { if(typeof W.v18LeagueId==='function') return W.v18LeagueId(); } catch(_){}
-  return S().selectedLeagueId || S().homeLeagueId || 'mastaba';
-}
-function pred27(uid,f,past=false){
-  if(!f) return null;
-  try { if(typeof W.v18Prediction==='function') { const p=W.v18Prediction(uid,f.id,past); if(p) return p; } } catch(_){}
-  if(past) return S()?.history?.predictions?.[uid]?.[f.id] || null;
-  try { if(typeof W.getOfficial==='function') { const p=W.getOfficial(uid,f.id); if(p) return p; } } catch(_){}
-  try { if(typeof W.getWorking==='function') return W.getWorking(uid,f.id); } catch(_){}
-  return null;
-}
-function userName27(uid){
-  try { if(typeof W.userName==='function') return W.userName(uid); } catch(_){}
-  return String(uid ?? '');
-}
-function visibleIds27(lid){
-  try { if(typeof W.visibleIdsV1096==='function') return W.visibleIdsV1096(lid) || []; } catch(_){}
-  try { return [...(W.leagueById(lid)?.members || [])]; } catch(_){}
-  return [];
-}
-function isPublic27(lid){ return lid === 'mastaba-public'; }
+window.memberLeagues=function(uid){return(state.leagues||[]).filter(l=>OFFICIAL_LEAGUES_V1128.has(l.id)&&Array.isArray(l.members)&&l.members.includes(uid))};
+const oldLeagueOptionsV1128=window.leagueOptionsHTML||leagueOptionsHTML;
+window.leagueOptionsHTML=leagueOptionsHTML=function(selected,uid){return memberLeagues(uid).map(l=>`<option value="${l.id}" ${l.id===selected?'selected':''}>${escapeHTML(leagueName(l))}</option>`).join('')};
+window.setHomeLeague=function(id){if(!OFFICIAL_LEAGUES_V1128.has(id))return;const allowed=privateMemberV1128()?['mastaba','mastaba-public']:['mastaba-public'];if(!allowed.includes(id))return;state.homeLeagueId=id;state.selectedLeagueId=id;save();render()};
+window.setRankLeague=function(id){if(!OFFICIAL_LEAGUES_V1128.has(id))return;const allowed=privateMemberV1128()?['mastaba','mastaba-public']:['mastaba-public'];if(!allowed.includes(id))return;state.selectedLeagueId=id;state.homeLeagueId=id;state.rankSectionV21='league';save();render()};
 
-function core27(p,h,a){
-  const ph=Number(p?.home), pa=Number(p?.away), ah=Number(h), aa=Number(a);
-  if(!Number.isFinite(ph)||!Number.isFinite(pa)||!Number.isFinite(ah)||!Number.isFinite(aa))
-    return {points:0,correctOutcome:false,parts:[]};
-  const parts=[];
-  const add=(kind,en,ar,pts)=>{if(pts)parts.push({kind,label:L27(en,ar),pts})};
-  let points=0;
-  const correctOutcome=out27(ph,pa)===out27(ah,aa);
-  if(correctOutcome){points+=5;add('outcome','Correct Outcome','النتيجة الصحيحة',5)}
-  if((ph-pa)===(ah-aa)){points+=3;add('gd','Correct Goal Difference','فارق الأهداف الصحيح',3)}
-  if(ph===ah){points+=1;add('home','Correct Home Team Goals','أهداف صاحب الأرض الصحيحة',1)}
-  if(pa===aa){points+=1;add('away','Correct Away Team Goals','أهداف الضيف الصحيحة',1)}
-  const exact=ph===ah&&pa===aa;
-  if(exact){points+=5;add('exact','Exact Score Bonus','بونص النتيجة بالظبط',5)}
-  return {points,correctOutcome,exact,parts};
+/* Retired user-league entrypoints fail closed even if stale markup is somehow invoked. */
+for(const name of ['comingSoonLeague','joinPublicLeague','requestPrivateLeague','leaveLeagueV1029','confirmLeaveLeagueV1034','createLeagueV1018','createLeagueV1025','openCreateLeagueV1018','openLeagueHubV20','openCreateCupV21','createCupV21']){window[name]=function(){toast(L('This feature is no longer available.','الميزة دي لم تعد متاحة.'),'warn')}}
+window.openLeagueAdmin=function(){toast(L('League administration is managed centrally.','إدارة الدوري بقت مركزية.'),'warn')};
+
+async function mediaJSONV1128(){
+ for(const url of ['/mastaba-content/media.json','https://bnwjtrtlwnlbldfhaggg.supabase.co/storage/v1/object/public/mastaba-content/media.json']){try{const r=await fetch(url,{cache:'no-store'});if(r.ok)return await r.json()}catch{}}
+ return null;
 }
-
-function aux27(p,f,h,a,{optimistic=false,final=false}={}){
-  const parts=[], candidateGoals=Number(h||0)+Number(a||0);
-  const predictedZero=Number(p?.home||0)===0 && Number(p?.away||0)===0;
-  const add=(kind,en,ar,pts)=>{parts.push({kind,label:L27(en,ar),pts})};
-
-  // Authoritative DB rule: a correct 0–0 receives No Team +2 and No Scorer +3.
-  if(candidateGoals===0){
-    if(predictedZero){
-      add('no_team','No Team to Score','لا فريق يسجل',2);
-      add('no_scorer','No First Scorer','لا يوجد أول مسجل',3);
-    }
-    return parts;
-  }
-
-  const currentGoals=Number(f?.liveScore?.home||0)+Number(f?.liveScore?.away||0);
-  const actualTeam = final ? (f?.result?.firstTeam ?? f?.liveFirstTeam) : f?.liveFirstTeam;
-  const actualScorer = final ? (f?.result?.firstScorer ?? f?.liveFirstScorer) : f?.liveFirstScorer;
-
-  if(final || currentGoals>0){
-    if(actualTeam!=null && actualTeam!=='none' && p?.firstTeam===actualTeam)
-      add('first_team','First Team to Score','أول فريق يسجل',2);
-    if(actualScorer!=null && actualScorer!=='none' && p?.firstScorer===actualScorer)
-      add('first_scorer','First Goalscorer','أول لاعب يسجل',3);
-  }else if(optimistic){
-    if(p?.firstTeam && p.firstTeam!=='none') add('first_team','First Team to Score','أول فريق يسجل',2);
-    if(p?.firstScorer && p.firstScorer!=='none') add('first_scorer','First Goalscorer','أول لاعب يسجل',3);
-  }
-  return parts;
-}
-
-function riskyEligible27(uid,f,lid){
-  try {
-    if(typeof W.riskyForLeagueV1096==='function') return !!W.riskyForLeagueV1096(uid,f,lid);
-  } catch(_){}
-  if(lid==='mastaba'){
-    try { if(typeof W.riskyFor==='function') return !!W.riskyFor(uid,f); } catch(_){}
-  }
-  if(lid==='mastaba-public'){
-    try {
-      const p=pred27(uid,f,false), c=S()?.productionConsensusV1088?.[f.id]?.global;
-      if(!p||!c||!Number(c.total||0)) return false;
-      return Number(c[out27(p.home,p.away)]||0)<20;
-    } catch(_){}
-  }
-  return false;
-}
-
-function projectedDetail27(uid,f,p,h,a,{optimistic=false,final=false,lid=league27()}={}){
-  if(!p) return {total:0,base:0,risky:0,doubleMultiplier:1,parts:[],bonusParts:[],correctOutcome:false};
-  const core=core27(p,h,a), aux=aux27(p,f,h,a,{optimistic,final});
-  const base=core.points+aux.reduce((s,x)=>s+x.pts,0);
-  const risky=(core.correctOutcome&&riskyEligible27(uid,f,lid))?10:0;
-  const doubleMultiplier=p?.double?2:1;
-  const parts=[...core.parts,...aux];
-  if(risky) parts.push({kind:'risky',label:L27('Risky Prediction','التوقع المجازف'),pts:10});
-  if(doubleMultiplier===2) parts.push({kind:'double',label:L27('Double Points','دبل بوينتس'),pts:base+risky,multiplier:2});
-  const total=(base+risky)*doubleMultiplier;
-  return {
-    total,base,risky,doubleMultiplier,parts,
-    bonusParts:parts.filter(x=>['risky','double','first_team','first_scorer','no_team','no_scorer'].includes(x.kind)),
-    correctOutcome:core.correctOutcome,exact:core.exact
-  };
-}
-W.mastabaProjectedBreakdownV11262=projectedDetail27;
-
-function authoritativeBonusDetail27(uid,f,lid){
-  try {
-    const row=typeof W.scoreRowV1096==='function'?W.scoreRowV1096(uid,f,lid):null;
-    if(!row) return null;
-    const p=pred27(uid,f,false), b=row.breakdown||{}, parts=[];
-    const zero=Number(f?.result?.home)===0&&Number(f?.result?.away)===0&&Number(p?.home)===0&&Number(p?.away)===0;
-    const firstTeam=Number(b.first_team_points||0), firstScorer=Number(b.first_scorer_points||0);
-    if(firstTeam) parts.push({kind:zero?'no_team':'first_team',label:zero?L27('No Team to Score','لا فريق يسجل'):L27('First Team to Score','أول فريق يسجل'),pts:firstTeam});
-    if(firstScorer) parts.push({kind:zero?'no_scorer':'first_scorer',label:zero?L27('No First Scorer','لا يوجد أول مسجل'):L27('First Goalscorer','أول لاعب يسجل'),pts:firstScorer});
-    if(Number(row.risky_points||0)) parts.push({kind:'risky',label:L27('Risky Prediction','التوقع المجازف'),pts:Number(row.risky_points)});
-    if(Number(row.double_multiplier||1)===2) parts.push({kind:'double',label:L27('Double Points','دبل بوينتس'),pts:Number(row.base_points||0)+Number(row.risky_points||0),multiplier:2});
-    return {total:Number(row.final_points||0),base:Number(row.base_points||0),risky:Number(row.risky_points||0),doubleMultiplier:Number(row.double_multiplier||1),bonusParts:parts,row};
-  } catch(_){return null}
-}
-
-const oldScoreLeague27=W.scorePredictionForLeagueV1096;
-function scoreLeague27(uid,f,lid='mastaba'){
-  if(f?.phase!=='final') return {total:0,base:0,risky:0,double:false,parts:[]};
-  if(typeof oldScoreLeague27==='function'){
-    try {
-      const current=oldScoreLeague27(uid,f,lid);
-      if(current?.authoritative) return current;
-    } catch(_){}
-  }
-  const p=pred27(uid,f,false), r=f?.result;
-  if(!p||r==null||r.home==null||r.away==null) return {total:0,base:0,risky:0,double:false,parts:[]};
-  const d=projectedDetail27(uid,f,p,Number(r.home),Number(r.away),{final:true,lid});
-  return {
-    total:d.total,base:d.base,risky:d.risky,double:d.doubleMultiplier===2,
-    parts:d.parts.map(x=>[x.label,x.kind==='double'?x.pts:x.pts]),
-    exact:d.exact,correctOutcome:d.correctOutcome,
-    correctGD:(Number(p.home)-Number(p.away))===(Number(r.home)-Number(r.away)),
-    teamGoals:(Number(p.home)===Number(r.home)?1:0)+(Number(p.away)===Number(r.away)?1:0),
-    fallbackV11262:true
-  };
-}
-W.scorePredictionForLeagueV1096=scoreLeague27;
-W.scorePrediction=function(uid,f){return scoreLeague27(uid,f,'mastaba')};
-
-function projectedNow27(uid,f,past=false){
-  if(past) return Number(S()?.history?.predictions?.[uid]?.[f?.id]?.points||0);
-  const lid=league27();
-  if(f?.phase==='final') return scoreLeague27(uid,f,lid).total;
-  const p=pred27(uid,f,false);
-  if(!p||!f?.liveScore) return 0;
-  return projectedDetail27(uid,f,p,Number(f.liveScore.home||0),Number(f.liveScore.away||0),{optimistic:false,lid}).total;
-}
-W.projectedPointsNowV20=projectedNow27;
-W.projectedPointsForV18=projectedNow27;
-
-function bestRoute27(f,p){
-  if(!p||!f?.liveScore) return null;
-  const ch=Number(f.liveScore.home||0), ca=Number(f.liveScore.away||0);
-  const uid=S().currentUser, lid=league27();
-  let best=null;
-  const maxH=Math.max(ch,Number(p.home||0))+4, maxA=Math.max(ca,Number(p.away||0))+4;
-  for(let h=ch;h<=maxH;h++) for(let a=ca;a<=maxA;a++){
-    const d=projectedDetail27(uid,f,p,h,a,{optimistic:true,lid}), pts=d.total;
-    const dist=Math.abs(h-Number(p.home))+Math.abs(a-Number(p.away));
-    const bestDist=best?Math.abs(best.h-Number(p.home))+Math.abs(best.a-Number(p.away)):Infinity;
-    if(!best||pts>best.pts||(pts===best.pts&&dist<bestDist)) best={h,a,pts,detail:d};
-  }
-  return best;
-}
-W.bestRouteFromHereV18=bestRoute27;
-
-function bonusHTML27(detail, cls=''){
-  const rows=detail?.bonusParts||[];
-  if(!rows.length) return '';
-  return `<div class="score-bonus-strip-v11262 ${cls}">${rows.map(x=>{
-    const txt=x.kind==='double'
-      ? `${x.label} ×2`
-      : `${x.label} +${Number(x.pts||0)}`;
-    return `<span class="score-bonus-chip-v11262 ${x.kind}">${esc27(txt)}</span>`;
-  }).join('')}</div>`;
-}
-
-const oldStory27=W.storyOutcomeHTMLV20;
-if(typeof oldStory27==='function'){
-  W.storyOutcomeHTMLV20=function(f,p){
-    let html=oldStory27(f,p);
-    if(f?.phase!=='live'&&f?.phase!=='final') return html;
-    const uid=S().currentUser,lid=league27();
-    let d=null;
-    if(f.phase==='final') d=authoritativeBonusDetail27(uid,f,lid);
-    if(!d && f?.liveScore && p) d=projectedDetail27(uid,f,p,Number(f.liveScore.home||0),Number(f.liveScore.away||0),{lid});
-    if(!d && f?.result && p) d=projectedDetail27(uid,f,p,Number(f.result.home||0),Number(f.result.away||0),{final:true,lid});
-    const chips=bonusHTML27(d,'ats-bonuses-v11262');
-    if(chips) html=html.replace(/(<strong[^>]*class="[^"]*story-points-now-v20[^"]*"[^>]*>[\s\S]*?<\/strong>)/i,`$1${chips}`);
-    return html;
-  };
-}
-
-const oldSwing27=W.liveSwingHTMLV1020;
-W.liveSwingHTMLV1020=function(f,mid,past){
-  if(past && typeof oldSwing27==='function') return oldSwing27(f,mid,past);
-  const lid=league27(),ids=visibleIds27(lid);
-  const rows=ids.map(uid=>{
-    const p=pred27(uid,f,false);
-    let detail=null, pts=projectedNow27(uid,f,false);
-    if(f?.phase==='final') detail=authoritativeBonusDetail27(uid,f,lid);
-    if(!detail&&p&&f?.liveScore) detail=projectedDetail27(uid,f,p,Number(f.liveScore.home||0),Number(f.liveScore.away||0),{lid});
-    if(!detail&&p&&f?.result) detail=projectedDetail27(uid,f,p,Number(f.result.home||0),Number(f.result.away||0),{final:true,lid});
-    return {uid,pts,detail};
-  }).sort((a,b)=>b.pts-a.pts||userName27(a.uid).localeCompare(userName27(b.uid)));
-  const note=isPublic27(lid)
-    ? `<div class="public-scope-note-v1096">${L27(`Showing the Public League Top 10${ids.length>10?' + you':''}.`,`عرض أفضل 10 في الدوري العام${ids.length>10?' + إنت':''}.`)}</div>`
-    : '';
-  return `<section class="insight-section-v20">
-    <div class="insight-kicker-v20">${f?.phase==='live'?L27('Live Points Swing','حركة النقاط لايف'):L27('Match Points','نقاط الماتش')}</div>
-    <h4>${f?.phase==='live'?L27('If the match ended right now','لو الماتش خلص دلوقتي'):L27('How this match scored for the league','الماتش ده جاب كام للدوري')}</h4>
-    <div class="swing-list-v20">${rows.map(r=>`<div class="swing-row-v20 swing-row-v11262">
-      <div class="swing-person-v20"><strong>${esc27(userName27(r.uid))}</strong>${r.uid===S().currentUser?`<span class="you-chip-v20">${L27('You','أنت')}</span>`:''}${bonusHTML27(r.detail,'analytics-bonuses-v11262')}</div>
-      <span class="swing-points-v20">${r.pts} ${L27('pts','نقطة')}</span>
-    </div>`).join('')}</div>${note}
-  </section>`;
+window.openLatestEpisodeV1128=async function(){
+ let url='';const data=await mediaJSONV1128();
+ url=String(data?.youtube?.url||data?.latest_episode?.url||state?.mastabaMediaV1029?.youtube?.url||'https://www.youtube.com/@MatchGamed').trim();
+ window.open(url,'_blank','noopener,noreferrer');
 };
 
-const oldBestCase27=W.bestCaseHTMLV1020;
-if(typeof oldBestCase27==='function'){
-  W.bestCaseHTMLV1020=function(f,mid,past,result){
-    let html=oldBestCase27(f,mid,past,result);
-    if(past||f?.phase!=='live'||!f?.liveScore) return html;
-    const p=pred27(S().currentUser,f,false), best=bestRoute27(f,p);
-    const chips=bonusHTML27(best?.detail,'bestcase-bonuses-v11262');
-    if(chips) html=html.replace(/<\/section>\s*$/i,`${chips}</section>`);
-    return html;
-  };
+async function questionContextV1128(){
+ const ctx=window.prodCtxV1073;if(!ctx?.supa||!ctx?.user?.id||!ctx?.gw?.id)throw new Error(L('Production profile is not ready.','حساب الإنتاج لسه مش جاهز.'));
+ const {data,error}=await ctx.supa.from('mastaba_questions').select('id,question_text,status,updated_at').eq('user_id',ctx.user.id).eq('gameweek_id',ctx.gw.id).is('deleted_at',null).maybeSingle();
+ if(error)throw error;return{ctx,row:data||null};
+}
+window.openAskMastabaV1128=async function(){
+ try{const {row}=await questionContextV1128();const root=document.querySelector('#modalRoot');const val=escapeHTML(row?.question_text||'');
+ root.innerHTML=`<div class="modal-backdrop" onclick="if(event.target===this)closeModal()"><div class="modal confirmation-modal"><div class="panel-head"><h3>${L('Ask المصطبة','اسأل المصطبة')}</h3><button class="icon-button" onclick="closeModal()">×</button></div><textarea id="askMastabaTextV1128" class="text-input" maxlength="500" rows="6" placeholder="${L('Write your question…','اكتب سؤالك…')}">${val}</textarea><div class="confirm-actions"><button class="btn btn-secondary" onclick="closeModal()">${L('Cancel','إلغاء')}</button><button class="btn btn-primary" onclick="saveAskMastabaV1128()">${row?L('Update Question','تحديث السؤال'):L('Submit Question','إرسال السؤال')}</button></div></div></div>`;
+ }catch(e){toast(String(e?.message||e),'warn')}
+};
+window.saveAskMastabaV1128=async function(){
+ try{const {ctx,row}=await questionContextV1128();const text=String(document.querySelector('#askMastabaTextV1128')?.value||'').trim();if(text.length<5)throw new Error(L('Question must be at least 5 characters.','السؤال لازم يكون 5 حروف على الأقل.'));
+ let q;if(row)q=ctx.supa.from('mastaba_questions').update({question_text:text}).eq('id',row.id);else q=ctx.supa.from('mastaba_questions').insert({user_id:ctx.user.id,gameweek_id:ctx.gw.id,question_text:text});const {error}=await q;if(error)throw error;closeModal();toast(L('Question saved.','تم حفظ السؤال.'),'good');
+ }catch(e){toast(String(e?.message||e),'warn')}
+};
+
+function cleanHomeV1128(){
+ normalizeLeagueStateV1128();const root=document.querySelector('#view-home');if(!root)return;
+ const join=root.querySelector('.btn-join');if(join){join.textContent=L('View Latest Episode','شاهد أحدث حلقة');join.onclick=window.openLatestEpisodeV1128}
+ const create=root.querySelector('.btn-create-league');if(create){create.textContent=L('Ask المصطبة','اسأل المصطبة');create.onclick=window.openAskMastabaV1128}
+ if(!privateMemberV1128()){const sel=root.querySelector('.rank-inline-select');if(sel){const span=document.createElement('span');span.className='rank-inline-name';span.textContent=leagueName(publicLeagueV1128());sel.replaceWith(span)}}
+}
+function cleanRankingsV1128(){
+ normalizeLeagueStateV1128();const root=document.querySelector('#view-rankings');if(!root)return;
+ root.querySelectorAll('.league-quick-tools,.league-leave-action-v1029,.league-admin-settings-v1018,.league-admin-inline-v19,.h2h-hub-v26,.h2h-panel-v25,.h2h-section-v25').forEach(x=>x.remove());
+ // Remove stale user-created league/H2H/Create/Join controls by their labels/handlers.
+ root.querySelectorAll('button').forEach(b=>{const s=`${b.textContent||''} ${b.getAttribute('onclick')||''}`.toLowerCase();if(/join league|create league|leave league|head to head|openleaguehub|leaveleague|createleague|h2h/.test(s))b.remove()});
+ const select=root.querySelector('.league-main-select');
+ if(privateMemberV1128()){if(select){select.innerHTML=leagueOptionsHTML(state.selectedLeagueId,state.currentUser);select.onchange=e=>setRankLeague(e.target.value)}}
+ else if(select){const fixed=document.createElement('div');fixed.className='league-fixed-label-v1128';fixed.textContent=leagueName(publicLeagueV1128());select.replaceWith(fixed)}
+ root.querySelectorAll('.league-main-select option').forEach(o=>{if(!OFFICIAL_LEAGUES_V1128.has(o.value))o.remove()});
+ // The old local Cup implementation is not authoritative. Replace its entrypoint with the central Public Cup.
+ root.querySelectorAll('button').forEach(b=>{const t=(b.textContent||'').trim().toLowerCase();if(t==='cup'||t.includes('league cup')){if(state.selectedLeagueId==='mastaba-public'){b.onclick=window.openPublicCupV1128}else b.remove()}});
+ if(state.selectedLeagueId==='mastaba-public'&&!root.querySelector('[data-public-cup-v1128]')){
+   const controls=root.querySelector('.rank-controls');if(controls){const bar=document.createElement('div');bar.className='official-rank-actions-v1128';bar.dataset.publicCupV1128='1';bar.innerHTML=`<button class="btn btn-secondary" onclick="openPublicCupV1128()">${L('League Cup','كأس الدوري')}</button>`;controls.appendChild(bar)}
+ }
+}
+function roundLabelV1128(n,max){if(n===max)return L('Final','النهائي');if(n===max-1)return L('Semi-final','نصف النهائي');if(n===max-2)return L('Quarter-final','ربع النهائي');return L(`Round ${n}`,`الدور ${n}`)}
+async function cupSnapshotV1128(){const ctx=window.prodCtxV1073;if(!ctx?.supa)throw new Error(L('Production connection is not ready.','اتصال الإنتاج مش جاهز.'));const {data,error}=await ctx.supa.rpc('mastaba_public_cup_snapshot');if(error)throw error;return data||{enabled:false,matches:[],history:[]}}
+function cupHTMLV1128(snap,admin=false){
+ if(!snap?.enabled)return`<div class="league-empty">${L('The Mastaba Public League Cup has not started yet.','كأس دوري المصطبة العام لسه ما بدأش.')}</div>`;
+ const cup=snap.cup||{},max=Number(cup.round_count||1),groups=new Map();for(const m of snap.matches||[]){if(!groups.has(m.round_number))groups.set(m.round_number,[]);groups.get(m.round_number).push(m)}
+ return`<div class="public-cup-rounds-v1128">${[...groups.entries()].map(([r,ms])=>`<div class="public-cup-round-v1128"><strong>${roundLabelV1128(Number(r),max)} · GW${Number(cup.start_gameweek||0)+Number(r)-1}</strong>${ms.map(m=>{const tied=m.status==='tied',w=String(m.winner_user_id||'');return`<div class="public-cup-match-v1128"><div class="public-cup-side-v1128 ${w===String(m.user1_id)?'winner':''}"><span>${escapeHTML(m.user1_name||L('TBD','لاحقًا'))}</span><b>${m.user1_score??'—'}</b></div><div class="public-cup-side-v1128 ${w===String(m.user2_id)?'winner':''}"><span>${escapeHTML(m.user2_name||L('TBD','لاحقًا'))}</span><b>${m.user2_score??'—'}</b></div><div class="public-cup-status-v1128">${escapeHTML(String(m.status||'pending').toUpperCase())}</div>${admin&&tied?`<div class="cup-tie-actions-v1128"><button class="btn btn-secondary" onclick="resolvePublicCupTieV1128('${m.id}','${m.user1_id}')">${escapeHTML(m.user1_name||'Player 1')}</button><button class="btn btn-secondary" onclick="resolvePublicCupTieV1128('${m.id}','${m.user2_id}')">${escapeHTML(m.user2_name||'Player 2')}</button></div>`:''}</div>`}).join('')}</div>`).join('')}</div>`
+}
+window.openPublicCupV1128=async function(){try{const snap=await cupSnapshotV1128();const root=document.querySelector('#modalRoot');root.innerHTML=`<div class="modal-backdrop" onclick="if(event.target===this)closeModal()"><div class="modal public-cup-modal-v1128"><div class="panel-head"><h3>${L('Mastaba Public League Cup','كأس دوري المصطبة العام')}</h3><button class="icon-button" onclick="closeModal()">×</button></div>${cupHTMLV1128(snap,false)}</div></div>`}catch(e){toast(String(e?.message||e),'warn')}};
+
+async function mountAdminCupV1128(){
+ const root=document.querySelector('#view-admin');if(!root||!currentUser()?.admin||root.querySelector('[data-admin-public-cup-v1128]'))return;
+ let snap;try{snap=await cupSnapshotV1128()}catch{return}
+ const panel=document.createElement('section');panel.className='panel public-cup-admin-v1128';panel.dataset.adminPublicCupV1128='1';
+ panel.innerHTML=`<div class="panel-head"><div><h3>${L('Mastaba Public League Cup','كأس دوري المصطبة العام')}</h3><small>${L('Only the platform admin can start the Cup or resolve tied Cup matches.','أدمن المنصة فقط يقدر يبدأ الكأس أو يحسم التعادل.')}</small></div></div>${snap.enabled?cupHTMLV1128(snap,true):`<div class="admin-start-row-v1128"><label>${L('Cup Name','اسم الكأس')}<input id="publicCupNameV1128" class="text-input" value="Mastaba League Cup"></label><label>${L('Start GW','جولة البداية')}<input id="publicCupGwV1128" class="text-input" type="number" min="1" value="${Number(state.week||1)}"></label><button class="btn btn-primary" onclick="startPublicCupV1128()">${L('Start Cup','ابدأ الكأس')}</button></div>`}`;
+ root.appendChild(panel);
+}
+window.startPublicCupV1128=async function(){try{const ctx=window.prodCtxV1073,name=String(document.querySelector('#publicCupNameV1128')?.value||'Mastaba League Cup').trim(),gw=Math.max(1,Number(document.querySelector('#publicCupGwV1128')?.value||state.week||1));const {error}=await ctx.supa.rpc('mastaba_start_public_cup',{p_name:name,p_start_gameweek:gw});if(error)throw error;toast(L('Public League Cup started.','تم بدء كأس الدوري العام.'),'good');window.renderAdmin?.()}catch(e){toast(String(e?.message||e),'warn')}};
+window.resolvePublicCupTieV1128=async function(match,winner){try{const {error}=await window.prodCtxV1073.supa.rpc('mastaba_resolve_public_cup_tie',{p_match:match,p_winner:winner});if(error)throw error;toast(L('Cup tie resolved.','تم حسم تعادل الكأس.'),'good');window.renderAdmin?.()}catch(e){toast(String(e?.message||e),'warn')}};
+
+function cleanAdminUserTagsV1128(){
+ const root=document.querySelector('#view-admin');if(!root)return;
+ root.querySelectorAll('.admin-v1094-pill,.admin-member-pill-v1085').forEach(el=>{const t=(el.textContent||'').trim();if(/public league|الدوري العام|waiting|منتظر/i.test(t))el.remove()});
+ root.querySelectorAll('[data-league-tag],.admin-league-tag,.user-league-tag').forEach(el=>el.remove());
 }
 
-// Rebind classic-script global identifiers when writable.
-try { projectedPointsNowV20=W.projectedPointsNowV20; } catch(_){}
-try { projectedPointsForV18=W.projectedPointsForV18; } catch(_){}
-try { bestRouteFromHereV18=W.bestRouteFromHereV18; } catch(_){}
-try { scorePredictionForLeagueV1096=W.scorePredictionForLeagueV1096; } catch(_){}
-try { scorePrediction=W.scorePrediction; } catch(_){}
-try { storyOutcomeHTMLV20=W.storyOutcomeHTMLV20; } catch(_){}
-try { liveSwingHTMLV1020=W.liveSwingHTMLV1020; } catch(_){}
-try { bestCaseHTMLV1020=W.bestCaseHTMLV1020; } catch(_){}
-
-if(!document.getElementById('mastaba-v11262-scoring-style')){
-  const st=document.createElement('style');
-  st.id='mastaba-v11262-scoring-style';
-  st.textContent=`
-    .score-bonus-strip-v11262{display:flex;flex-wrap:wrap;gap:5px;margin-top:6px}
-    .score-bonus-chip-v11262{display:inline-flex;align-items:center;min-height:22px;padding:3px 7px;border-radius:999px;
-      border:1px solid var(--theme-border,rgba(255,255,255,.2));background:var(--theme-surface-2,rgba(0,0,0,.16));
-      color:var(--theme-text,#fff);font-size:.58rem;font-weight:900;line-height:1.1;white-space:nowrap}
-    .score-bonus-chip-v11262.risky{border-style:dashed}
-    .score-bonus-chip-v11262.double{font-weight:1000}
-    .ats-bonuses-v11262{margin:7px 0 3px}
-    .swing-row-v11262{align-items:flex-start}
-    .swing-row-v11262 .swing-person-v20{min-width:0}
-    .analytics-bonuses-v11262{margin-top:5px;max-width:min(520px,72vw)}
-    .bestcase-bonuses-v11262{margin-top:10px}
-    @media(max-width:720px){
-      .score-bonus-strip-v11262{gap:4px}
-      .score-bonus-chip-v11262{font-size:.55rem;padding:3px 6px}
-      .analytics-bonuses-v11262{max-width:62vw}
-    }
-  `;
-  document.head.appendChild(st);
-}
-
-setTimeout(()=>{
-  try { if(typeof W.renderLiveSurfaceV1094==='function') W.renderLiveSurfaceV1094(); else if(typeof W.render==='function') W.render(); } catch(_){}
-},0);
+normalizeLeagueStateV1128();
+const homeBaseV1128=window.renderHome;window.renderHome=renderHome=function(){const out=homeBaseV1128?.apply(this,arguments);requestAnimationFrame(cleanHomeV1128);return out};
+const rankBaseV1128=window.renderRankings;window.renderRankings=renderRankings=function(){normalizeLeagueStateV1128();const out=rankBaseV1128?.apply(this,arguments);requestAnimationFrame(cleanRankingsV1128);return out};
+const adminBaseV1128=window.renderAdmin;window.renderAdmin=renderAdmin=function(){const out=adminBaseV1128?.apply(this,arguments);requestAnimationFrame(()=>{cleanAdminUserTagsV1128();mountAdminCupV1128()});return out};
+// Retire the old Leagues page if a stale history/navigation link reaches it.
+window.renderLeagues=function(){const root=document.querySelector('#view-leagues');if(root)root.innerHTML=`<div class="empty-state"><h2>${L('Mastaba Public League','دوري المصطبة العام')}</h2><p>${L('Every Mastaba account is automatically part of the Public League.','كل حساب في المصطبة بينضم تلقائيًا للدوري العام.')}</p><button class="btn btn-primary" onclick="go('rankings')">${L('View Rankings','عرض الترتيب')}</button></div>`};
+setTimeout(()=>{normalizeLeagueStateV1128();if(state.view==='home')cleanHomeV1128();if(state.view==='rankings')cleanRankingsV1128();if(state.view==='admin'){cleanAdminUserTagsV1128();mountAdminCupV1128()}},250);
 })();
-
 </script>
+
 </body>
 </html>
