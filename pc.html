@@ -23264,5 +23264,31 @@ document.addEventListener('visibilitychange',()=>{if(document.visibilityState===
 })();
 </script>
 
+<!-- V11.29.1 — live provisional Cup hero scores -->
+<script id="mastaba-v11291-live-cup-score-runtime">
+(()=>{
+'use strict';
+async function refreshCupLiveHeroV11291(){
+  try{
+    if(!window.prodCtxV1073?.supa||!window.prodCtxV1073?.user?.id)return;
+    if(!['home','rankings'].includes(state?.view))return;
+    const {data,error}=await window.prodCtxV1073.supa.rpc('mastaba_public_cup_live_match');
+    if(error||!data)return;
+    const a=data.user1_score===null||data.user1_score===undefined?'—':String(data.user1_score);
+    const b=data.user2_score===null||data.user2_score===undefined?'—':String(data.user2_score);
+    document.querySelectorAll('.cup-hero-v1129 .cup-duel-score-v1129').forEach(el=>{
+      const spans=el.querySelectorAll('span');
+      if(spans[0])spans[0].textContent=a;
+      if(spans[1])spans[1].textContent=b;
+    });
+  }catch(e){console.warn('Live Cup score unavailable',e)}
+}
+window.refreshCupLiveHeroV11291=refreshCupLiveHeroV11291;
+setTimeout(refreshCupLiveHeroV11291,700);
+setInterval(refreshCupLiveHeroV11291,20000);
+document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='visible')refreshCupLiveHeroV11291()});
+})();
+</script>
+
 </body>
 </html>
