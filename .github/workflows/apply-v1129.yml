@@ -3,7 +3,7 @@ name: Apply V11.29 production integration
 on:
   push:
     paths:
-      - 'v1129-patch.html'
+      - 'v1129-patch.gz.b64'
   workflow_dispatch:
 
 permissions:
@@ -14,12 +14,15 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - name: Apply V11.29 integration
+      - name: Decode and apply V11.29 integration
         run: |
+          base64 -d v1129-patch.gz.b64 | gzip -d > /tmp/v1129-patch.html
           python - <<'PY'
           from pathlib import Path
-          patch=Path('v1129-patch.html').read_text(encoding='utf-8')
+          patch=Path('/tmp/v1129-patch.html').read_text(encoding='utf-8')
           marker='mastaba-v1129-production-integration-runtime'
+          if marker not in patch:
+              raise SystemExit('decoded V11.29 marker missing')
           changed=[]
           for name in ('index.html','pc.html','mobile.html'):
               p=Path(name)
