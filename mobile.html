@@ -23397,5 +23397,58 @@ try{if(typeof window.renderLiveSurfaceV1094==='function')window.renderLiveSurfac
 })();
 </script>
 
+<!-- V11.29.4 — live projection parity with authoritative final scoring -->
+<script id="mastaba-v11294-live-scoring-parity">
+(()=>{
+'use strict';
+window.MASTABA_BUILD_VERSION='11.29.4';
+const isMissingFactV11294=(v)=>v==null||v===''||v==='none'||v==='__unknown__';
+function liveFactsV11294(f){
+  let team=!isMissingFactV11294(f?.liveFirstTeam)?String(f.liveFirstTeam):null;
+  let scorer=!isMissingFactV11294(f?.liveFirstScorer)?String(f.liveFirstScorer):null;
+  if(!team&&!isMissingFactV11294(f?.result?.firstTeam))team=String(f.result.firstTeam);
+  if(!scorer&&!isMissingFactV11294(f?.result?.firstScorer))scorer=String(f.result.firstScorer);
+  const db=window.prodCtxV1073?.fxById?.[f?.id];
+  if(!team&&db?.first_scoring_team_id){const tid=Number(db.first_scoring_team_id);if(tid===Number(f?.homeTeamId))team=String(f.home);else if(tid===Number(f?.awayTeamId))team=String(f.away)}
+  if(!scorer&&db?.first_scorer_id)scorer=String(db.first_scorer_id);
+  return{team,scorer};
+}
+window.liveFactsV11294=liveFactsV11294;
+function liveAuxLeagueV11294(p,f,h,a,optimistic=false){
+  if(!p)return 0;
+  const candidateGoals=Number(h||0)+Number(a||0),currentGoals=Number(f?.liveScore?.home||0)+Number(f?.liveScore?.away||0);let pts=0;
+  if(candidateGoals===0){if(p.firstTeam==='none')pts+=2;if(p.firstScorer==='none')pts+=3;return pts}
+  const facts=liveFactsV11294(f);
+  if(facts.team&&p.firstTeam===facts.team)pts+=2;
+  if(facts.scorer&&String(p.firstScorer)===String(facts.scorer))pts+=3;
+  if(optimistic&&currentGoals===0){if(!facts.team&&p.firstTeam&&p.firstTeam!=='none')pts+=2;if(!facts.scorer&&p.firstScorer&&p.firstScorer!=='none')pts+=3}
+  return pts;
+}
+window.liveAuxLeagueV1096=liveAuxLeagueV11294;
+function liveProjectedLeagueV11294(uid,f,p,h,a,optimistic=false,lid=(typeof v18LeagueId==='function'?v18LeagueId():'mastaba')){
+  if(!p)return 0;const s=window.scorelineV1090(p,h,a);let pts=Number(s?.points||0)+liveAuxLeagueV11294(p,f,h,a,optimistic);
+  if(typeof window.riskyForLeagueV1096==='function'&&window.riskyForLeagueV1096(uid,f,lid)&&s?.correctOutcome)pts+=10;
+  return p.double?pts*2:pts;
+}
+window.liveProjectedLeagueV1096=liveProjectedLeagueV11294;
+window.projectedPointsNowV20=projectedPointsNowV20=function(uid,f,past=false){
+  if(past){const hist=state.history?.predictions?.[uid]?.[f?.id];return Number(hist?.points||0)}
+  const lid=typeof v18LeagueId==='function'?v18LeagueId():'mastaba';
+  if(f?.phase==='final')return typeof window.scorePredictionForLeagueV1096==='function'?Number(window.scorePredictionForLeagueV1096(uid,f,lid)?.total||0):0;
+  const p=typeof window.v18Prediction==='function'?window.v18Prediction(uid,f?.id,false):null;
+  if(!p||p.submitted!==true||!f?.liveScore)return 0;
+  return liveProjectedLeagueV11294(uid,f,p,Number(f.liveScore.home||0),Number(f.liveScore.away||0),false,lid);
+};
+window.projectedPointsForV18=projectedPointsNowV20;
+window.bestRouteFromHereV18=function(f,p){
+  if(!p||!f?.liveScore)return null;const ch=Number(f.liveScore.home||0),ca=Number(f.liveScore.away||0),uid=state.currentUser,lid=typeof v18LeagueId==='function'?v18LeagueId():'mastaba';let best=null;
+  const maxH=Math.max(ch,Number(p.home||0))+4,maxA=Math.max(ca,Number(p.away||0))+4;
+  for(let h=ch;h<=maxH;h++)for(let a=ca;a<=maxA;a++){const pts=liveProjectedLeagueV11294(uid,f,p,h,a,true,lid);if(!best||pts>best.pts||(pts===best.pts&&(Math.abs(h-Number(p.home))+Math.abs(a-Number(p.away)))<(Math.abs(best.h-Number(p.home))+Math.abs(best.a-Number(p.away)))))best={h,a,pts}}
+  return best;
+};
+try{if(typeof window.renderLiveSurfaceV1094==='function')window.renderLiveSurfaceV1094()}catch{}
+})();
+</script>
+
 </body>
 </html>
