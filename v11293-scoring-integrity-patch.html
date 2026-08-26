@@ -1,0 +1,81 @@
+<!-- V11.29.3 — scoring integrity: authoritative submitted picks only -->
+<script id="mastaba-v11293-scoring-integrity">
+(()=>{
+'use strict';
+window.MASTABA_BUILD_VERSION='11.29.3';
+const P=window.prodLeagueV1096;
+function isSubmittedPickV11293(p){
+  return !!p && p.touched===true && p.submitted===true && p.home!=='' && p.away!=='' && p.home!=null && p.away!=null;
+}
+function sanitizeAuthoritativePicksV11293(){
+  const store=window.prodLeagueV1096?.picks;
+  if(!store)return;
+  for(const [k,p] of Object.entries(store)) if(!isSubmittedPickV11293(p)) delete store[k];
+}
+window.sanitizeAuthoritativePicksV11293=sanitizeAuthoritativePicksV11293;
+sanitizeAuthoritativePicksV11293();
+const afterBaseV11293=window.afterProdLeagueV1096;
+window.afterProdLeagueV1096=function(...args){
+  sanitizeAuthoritativePicksV11293();
+  return typeof afterBaseV11293==='function'?afterBaseV11293.apply(this,args):undefined;
+};
+const v18BaseV11293=window.v18Prediction||v18Prediction;
+window.v18Prediction=v18Prediction=function(uid,mid,past=false){
+  if(past)return v18BaseV11293(uid,mid,past);
+  const auth=typeof window.uidAuthV1096==='function'?window.uidAuthV1096(uid):null;
+  const prod=window.prodLeagueV1096;
+  if(prod?.ready&&auth){
+    const p=prod.picks?.[`${auth}|${mid}`]||null;
+    return isSubmittedPickV11293(p)?p:null;
+  }
+  const p=v18BaseV11293(uid,mid,past);
+  return p?.submitted===false?null:p;
+};
+function rowPartsV11293(row){
+  const b=row?.breakdown||{},parts=[];
+  const add=(en,ar,key)=>{const v=Number(b[key]||0);if(v)parts.push([L(en,ar),v])};
+  add('Correct Outcome','النتيجة الصحيحة','outcome_points');
+  add('Correct Goal Difference','فارق الأهداف الصحيح','goal_difference_points');
+  add('Correct Home Team Goals','أهداف صاحب الأرض الصحيحة','home_goals_points');
+  add('Correct Away Team Goals','أهداف الضيف الصحيحة','away_goals_points');
+  add('Exact Score Bonus','بونص النتيجة بالظبط','exact_score_points');
+  add('First Team to Score','أول فريق يسجل','first_team_points');
+  add('First Goalscorer','أول لاعب يسجل','first_scorer_points');
+  if(Number(row?.risky_points||0))parts.push([L('Risky Prediction','التوقع المجازف'),Number(row.risky_points)]);
+  if(Number(row?.double_multiplier||1)===2){const pre=Number(row.base_points||0)+Number(row.risky_points||0);if(pre)parts.push([L('Double Points','دبل بوينتس'),pre])}
+  return parts;
+}
+function zeroScoreV11293(){return{total:0,base:0,risky:0,double:false,parts:[],exact:false,correctOutcome:false,correctGD:false,teamGoals:0,breakdown:{},authoritative:true}}
+function scoreFromRowV11293(row){
+  const b=row?.breakdown||{};
+  return{total:Number(row.final_points||0),base:Number(row.base_points||0),risky:Number(row.risky_points||0),double:Number(row.double_multiplier||1)===2,parts:rowPartsV11293(row),exact:!!b.exact,correctOutcome:!!b.correct_outcome,correctGD:!!b.correct_goal_difference,teamGoals:(Number(b.home_goals_points||0)>0?1:0)+(Number(b.away_goals_points||0)>0?1:0),breakdown:b,authoritative:true};
+}
+const scoreBaseV11293=window.scorePredictionForLeagueV1096;
+window.scorePredictionForLeagueV1096=function(uid,f,lid='mastaba'){
+  if(f?.phase!=='final')return zeroScoreV11293();
+  const auth=typeof window.uidAuthV1096==='function'?window.uidAuthV1096(uid):null;
+  const prod=window.prodLeagueV1096,dbid=prod?.leagueIds?.[lid];
+  if(prod?.ready&&auth&&dbid){
+    const row=prod.scores?.[`${dbid}|${auth}|${f.id}`]||null;
+    return row?scoreFromRowV11293(row):zeroScoreV11293();
+  }
+  return typeof scoreBaseV11293==='function'?scoreBaseV11293(uid,f,lid):zeroScoreV11293();
+};
+const projectedBaseV11293=window.projectedPointsNowV20;
+window.projectedPointsNowV20=projectedPointsNowV20=function(uid,f,past=false){
+  if(past)return projectedBaseV11293(uid,f,past);
+  if(f?.phase==='final'){
+    const lid=typeof v18LeagueId==='function'?v18LeagueId():'mastaba';
+    return window.scorePredictionForLeagueV1096(uid,f,lid).total;
+  }
+  const p=window.v18Prediction(uid,f?.id,false);
+  if(!isSubmittedPickV11293(p)||!f?.liveScore)return 0;
+  const lid=typeof v18LeagueId==='function'?v18LeagueId():'mastaba';
+  return typeof window.liveProjectedLeagueV1096==='function'
+    ?window.liveProjectedLeagueV1096(uid,f,p,Number(f.liveScore.home||0),Number(f.liveScore.away||0),false,lid)
+    :0;
+};
+window.projectedPointsForV18=projectedPointsNowV20;
+try{if(typeof window.renderLiveSurfaceV1094==='function')window.renderLiveSurfaceV1094()}catch{}
+})();
+</script>
