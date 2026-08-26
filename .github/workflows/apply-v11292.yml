@@ -1,0 +1,51 @@
+name: Apply V11.29.2 notification theme audit
+on:
+  push:
+    paths:
+      - 'v11292-notification-theme-patch.html'
+permissions:
+  contents: write
+jobs:
+  patch:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Apply notification theme patch
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          patch=Path('v11292-notification-theme-patch.html').read_text(encoding='utf-8')
+          marker='mastaba-v11292-notification-theme-audit'
+          for name in ('index.html','pc.html','mobile.html'):
+              p=Path(name)
+              if not p.exists(): continue
+              text=p.read_text(encoding='utf-8')
+              if marker in text: continue
+              pos=text.lower().rfind('</body>')
+              if pos<0: raise SystemExit(f'{name}: missing </body>')
+              p.write_text(text[:pos]+patch+'\n'+text[pos:],encoding='utf-8')
+          PY
+      - name: Validate inline JavaScript
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          import re,subprocess,tempfile,os
+          for html in [Path(x) for x in ('index.html','pc.html','mobile.html') if Path(x).exists()]:
+              scripts=re.findall(r'<script(?:\s[^>]*)?>([\s\S]*?)</script>',html.read_text(encoding='utf-8'),re.I)
+              for i,script in enumerate(scripts,1):
+                  with tempfile.NamedTemporaryFile('w',suffix='.js',delete=False,encoding='utf-8') as f:
+                      f.write(script); tmp=f.name
+                  r=subprocess.run(['node','--check',tmp],capture_output=True,text=True)
+                  os.unlink(tmp)
+                  if r.returncode: raise SystemExit(f'{html} script {i}: {r.stderr}')
+          PY
+      - name: Commit build
+        run: |
+          files=""
+          for f in index.html pc.html mobile.html; do [ -f "$f" ] && files="$files $f"; done
+          if git diff --quiet -- $files; then exit 0; fi
+          git config user.name "Mastaba Production Bot"
+          git config user.email "actions@users.noreply.github.com"
+          git add $files
+          git commit -m "V11.29.2 fix notification theme contrast"
+          git push
