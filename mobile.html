@@ -23025,5 +23025,54 @@ setTimeout(()=>{if(state.view==='show')mountShowActionsV11281();if(state.view===
 })();
 </script>
 
+
+<style id="mastaba-v11282-safe-submissions-style">
+.safe-text-meta-v11282{display:flex;justify-content:space-between;gap:12px;align-items:center;margin-top:7px;font-size:12px;font-weight:800;color:var(--muted)}
+.safe-text-meta-v11282 .unsafe-note-v11282{max-width:72%;line-height:1.35}
+.safe-text-meta-v11282 .char-count-v11282{white-space:nowrap;font-variant-numeric:tabular-nums}
+.show-action-v11281[data-show-ticket-v11281] svg{width:18px;height:18px;display:block;flex:0 0 18px}
+</style>
+<script id="mastaba-v11282-safe-submissions-runtime">
+(function(){
+'use strict';
+const V11282='11.28.2';
+const ASK_MAX_V11282=500,TICKET_MAX_V11282=1500,MIN_V11282=5;
+function ctxV11282(){const c=window.prodCtxV1073;if(!c?.supa||!c?.user?.id||!c?.gw?.id)throw new Error(L('Production profile is not ready.','حساب الإنتاج لسه مش جاهز.'));return c}
+function unsafeCodeLikeV11282(raw){
+ const v=String(raw||'').toLowerCase();
+ return /<\s*\/?\s*[a-z][^>]*>|javascript\s*:|data\s*:\s*text\/html|on[a-z]{2,30}\s*=|```|<\?php|function\s+[a-z_$][a-z0-9_$]*\s*\(|=>|(?:document|window|globalthis)\s*\.|(?:eval|fetch|settimeout|setinterval)\s*\(|(?:localstorage|sessionstorage)\s*\.|insert\s+into\s+[a-z0-9_.]+\s*(?:\(|values\b)|update\s+[a-z0-9_.]+\s+set\s+|delete\s+from\s+[a-z0-9_.]+(?:\s+where|\s*;)|(?:drop|alter)\s+(?:table|schema|database)\s+|create\s+(?:table|function|view|schema)\s+|union\s+(?:all\s+)?select\s+|select\s+[\s\S]{1,180}\s+from\s+[\s\S]{1,180}\s+where\s+|(?:curl|wget)\s+(?:-[^\s]+\s+)*https?:\/\/|(?:powershell|bash)\s+(?:-c|-command)|cmd\s+\/c/.test(v)
+}
+function unsafeMessageV11282(){return L('For security, code, scripts, markup, SQL, or command payloads cannot be submitted here. Please describe the issue in plain language.','للأمان، لا يمكن إرسال أكواد أو سكربتات أو HTML أو SQL أو أوامر هنا. اشرح المشكلة بالكلام العادي.')}
+window.guardMastabaPasteV11282=function(ev){const t=ev?.clipboardData?.getData('text/plain')||'';if(unsafeCodeLikeV11282(t)){ev.preventDefault();toast(unsafeMessageV11282(),'warn');return false}return true};
+function validateSafeTextV11282(text,max,label){const t=String(text||'').trim();if(t.length<MIN_V11282)throw new Error(L(`${label} must be at least ${MIN_V11282} characters.`,`${label} لازم يكون ${MIN_V11282} حروف على الأقل.`));if(t.length>max)throw new Error(L(`${label} must be ${max} characters or fewer.`,`${label} لازم يكون ${max} حرف أو أقل.`));if(unsafeCodeLikeV11282(t))throw new Error(unsafeMessageV11282());return t}
+function counterHTMLV11282(id,max){return `<div class="safe-text-meta-v11282"><span class="unsafe-note-v11282">${L('Plain text only — code and executable content are blocked.','نص عادي فقط — الأكواد والمحتوى التنفيذي محظور.')}</span><span class="char-count-v11282" id="${id}">0 / ${max}</span></div>`}
+function bindCounterV11282(textareaId,counterId,max){const ta=document.getElementById(textareaId),counter=document.getElementById(counterId);if(!ta)return;const refresh=()=>{if(counter)counter.textContent=`${ta.value.length} / ${max}`};ta.addEventListener('paste',window.guardMastabaPasteV11282);ta.addEventListener('input',refresh);refresh()}
+function feedbackIconV11282(){return '<svg viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M12 2a7 7 0 0 0-4 12.74V17h8v-2.26A7 7 0 0 0 12 2Zm2.85 11.1-.85.55V15h-4v-1.35l-.85-.55A5 5 0 1 1 14.85 13.1ZM9 19h6v2H9v-2Z"/></svg>'}
+function polishFeedbackIconV11282(){const b=document.querySelector('#view-show [data-show-ticket-v11281]');if(b&&!b.dataset.iconV11282){b.dataset.iconV11282='1';b.innerHTML=`${feedbackIconV11282()}${L('Enhancement / Report Issue','تطوير / بلّغ عن مشكلة')}`}}
+async function currentQuestionV11282(){const c=ctxV11282();const {data,error}=await c.supa.from('mastaba_questions').select('id,question_text,status,updated_at').eq('user_id',c.user.id).eq('gameweek_id',c.gw.id).is('deleted_at',null).maybeSingle();if(error)throw error;return{c,row:data||null}}
+window.openAskMastabaV1128=async function(){
+ try{const {row}=await currentQuestionV11282(),root=document.querySelector('#modalRoot');if(!root)return;const val=escapeHTML(row?.question_text||'');
+ root.innerHTML=`<div class="modal-backdrop" onclick="if(event.target===this)closeModal()"><div class="modal confirmation-modal"><div class="panel-head"><h3>${L('Ask المصطبة','اسأل المصطبة')}</h3><button class="icon-button" onclick="closeModal()">×</button></div><textarea id="askMastabaTextV11282" class="text-input" minlength="5" maxlength="${ASK_MAX_V11282}" rows="6" placeholder="${L('Write your question…','اكتب سؤالك…')}">${val}</textarea>${counterHTMLV11282('askMastabaCountV11282',ASK_MAX_V11282)}<div class="confirm-actions"><button class="btn btn-secondary" onclick="closeModal()">${L('Cancel','إلغاء')}</button><button class="btn btn-primary" onclick="saveAskMastabaV11282()">${row?L('Update Question','تحديث السؤال'):L('Submit Question','إرسال السؤال')}</button></div></div></div>`;
+ bindCounterV11282('askMastabaTextV11282','askMastabaCountV11282',ASK_MAX_V11282)
+ }catch(e){toast(String(e?.message||e),'warn')}
+};
+window.saveAskMastabaV11282=async function(){try{const {c,row}=await currentQuestionV11282(),text=validateSafeTextV11282(document.querySelector('#askMastabaTextV11282')?.value,ASK_MAX_V11282,L('Question','السؤال'));let q;if(row)q=c.supa.from('mastaba_questions').update({question_text:text}).eq('id',row.id);else q=c.supa.from('mastaba_questions').insert({user_id:c.user.id,gameweek_id:c.gw.id,question_text:text});const {error}=await q;if(error)throw error;closeModal();toast(L('Question saved.','تم حفظ السؤال.'),'good')}catch(e){toast(String(e?.message||e),'warn')}};
+window.saveAskMastabaV1128=window.saveAskMastabaV11282;
+async function existingTicketV11282(){const c=ctxV11282();const {data,error}=await c.supa.from('mastaba_feedback').select('id,category,status,created_at').eq('user_id',c.user.id).eq('gameweek_id',c.gw.id).limit(1).maybeSingle();if(error)throw error;return{c,row:data||null}}
+window.openMastabaTicketV11281=async function(){
+ try{const {row}=await existingTicketV11282();if(row)throw new Error(L('You have already submitted your one Enhancement or Issue for this Gameweek.','أنت أرسلت بالفعل التطوير أو المشكلة الوحيدة المسموح بها في الجولة دي.'));const root=document.querySelector('#modalRoot');if(!root)return;
+ root.innerHTML=`<div class="modal-backdrop" onclick="if(event.target===this)closeModal()"><div class="modal confirmation-modal"><div class="panel-head"><div><h3>${L('Enhancement / Report Issue','تطوير / بلّغ عن مشكلة')}</h3><small>${L('Maximum 1 Enhancement or Issue per Gameweek. Sent directly to the seven Mastaba members.','الحد الأقصى تطوير أو مشكلة واحدة لكل جولة، وتوصل مباشرة لسبعة أعضاء المصطبة.')}</small></div><button class="icon-button" onclick="closeModal()">×</button></div><div class="ticket-type-v11281"><button class="active" data-ticket-type="suggestion" onclick="setMastabaTicketTypeV11281('suggestion')">${L('Enhancement','تطوير')}</button><button data-ticket-type="bug" onclick="setMastabaTicketTypeV11281('bug')">${L('Report an Issue','بلّغ عن مشكلة')}</button></div><textarea id="mastabaTicketTextV11282" class="text-input" minlength="5" maxlength="${TICKET_MAX_V11282}" rows="7" placeholder="${L('Describe the enhancement or issue in plain language…','اشرح التطوير أو المشكلة بالكلام العادي…')}"></textarea>${counterHTMLV11282('mastabaTicketCountV11282',TICKET_MAX_V11282)}<div class="confirm-actions"><button class="btn btn-secondary" onclick="closeModal()">${L('Cancel','إلغاء')}</button><button class="btn btn-primary" onclick="submitMastabaTicketV11282()">${L('Submit Ticket','إرسال التذكرة')}</button></div></div></div>`;
+ window.mastabaTicketTypeV11281='suggestion';bindCounterV11282('mastabaTicketTextV11282','mastabaTicketCountV11282',TICKET_MAX_V11282)
+ }catch(e){toast(String(e?.message||e),'warn')}
+};
+window.submitMastabaTicketV11282=async function(){try{const {c,row}=await existingTicketV11282();if(row)throw new Error(L('Ticket limit reached: 1 Enhancement or Issue per Gameweek.','وصلت للحد: تطوير أو مشكلة واحدة لكل جولة.'));const text=validateSafeTextV11282(document.querySelector('#mastabaTicketTextV11282')?.value,TICKET_MAX_V11282,L('Ticket','التذكرة'));const {error}=await c.supa.from('mastaba_feedback').insert({user_id:c.user.id,gameweek_id:c.gw.id,category:window.mastabaTicketTypeV11281==='bug'?'bug':'suggestion',message_text:text,page_context:'show',app_version:V11282});if(error)throw error;closeModal();toast(L('Ticket sent to the Mastaba members.','التذكرة اتبعتت لأعضاء المصطبة.'),'good')}catch(e){toast(String(e?.message||e),'warn')}};
+window.submitMastabaTicketV11281=window.submitMastabaTicketV11282;
+function hardenShowV11282(){polishFeedbackIconV11282()}
+const renderShowBeforeV11282=window.renderShowV1029;if(renderShowBeforeV11282)window.renderShowV1029=function(){const out=renderShowBeforeV11282.apply(this,arguments);requestAnimationFrame(hardenShowV11282);return out};
+const observerV11282=new MutationObserver(()=>{if(state?.view==='show')polishFeedbackIconV11282()});observerV11282.observe(document.body,{childList:true,subtree:true});
+setTimeout(hardenShowV11282,100);
+})();
+</script>
+
 </body>
 </html>
